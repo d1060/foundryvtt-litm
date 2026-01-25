@@ -1,0 +1,15 @@
+<div class="{{cssClass}} litm--story-themes-container" data-context='menu'>
+    {{#if editingTitle}}
+        <span class="litm--story-themes-title" role="textbox" contenteditable data-input="name" data-path="name" aria-labelledby="tags-label">{{name}}</span>
+    {{else}}
+        <div class="litm--story-themes-title" {{#if isBurnt}}data-scratched{{/if}}>{{{renderedName}}}</div>
+    {{/if}}
+    {{#each tags as |tag|}}
+        {{#if tag.editing}}
+            <span class="litm--story-theme-tags" role="textbox" contenteditable data-input="tags" data-id="{{tag.id}}" data-path="tags" aria-labelledby="tags-label">{{tag.name}}</span>
+            <input type="hidden" id="tags" name="name" value="{{tag.name}}" required />
+        {{else}}
+            <div class="litm--story-theme-tags" data-input="tags" data-id="{{tag.id}}" data-action="toggleEdit"{{#if tag.isBurnt}} data-scratched{{/if}}>{{{tag.renderedName}}}</div>
+        {{/if}}
+    {{/each}}
+</div>

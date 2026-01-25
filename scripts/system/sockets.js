@@ -1,5 +1,5 @@
 import Fellowship from "../apps/fellowship.js";
-import { showImageDialog } from "../utils.js";
+import Randomizer from "../apps/randomizer.js";
 
 export class Sockets {
 	static dispatch(event, data) {
@@ -11,7 +11,7 @@ export class Sockets {
 		const senderIsGM = game.user.isGM;
 		const senderId = game.user.id;
 		const id = foundry.utils.randomID();
-		game.socket.emit("system.litm", {
+		game.socket.emit("system.foundryvtt-litm", {
 			id,
 			data,
 			event,
@@ -21,9 +21,11 @@ export class Sockets {
 	}
 
 	static on(event, cb) {
-		game.socket.on("system.litm", (data) => {
-			const { event: e, senderId, ...d } = data;
+		game.socket.on("system.foundryvtt-litm", (data) => {
+			logger.info(`Received event ${data.event} from ${data.senderId}`);
+			const { event: e, senderId, receiverId, ...d } = data;
 			if (e !== event || senderId === game.userId) return;
+			if (receiverId != null && game.user.id != receiverId) return;
 			cb(d);
 		});
 	}
@@ -57,6 +59,24 @@ export class Sockets {
 		Sockets.on("burnStoryTag", (event) => {
 			const { data } = event;
 			game.litm.storyTags?.burnTag(data.tag);
+		});
+
+		Sockets.on("storyTagChange", (event) => {
+			const { data } = event;
+
+			for (const actor of game.actors) {
+				if (!actor.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)) continue;
+
+				const app = actor.sheet;
+				if (!app) continue;
+				if (!app.rendered) continue;
+
+				if (!app._roll) continue;
+				const rollDialog = app._roll;
+
+				if (rollDialog.rendered)
+					rollDialog.render(true);
+			}
 		});
 	}
 
@@ -92,7 +112,6 @@ export class Sockets {
 
 	static #registerFellowshipListeners() {
 		Sockets.on("renderFellowship", () => {
-			//console.log(`Received renderFellowship.`);
 			Fellowship.renderFellowship();
 		});
 
@@ -106,14 +125,25 @@ export class Sockets {
 			foundry.utils.setProperty(fellowship, attrib, value);
 			game.settings.set("foundryvtt-litm", "fellowship", fellowship).then(r => {
 				Fellowship.renderFellowship();
-				game.socket.emit("system.litm", { app: "character-sheet", type: "renderFellowship", event: "renderFellowship", senderId: game.user.id, isGM: game.user.isGM, user: game.user});
+				game.socket.emit("system.foundryvtt-litm", { app: "character-sheet", type: "renderFellowship", event: "renderFellowship", senderId: game.user.id, isGM: game.user.isGM, user: game.user});
 			});
 		});
 	}
 
 	static #registerCharacterListeners() {
 		Sockets.on("showImage", (data) => {
-			showImageDialog(data.src, data.name, false, data.origin, data.width, data.height);
+			utils.showImageDialog(data.src, data.name, false, data.origin, data.width, data.height);
+		});
+
+		Sockets.on("createNewCharacter", (data) => {
+			Randomizer.newCharacter(data.user._id);
+		});
+		
+		Sockets.on("renderCharacterCheet", (data) => {
+			const actor = game.actors.get(data.actorId);
+			if (actor) {
+				actor.sheet.render(true);
+			}
 		});
 	}
 }

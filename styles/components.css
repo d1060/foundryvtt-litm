@@ -102,6 +102,11 @@
 		background-image: url("../assets/media/burn-c.svg");
 	}
 
+	&:selected,
+	&.selected {
+		background-image: url("../assets/media/burn-50.svg");
+	}
+
 	&:is([type="checkbox"]) {
 		cursor: pointer;
 	}
@@ -160,6 +165,7 @@
 :where(.litm--targetTag),
 :where(.litm--weaknessTag),
 :where(.litm--themeTag),
+:where(.litm--storyThemeTag),
 :where(.litm--backpack) {
 	padding: 0px 0.4em;
 	border-radius: 0.2em;
@@ -190,6 +196,7 @@
 
 	&.litm--powerTag,
 	&.litm--themeTag,
+	&.litm--storyThemeTag,
 	&.litm--backpack {
 		background: color-mix(in hsl, var(--litm-color-accent-bg) 60%, transparent);
 	}

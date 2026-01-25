@@ -23,15 +23,6 @@ export default class V2 {
 		header.insertBefore(resize, close);
 	}
 
-    static async updateResizeHandle(doc) {
-		const resizeHandle = doc.element.querySelector("div.window-resize-handle");
-		if (resizeHandle) {
-			if (resizeHandle.innerHTML == '') {
-				resizeHandle.innerHTML = '<i inert class="fa-solid fa-left-right fa-rotate-by"></i>';
-			}
-		}
-    }
-
 	static activateListeners(doc, html) {
         const button = html.querySelector(".litm--sheet-scale-button");
         if (button) {
@@ -39,14 +30,17 @@ export default class V2 {
         }
 
         html.querySelectorAll("[data-size-input]").forEach(el => {
-            el.style.width = `${Math.ceil(Math.max(el.value.length * 1.5, 6))}ch`;
+            this._elementSizeToText(el);
             el.addEventListener("input", V2._sizeInput.bind(V2, doc));
         });
     }
 
     static _sizeInput(app, event) {
         const input = event.currentTarget;
+        this._elementSizeToText(input);
+    }
 
+    static _elementSizeToText(input) {
         // Create (or reuse) a canvas
         const canvas = this._measureCanvas ??= document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -58,80 +52,78 @@ export default class V2 {
         // Measure text
         const text = input.value || input.placeholder || "";
         const metrics = ctx.measureText(text.toUpperCase());
+        const width = metrics.actualBoundingBoxRight - metrics.actualBoundingBoxLeft;
 
         // Add padding + caret room
         const padding =
             parseFloat(style.paddingLeft) +
             parseFloat(style.paddingRight) +
-            10; // caret breathing room
+            6; // caret breathing room
 
-        input.style.width = `${Math.ceil(metrics.width + padding)}px`;
+        input.style.width = `${Math.ceil(width + padding)}px`;
     }
 
     static _scale(app, event) {
         event.preventDefault();
         event.stopPropagation();
-        let currentScale = event.target.dataset.scale;
-        if (currentScale == null) currentScale = '1';
-        currentScale = parseFloat(currentScale);
 
-        const eventNames =
-            event.type === "pointerdown"
-                ? ["pointermove", "pointerup"]
-                : ["mousemove", "mouseup"];
+        // IMPORTANT: use currentTarget (the button you bound the listener to)
+        const button = event.target;
 
-        let previousX = event.screenX;
-        let delta = 0;
+        // Pointer capture only works with pointer events
+        if (event.pointerId == null || typeof button.setPointerCapture !== "function") return;
+
+        // Cache the form once so we don't depend on event.target during dragging
+        const form = button.closest("form") ?? app.element?.[0]?.querySelector?.("form");
+        if (!form) return;
+
+        let currentScale = parseFloat(button.dataset.scale ?? "1");
+        if (!Number.isFinite(currentScale)) currentScale = 1;
 
         const clampValue = (current, delta) => {
             const value = current + delta / 500;
             return Math.max(0.3, Math.min(3, value));
         };
 
-        const mousemove = (event) => {
-            delta = event.screenX - previousX;
-            previousX = event.screenX;
+        let previousX = event.screenX;
+
+        const onMove = (e) => {
+            // We keep getting these even if the pointer leaves the button/app
+            const delta = e.screenX - previousX;
+            previousX = e.screenX;
+
             currentScale = clampValue(currentScale, delta);
-
-            if (typeof event.target.closest == 'function')
-            {
-                const el = event.target.closest("form");
-                if (!el) return;
-                el.style.transform = `scale(${currentScale})`;
-            }
+            form.style.transform = `scale(${currentScale})`;
         };
 
-        const mouseup = () => {
-            document.removeEventListener(eventNames[0], mousemove);
-            document.removeEventListener(eventNames[1], mouseup);
-            event.target.dataset.scale = currentScale;
+        const finish = (e) => {
+            button.removeEventListener("pointermove", onMove);
+            button.removeEventListener("pointerup", finish);
+            button.removeEventListener("pointercancel", finish);
 
-            app.setPosition({scale: currentScale});
+            try { button.releasePointerCapture(event.pointerId); } catch (_) {}
 
-            if (app.options?.document?.type == 'character') {
-                app.options.document.update({"system.scale" : currentScale});
-            }
+            button.dataset.scale = String(currentScale);
+
+            app.setPosition({ scale: currentScale });
+
+            const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+            if (prefs.sheetViewTags == null || !prefs.sheetViewTags)
+                prefs.sheetViewTags = {};
+
+            if (prefs.sheetViewTags[app.options.document._id] == null)
+                prefs.sheetViewTags[app.options.document._id] = {};
+
+            prefs.sheetViewTags[app.options.document._id].scale = currentScale;
+            game.settings.set("foundryvtt-litm", "user_prefs", prefs);
         };
 
-        document.addEventListener(eventNames[0], mousemove);
-        document.addEventListener(eventNames[1], mouseup);
-    }
+        // Capture the pointer so moves/ups keep firing on *this button*
+        button.setPointerCapture(event.pointerId);
 
-    static _storeScrollPositions(app) {
-        app._scrollPositions = {};
-        for (const el of app.element.querySelectorAll("[data-scroll]")) {
-            app._scrollPositions[el.dataset.scroll] = el.scrollTop;
-        }
-    }
-
-    static _restoreScrollPositions(app) {
-        if (!app._scrollPositions) return;
-
-        for (const el of app.element.querySelectorAll("[data-scroll]")) {
-            const pos = app._scrollPositions[el.dataset.scroll];
-            if (pos !== undefined) el.scrollTop = pos;
-        }
-
-        app._scrollPositions = null;
+        // Listen on the button (captured), not on document
+        button.addEventListener("pointermove", onMove);
+        button.addEventListener("pointerup", finish);
+        button.addEventListener("pointercancel", finish);
     }
 }

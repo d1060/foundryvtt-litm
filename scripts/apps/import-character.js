@@ -1,5 +1,3 @@
-import { localize as t } from "../utils.js";
-
 function createTag(data, type) {
 	return {
 		...(data || { name: "", isBurnt: false, isActive: false }),
@@ -30,7 +28,7 @@ function createStatus(data) {
 	const type = value ? "status" : "tag";
 
 	return {
-		name: data.name || t("Litm.other.unnamed"),
+		name: data.name || utils.localize("Litm.other.unnamed"),
 		type: "ActiveEffect",
 		flags: {
 			"foundryvtt-litm": {
@@ -60,7 +58,7 @@ export async function importCharacter(data) {
 		.map(([_, theme]) => ({
 			name:
 				theme.content.mainTag.name ||
-				t("Litm.other.unnamed", "TYPES.Item.theme"),
+				utils.localize("Litm.other.unnamed", "TYPES.Item.theme"),
 			type: "theme",
 			system: {
 				themebook: theme.content.themebook,
@@ -88,7 +86,7 @@ export async function importCharacter(data) {
 		}));
 
 	const backpack = {
-		name: t("TYPES.Item.backpack"),
+		name: utils.localize("TYPES.Item.backpack"),
 		type: "backpack",
 		system: {
 			contents: data.backpack.map((item) => createTag(item, "backpack")),

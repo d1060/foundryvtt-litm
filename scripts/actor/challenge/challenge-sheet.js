@@ -1,4 +1,3 @@
-import { confirmDelete, dispatch, showImageDialog } from "../../utils.js";
 import V2 from "../../v2sheets.js";
 import ExternalTextEditor from "../../apps/text-editor.js";
 
@@ -98,7 +97,6 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	async _onRender(force, options) {
 		await super._onRender(force, options);
 		await V2.updateHeader(this);
-		await V2.updateResizeHandle(this);
 		await this.activateListeners(this.element);
 	}
 
@@ -120,7 +118,7 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				span.addEventListener("keydown", ev => {
 					if (ev.key === "Enter") {
 						ev.preventDefault();
-						this._setText(ev);
+						span.blur();
 					}
 				});
 
@@ -131,8 +129,6 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const editable = Array.from(html.querySelectorAll("[contenteditable]"))
 			.find(el => el.nextElementSibling?.id === "tags");
 		if (editable) editable.focus();
-
-		V2.activateListeners(this, html);
 	}
 
 	static async #onSubmit(event, form, formData) {
@@ -308,7 +304,7 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	}
 
 	async _removeLimit(button) {
-		if (!(await confirmDelete("Litm.other.limit"))) return;
+		if (!(await utils.confirmDelete("Litm.other.limit"))) return;
 		const index = Number(button.dataset.id);
 		const limits = this.system.limits;
 
@@ -317,7 +313,7 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	}
 
 	async _removeThreat(button) {
-		if (!(await confirmDelete("TYPES.Item.threat"))) return;
+		if (!(await utils.confirmDelete("TYPES.Item.threat"))) return;
 		const item = this.items.get(button.dataset.id);
 		item.delete();
 	}
@@ -390,7 +386,7 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				condition: element => canEdit(element, this.actor),
 				callback: async element => {
 					const portrait = await PIXI.Texture.fromURL(this.actor.img);
-					await showImageDialog(this.actor.img, this.actor.name, true, game.user, portrait.width, portrait.height);
+					await utils.showImageDialog(this.actor.img, this.actor.name, true, game.user, portrait.width, portrait.height);
 				},
 			},
 		];

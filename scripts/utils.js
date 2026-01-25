@@ -40,7 +40,7 @@ export function titleCase(str) {
 export function dispatch(data) {
 	const isGM = game.user.isGM;
 	const user = game.user.id;
-	return game.socket.emit("system.litm", { ...data, isGM, user });
+	return game.socket.emit("system.foundryvtt-litm", { ...data, isGM, user });
 }
 
 export async function newTagDialog(actors) {
@@ -196,7 +196,6 @@ export async function showImageDialog(image, name, propagate, origin, width, hei
 			action: "share"
 		});
 
-	//console.log(`canvasWidth: ${canvasWidth}, canvasHeight: ${canvasHeight}, displayWidth: ${displayWidth}, displayHeight: ${displayHeight}`);
 	const left = (canvasWidth - displayWidth) / 2;
 	const top = (canvasHeight - displayHeight) / 2;
 
@@ -223,7 +222,7 @@ export async function showImageDialog(image, name, propagate, origin, width, hei
 
 	if (response === 'share') {
 		game.socket.emit(
-			"system.litm",
+			"system.foundryvtt-litm",
 			{
 				event: "showImage",
 				src: image,

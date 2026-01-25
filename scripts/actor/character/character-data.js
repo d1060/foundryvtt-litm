@@ -1,5 +1,4 @@
-import { error, warn } from "../../logger.js";
-import { localize as t } from "../../utils.js";
+import Randomizer from '../../apps/randomizer.js';
 
 export class CharacterData extends foundry.abstract.TypeDataModel {
 	static defineSchema() {
@@ -55,7 +54,15 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 			fellowshipPowerTag.isScratched = fellowshipPowerTag.isBurnt;
 		}
 		const fellowshipTags = [...fellowshipPowerTags, ...fellowship.system.weakness];
-		return [...backpack, ...themeTags, ...fellowshipTags, {id: 'fellowship', type: 'themeTag', isActive: fellowship.system.isActive, isScratched: fellowship.system.isBurnt, isBurnt: fellowship.system.isBurnt, name: fellowship.name, isSingleUse: true}];
+		return [...backpack, ...themeTags, ...fellowshipTags, {
+			id: 'fellowship', 
+			type: 'themeTag', 
+			isActive: fellowship.system.isActive,
+			isScratched: fellowship.system.isBurnt,
+			isBurnt: fellowship.system.isBurnt,
+			toBurn: fellowship.system.toBurn,
+			name: fellowship.name,
+			isSingleUse: true}];
 	}
 
 	get powerTags() {
@@ -144,7 +151,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 		// Make sure only four themes are present
 		const themes = this.parent.items.filter((item) => item.type === "theme");
 		if (themes.length > 4) {
-			warn(
+			logger.warn(
 				`Too many themes found for ${this.parent.name}, attempting to resolve...`,
 			);
 			const toDelete = themes.slice(4);
@@ -159,7 +166,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 			(item) => item.type === "backpack",
 		);
 		if (backpacks.length > 1) {
-			warn(
+			logger.warn(
 				`Too many backpacks found for ${this.parent.name}, attempting to resolve...`,
 			);
 			const toDelete = backpacks.slice(1);
@@ -175,8 +182,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 			.map((tag) => tag.id)
 			.filter((id, index, arr) => arr.indexOf(id) !== index);
 		if (!duplicates.length) return;
-		warn("Duplicate tag IDs found, attempting to resolve...");
-		error(`Duplicate tag IDs found for: ${this.parent._id}`, duplicates);
+		logger.warn("Duplicate tag IDs found, attempting to resolve...");
+		logger.error(`Duplicate tag IDs found for: ${this.parent._id}`, duplicates);
 
 		// try to fix duplicates
 		const tags = this.allTags;
@@ -193,7 +200,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 
 		for (let i = 0; i < missingThemes; i++) {
 				await actor.createEmbeddedDocuments("Item", [{
-				name: `${t("TYPES.Item.theme")} ${existingThemes + i + 1}`,
+				name: `${utils.localize("TYPES.Item.theme")} ${existingThemes + i + 1}`,
 				type: "theme"
 			}]);
 		}
@@ -201,36 +208,30 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 		const backpack = actor.items.find(it => it.type === "backpack");
 		if (!backpack) {
 				await actor.createEmbeddedDocuments("Item", [{
-				name: t("TYPES.Item.backpack"),
+				name: utils.localize("TYPES.Item.backpack"),
 				type: "backpack"
 			}]);
 		}
 	}
 
-	static async randomizeImage(actor) {
+	static async randomizeNameAndImage(actor) {
+        const gender = Math.random() >= 0.5 ? 'male' : 'female';
+		await this.randomizeName(actor, gender);
+		await this.randomizeImage(actor, gender);
+	}
+
+	static async randomizeName(actor, gender) {
+		const name = Randomizer.newName(gender);
+		actor.name = name;
+		await actor.update({"name": actor.name});
+	}
+
+	static async randomizeImage(actor, gender) {
 		if (actor?.img == '' || actor?.img?.startsWith('icons/svg/'))
 		{
-			const defaultPortraits = [
-				'apple-picker-a.webp',
-				'apple-picker-b.webp',
-				'apple-picker-c.webp',
-				'red-marshal-a.webp',
-				'red-marshal-b.webp',
-				'red-marshal-c.webp',
-				'red-marshal-d.webp',
-				'sorrowbalm-mask.webp',
-				'willow-mask.webp',
-				'wise-one-a.webp',
-				'wise-one-b.webp',
-				'wise-one-c.webp',
-				'wise-one-d.webp',
-				'hardy-lady.webp',
-				'gerrin.webp',
-				'swordsman.webp',
-			];
-			const chosenPortrait = defaultPortraits[Math.floor(Math.random() * defaultPortraits.length)];
-			actor.img = 'systems/foundryvtt-litm/assets/media/portraits/' + chosenPortrait;
-			actor.update({"img": actor.img});
+			const portrait = Randomizer.randomizeImage(gender);
+			actor.img = portrait;
+			await actor.update({"img": actor.img});
 		}
 	}
 }

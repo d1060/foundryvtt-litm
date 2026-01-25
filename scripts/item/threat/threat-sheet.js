@@ -1,5 +1,4 @@
 import V2 from "../../v2sheets.js";
-import { confirmDelete, localize as t } from "../../utils.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ItemSheetV2 } = foundry.applications.sheets
@@ -81,7 +80,6 @@ export class ThreatSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	async _onRender(force, options) {
 		await super._onRender(force, options);
 		await V2.updateHeader(this);
-		await V2.updateResizeHandle(this);
 		await this.activateListeners(this.element);
 	}
 
@@ -96,7 +94,7 @@ export class ThreatSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 				span.addEventListener("keydown", ev => {
 					if (ev.key === "Enter") {
 						ev.preventDefault();
-						this._setConsequence(ev);
+						span.blur();
 					}
 				});
 
@@ -108,8 +106,6 @@ export class ThreatSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 			.find(el => el.nextElementSibling?.id === "consequence");
 
 		if (editable) editable.focus();
-
-		V2.activateListeners(this, html);
 	}
 
 	static async #onSubmit(event, form, formData) {
@@ -182,14 +178,15 @@ export class ThreatSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		await this.submit(new Event("submit"));
 
 		const consequences = this.system.consequences;
-		consequences.push(t("Litm.ui.name-consequence"));
+		consequences.push(utils.localize("Litm.ui.name-consequence"));
 		this.item.update({ "system.consequences": consequences });
 	}
 
 	_setConsequence(event) {
 		let { id, input } = event.target.dataset;
 		id = parseInt(id);
-		const innerHTML = event.target.innerHTML;
+		let innerHTML = event.target.innerHTML;
+		if (innerHTML == '<br>') innerHTML = null;
 
 		this.isEditing = false;
 		switch (input) {
@@ -199,7 +196,11 @@ export class ThreatSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 			case 'consequence':
 				const consequences = structuredClone(this.options.document.system.consequences);
 				if (consequences?.length > id) {
-					consequences[id] = innerHTML;
+					if (innerHTML == null) {
+						consequences.splice(id, 1);
+					} else {
+						consequences[id] = innerHTML;
+					}
 					this.options.document.update({"system.consequences": consequences});
 				}
 				break;
@@ -208,7 +209,7 @@ export class ThreatSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	}
 
 	async _removeConsequence(event) {
-		if (!(await confirmDelete("Litm.other.consequence"))) return;
+		if (!(await utils.confirmDelete("Litm.other.consequence"))) return;
 
 		const { id } = event.target.dataset;
 		this.system.consequences.splice(id, 1);

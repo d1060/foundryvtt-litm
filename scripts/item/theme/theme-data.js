@@ -1,5 +1,3 @@
-import { localize as t, titleCase } from "../../utils.js";
-
 export class ThemeData extends foundry.abstract.TypeDataModel {
 	static defineSchema() {
 		const fields = foundry.data.fields;
@@ -7,7 +5,7 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 		return {
 			themebook: new fields.StringField({
 				trim: true,
-				initial: t("Litm.other.themebook"),
+				initial: utils.localize("Litm.other.themebook"),
 			}),
 			flipped: new fields.BooleanField(),
 			level: new fields.StringField({
@@ -28,10 +26,11 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 							.fill()
 							.map((_, i) => ({
 								id: foundry.utils.randomID(),
-								name: `${i < 2 ? `${t("Litm.ui.name-power")}` : ""}`,
+								name: `${i < 2 ? `${utils.localize("Litm.ui.name-power")}` : ""}`,
 								type: "powerTag",
 								isActive: i < 2,
 								isBurnt: false,
+								toBurn: false,
 							})),
 					validate: (tags) => tags.length === 10,
 				},
@@ -44,10 +43,11 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 							.fill()
 							.map(() => ({
 								id: foundry.utils.randomID(),
-								name: t("Litm.ui.name-weakness"),
+								name: utils.localize("Litm.ui.name-weakness"),
 								isActive: true,
 								isBurnt: false,
 								type: "weaknessTag",
+								toBurn: false,
 							})),
 					validate: (tags) => tags.length === 2,
 				},
@@ -87,10 +87,10 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 				max: 3,
 			}),
 			motivation: new fields.StringField({
-				initial: t("Litm.ui.name-motivation"),
+				initial: utils.localize("Litm.ui.name-motivation"),
 			}),
 			note: new fields.HTMLField({
-				initial: t("Litm.ui.name-note"),
+				initial: utils.localize("Litm.ui.name-note"),
 			}),
 		};
 	}
@@ -112,6 +112,7 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 						type: "powerTag",
 						isActive: false,
 						isBurnt: false,
+						toBurn: false,
 					})),
 			];
 		}
@@ -131,10 +132,11 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 					.fill()
 					.map(() => ({
 						id: foundry.utils.randomID(),
-						name: t("Litm.ui.name-weakness"),
+						name: utils.localize("Litm.ui.name-weakness"),
 						isActive: true,
 						isBurnt: false,
 						type: "weaknessTag",
+						toBurn: false,
 					})),
 			];
 		}
@@ -148,10 +150,11 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 	get themeTag() {
 		const item = {
 			id: this.parent._id,
-			name: titleCase(this.parent.name),
+			name: utils.titleCase(this.parent.name),
 			isActive: this.isActive,
 			isBurnt: this.isBurnt,
 			type: "themeTag",
+			toBurn: this.toBurn,
 		};
 		return game.litm.data.TagData.fromSource(item);
 	}
@@ -180,7 +183,7 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 
 	get levels() {
 		return Object.keys(CONFIG.litm.theme_levels).reduce((acc, level) => {
-			acc[level] = t(level);
+			acc[level] = utils.localize(level);
 			return acc;
 		}, {});
 	}

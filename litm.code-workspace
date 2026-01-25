@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../shadowdark"
+		},
+		{
+			"path": "../../../App/resources/app"
+		}
+	],
+	"settings": {}
+}

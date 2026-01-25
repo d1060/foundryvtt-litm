@@ -55,12 +55,11 @@ export default class ExternalTextEditor extends HandlebarsApplicationMixin(Appli
     async _onRender(force, options) {
 		await super._onRender(force, options);
         await V2.updateHeader(this);
-        await V2.updateResizeHandle(this);
         await this.activateListeners(this.element);
     }
 
 	activateListeners(html) {
-        V2.activateListeners(this, html);
+
 	}
 
 	static async #onSubmit(event, target) {

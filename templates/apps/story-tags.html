@@ -8,11 +8,13 @@
 					<legend>
 						{{localize "Litm.tags.story-tags"}}
 					</legend>
-					{{> systems/foundryvtt-litm/templates/partials/add-button.html id="story"}}
+    				{{#if isGM}}
+						{{> systems/foundryvtt-litm/templates/partials/add-button.html id="story" isGM=isGM}}
+					{{/if}}
 				</div>
 				<ul>
 					{{#each tags as |tag|}}
-						{{> systems/foundryvtt-litm/templates/partials/tag-item.html tag=tag source="story" editable=true}}
+						{{> systems/foundryvtt-litm/templates/partials/tag-item.html tag=tag source="story" editable=true isGM=../isGM}}
 					{{/each}}
 				</ul>
 			</fieldset>
@@ -21,20 +23,25 @@
 	<hr />
 	<section>
 		{{#each actors as |actor|}}
-			<div data-id="{{actor.id}}" class="litm--story-tags-actor">
+			<div data-id="{{actor.id}}" data-name="{{actor.name}}" class="litm--story-tags-actor" data-context="actor">
 				<fieldset style="display: contents">
 					<div class="litm--story-tags-section-header">
-						<legend aria-label="{{actor.name}} tags" data-action="openSheet"
-							data-action="removeActor" data-id="{{actor.id}}"
+						<legend aria-label="{{actor.name}} tags"
+							data-action="openSheet"
+							data-action="removeActor"
+							data-id="{{actor.id}}"
+							data-name="{{actor.name}}"
 							data-tooltip="{{localize 'Litm.ui.click-open-context-remove'}}">
 							<!-- <img src="{{actor.img}}" alt="" aria-hidden="true"> -->
 							{{actor.name}}
 						</legend>
-						{{#if actor.isOwner}} {{> systems/foundryvtt-litm/templates/partials/add-button.html id=actor.id}} {{/if}}
+	    				{{#if ../isGM}}
+							{{#if actor.isOwner}} {{> systems/foundryvtt-litm/templates/partials/add-button.html id=actor.id isGM=../isGM}} {{/if}}
+						{{/if}}
 					</div>
 					<ul>
 						{{#each actor.tags as |tag|}}
-							{{> systems/foundryvtt-litm/templates/partials/tag-item.html tag=tag source=../id editable=actor.isOwner}}
+							{{> systems/foundryvtt-litm/templates/partials/tag-item.html tag=tag source=../id editable=actor.isOwner isGM=../../isGM}}
 						{{/each}}
 					</ul>
 				</fieldset>

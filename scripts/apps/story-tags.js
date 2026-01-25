@@ -1,4 +1,4 @@
-import { confirmDelete, dispatch, localize as t } from "../utils.js";
+import StoryTheme from "./story-theme.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -7,6 +7,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	constructor(options) {
 		super();
 		this.#dragDrop = this.#createDragDropHandlers();
+		this.storyThemeSheets = [];
 	}
 
 	/** @inheritdoc */
@@ -31,6 +32,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
   		},
 		actions: {
 			addTag: this.#onAddTag,
+			makeStoryTheme: this.#onMakeStoryTheme,
 			openSheet: this.#onOpenSheet,
 			removeAllTags: this.#onRemoveAllTags,
 			removeActor: this.#onRemoveActor,
@@ -46,22 +48,70 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	async getTitle() {
-	    return t("Litm.ui.manage-tags");
+	    return utils.localize("Litm.ui.manage-tags");
 	}
 
 	async _onFirstRender(context, options) {
+		this._createContextMenu(this._getStoryTagContextOptions, "[data-context='story-tag']", {
+			hookName: "LitmStoryTagItemsContextMenu",
+			jQuery: false,
+      		parentClassHooks: false,
+      		fixed: true,
+    	});
+
+		this._createContextMenu(this._getActorContextOptions, "[data-context='actor']", {
+			hookName: "LitmActorContextMenu",
+			jQuery: false,
+      		parentClassHooks: false,
+      		fixed: true,
+    	});
+
 		this._createContextMenu(this._getItemContextOptions, "[data-context='menu']", {
 			hookName: "LitmStoryTagsContextMenu",
 			jQuery: false,
       		parentClassHooks: false,
       		fixed: true,
     	});
+
+		const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+		if (prefs.storyTags == null || !prefs.storyTags)
+		{
+			prefs.storyTags = true;
+			game.settings.set("foundryvtt-litm", "user_prefs", prefs);
+		}
+
 		super._onFirstRender(context, options);
+	}
+
+	_getActorContextOptions(target) {
+		const canEdit = function(element, actor) {
+			let result = game.user.isGM;
+			return result;
+		};
+
+		const options = [
+			{
+				name: game.i18n.localize("Litm.ui.remove-actor"),
+				icon: "<i class='fas fa-user-slash'></i>",
+				condition: (element) => canEdit(element),
+				callback: async (element) => {
+					if (!game.user.isGM) return;
+					const id = element.dataset.id;
+					const name = element.dataset.name;
+					if (!(await utils.confirmDelete(name))) return;
+
+					await this.setActors(this.config.actors.filter((a) => a !== id));
+					this._broadcastRender();
+				},
+			},
+		];
+
+		return options;
 	}
 
 	_getItemContextOptions(target) {
 		const canEdit = function(element, actor) {
-			let result = true;
+			let result = game.user.isGM;
 			return result;
 		};
 
@@ -87,6 +137,40 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		return options;
 	}
 
+	_getStoryTagContextOptions(target) {
+		const canEdit = function(element, actor) {
+			let result = game.user.isGM;
+			return result;
+		};
+
+		const canEditAndIsStory = function(element, actor) {
+			const type = element.dataset.type;
+			let result = game.user.isGM;
+			return result && type == "story";
+		};
+
+		const options = [
+			{
+				name: game.i18n.localize("Litm.ui.remove-tag"),
+				icon: '<i class="fas fa-tags"></i>',
+				condition: element => canEdit(element, this.actor),
+				callback: (element) => {
+					this._onRemoveTag(element);
+				},
+			},
+			{
+				name: game.i18n.localize("Litm.ui.make-story-theme"),
+				icon: "<i class='fas fa-user-slash'></i>",
+				condition: element => canEditAndIsStory(element, this.actor),
+				callback: (element) => {
+					this._makeStoryTheme(element);
+				},
+			},
+		];
+
+		return options;
+	}
+
 	async _onRender(force, options) {
 		const resizeHandle = this.element.querySelector("div.window-resize-handle");
 		if (resizeHandle) {
@@ -97,22 +181,65 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
 		await this.activateListeners(this.element);
 		this.#dragDrop.forEach((d) => d.bind(this.element));
+
+		requestAnimationFrame(() => {
+			this.openStoryThemes();
+		});
 	}
+
+	async _onClose(options) {
+		const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+		if (prefs.storyTags == null || prefs.storyTags)
+		{
+			prefs.storyTags = false;
+			game.settings.set("foundryvtt-litm", "user_prefs", prefs);
+		}
+
+		for (const storyThemeSheet of this.storyThemeSheets) {
+			if (storyThemeSheet.rendered)
+				storyThemeSheet.close();
+		}
+		this.__storyThemesOpened = false;
+	}
+
+	_onPosition(position) {
+    	super._onPosition(position);
+    	//logger.info(`Moved to ${position.left} ${position.top}`);
+		for (const storyThemeSheet of this.storyThemeSheets) {
+			if (storyThemeSheet?.rendered)
+				storyThemeSheet.moveToParents(position);
+		}
+  	}
 
 	activateListeners(html) {
 		if (html && html.jquery) {
 			html = html[0];
 		}
 
-		html.querySelectorAll('input[type="text"]').forEach(input => {
-			input.addEventListener("contextmenu", event => {
-				this._onRemoveTag(event);
-			});
-		});
+		//html.querySelectorAll('input[type="text"]').forEach(input => {
+			//input.addEventListener("contextmenu", event => {
+			//	this._onRemoveTag(event);
+			//});
+		//});
 
 		html.querySelectorAll("[data-focus]").forEach(el => {
 			el.addEventListener("focus", event => {
-				event.currentTarget.select();
+				const li = event.currentTarget.closest("li");
+				const source = li.dataset.type;
+				if (source != "story" || game.user.isGM)
+					event.currentTarget.select();
+			});
+		});
+
+		html.querySelectorAll(".window-header").forEach(el => {
+			el.addEventListener("pointerup", event => {
+				const form = event.target.closest("form");
+				const left = parseInt(form.style.left.replace('px', ''));
+				const top = parseInt(form.style.top.replace('px', ''));
+				const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+				if (!prefs.storyTagsPosition) prefs.storyTagsPosition = [];
+				prefs.storyTagsPosition = [left, top];
+				game.settings.set("foundryvtt-litm", "user_prefs", prefs);
 			});
 		});
 
@@ -120,7 +247,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			if (this.rendered) this.setPosition({ left: window.innerWidth - 605 });
 		});
 
-		game.socket.on("system.litm", async (data) => {
+		game.socket.on("system.foundryvtt-litm", async (data) => {
 			if (data.app !== "story-tags") return;
 			switch (data.type) {
 				case "update":
@@ -131,9 +258,6 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 					break;
 			}
 		});
-
-		// GM only listeners
-		if (!game.user.isGM) return;
 	}
 
 	#createDragDropHandlers() {
@@ -157,11 +281,17 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	/** @override */
 	async _prepareContext(options)
 	{
-		const context = {
-			actors: this.actors
+		const actors = this.actors
+				.filter(a => game.user.isGM || a.isOwner)
 				.sort((a, b) => a.name.localeCompare(b.name))
-				.sort((_a, b) => (b.type === "challenge" ? 1 : -1)),
-			tags: this.tags || [],
+				.sort((_a, b) => (b.type === "challenge" ? 1 : -1));
+				
+		const tags = this.tags || [];
+
+		const context = {
+			actors,
+			tags,
+			isGM: game.user.isGM,
 		};
 		return context;
 	}
@@ -174,7 +304,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	get config() {
 		const config = game.settings.get("foundryvtt-litm", "storytags");
 		if (!config || foundry.utils.isEmpty(config))
-			return { actors: [], tags: [] };
+			return { actors: [], tags: [], storyThemes: [] };
 		return config;
 	}
 
@@ -208,7 +338,13 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	get tags() {
-		return this.config.tags
+		return (this.config.tags ?? [])
+			.sort((a, b) => a.name.localeCompare(b.name))
+			.sort((a, b) => (a.type === b.type ? 0 : a.type === "status" ? -1 : 1));
+	}
+
+	get storyThemes() {
+		return (this.config.storyThemes ?? [])
 			.sort((a, b) => a.name.localeCompare(b.name))
 			.sort((a, b) => (a.type === b.type ? 0 : a.type === "status" ? -1 : 1));
 	}
@@ -220,6 +356,11 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	async setTags(tags) {
 		await game.settings.set("foundryvtt-litm", "storytags", { ...this.config, tags });
+		return this._broadcastRender();
+	}
+
+	async setStoryThemes(storyThemes) {
+		await game.settings.set("foundryvtt-litm", "storytags", { ...this.config, storyThemes });
 		return this._broadcastRender();
 	}
 
@@ -316,7 +457,6 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	static async #onSubmit(event, target) {
-		if (!game.user.isGM) return;
 		const name = event.target.name;
 		const nameParts = name.split('.');
 		if (nameParts.length == 3) {
@@ -325,6 +465,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			const type = nameParts[2];
 
 			if (actorId == 'story') {
+				if (!game.user.isGM) return;
 				const tags = this.tags;
 				const tag = tags.find(t => t.id == id);
 				if (tag) {
@@ -364,6 +505,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 					}
 				}
 			}
+			this._broadcastStoryTagChange();
 		}
 	}
 
@@ -371,7 +513,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		const id = event.target.dataset.id;
 
 		const tag = {
-			name: t("Litm.ui.name-tag"),
+			name: utils.localize("Litm.ui.name-tag"),
 			values: Array(6)
 				.fill()
 				.map(() => null),
@@ -381,11 +523,19 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		};
 
 		if (id === "story") {
-			if (game.user.isGM) return this.setTags([...this.tags, tag]);
-			return this._broadcastUpdate("tags", [...this.tags, tag]);
+			if (game.user.isGM) {
+				this.setTags([...this.tags, tag]);
+				this._broadcastStoryTagChange();
+				return this._broadcastUpdate("tags", [...this.tags, tag]);
+			}
 		}
 
 		return this._addTagToActor({ id, tag });
+	}
+
+	static async #onMakeStoryTheme(event, target) {
+		if (!game.user.isGM) return;
+		return this._makeStoryTheme(event.target);
 	}
 
 	static async #onOpenSheet(event, target) {
@@ -397,18 +547,21 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		event.preventDefault();
 		event.stopPropagation();
 
-		if (!this.config.tags.length || !(await confirmDelete())) return;
-		if (game.user.isGM) return this.setTags([]);
-		return this._broadcastUpdate("tags", []);
+		if (!this.config.tags.length || !(await utils.confirmDelete())) return;
+		if (game.user.isGM) {
+			this.setTags([]);
+			return this._broadcastUpdate("tags", []);
+		}
 	}
 
 	static async #onRemoveActor(event, target) {
 		const id = event.target.dataset.id;
+		const name = event.target.dataset.name;
 		event.preventDefault();
 		event.stopPropagation();
 
 		if (!game.user.isGM) return;
-		if (!(await confirmDelete("Actor"))) return;
+		if (!(await utils.confirmDelete(name))) return;
 
 		await this.setActors(this.config.actors.filter((a) => a !== id));
 		this._broadcastRender();
@@ -423,20 +576,35 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			const id = sourceParts[1];
 			const type = sourceParts[2];
 
-			const actor = game.actors.get(actorId);
-			if (actor) {
-				if (type == "isBurnt") {
-					const tag = actor.getEmbeddedDocument("ActiveEffect", id);
-					if (tag) {
-						const flags = tag.flags;
-						flags["foundryvtt-litm"].isBurnt = checked;
-						await actor.updateEmbeddedDocuments("ActiveEffect", [{
-							_id: id,
-							flags: flags,
-						}]);
+			if (actorId == "story") {
+				if (game.user.isGM) {
+					const tag = this.config.tags.find((t) => t.id == id);
+					tag.isBurnt = checked;
+
+					this.setTags([...this.tags]);
+					this._broadcastRender();
+					this.renderRollDialogs();
+				}
+			} else {
+				const actor = game.actors.get(actorId);
+				if (actor) {
+					if (type == "isBurnt") {
+						const tag = actor.getEmbeddedDocument("ActiveEffect", id);
+						if (tag) {
+							const flags = tag.flags;
+							flags["foundryvtt-litm"].isBurnt = checked;
+							await actor.updateEmbeddedDocuments("ActiveEffect", [{
+								_id: id,
+								flags: flags,
+							}]);
+						}
 					}
 				}
 			}
+			if (game.user.isGM) 
+				return this._broadcastStoryTagChange();
+			else
+				this.render();
 		}
 	}
 
@@ -475,28 +643,81 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 					}
 				}
 			}
+			if (game.user.isGM) 
+				return this._broadcastStoryTagChange();
+			else
+				this.render();
 		}
 	}
 
-	async _onRemoveTag(event) {
-		event.preventDefault();
-		event.stopPropagation();
-		event.target.blur();
+	async _makeStoryTheme(target) {
+		logger.info(`Making a new Story Theme.`);
+		if (!game.user.isGM) return;
+		const tagId = target.dataset.id;
 
-		const id = event.target.dataset.id;
-		const type = event.target.dataset.type;
+		const tag = this.config.tags.find((t) => t.id == tagId);
+		if (!tag) return;
+		const tags = this.config.tags.filter((t) => t.id != tagId);
+
+		const storyTheme = {
+			name: tag.name,
+			type: "storyTheme",
+			tags: [],
+			isBurnt: false,
+			id: foundry.utils.randomID(),
+		};
+		let storyThemes = structuredClone(this.config.storyThemes);
+		if (!storyThemes) storyThemes = [];
+		storyThemes.push(storyTheme);
+		
+		const style = getComputedStyle(this.element);
+		const newIndex = this.storyThemeSheets.length;
+		const zIndex = parseInt(style.zIndex) - storyThemes.length + newIndex;
+		const storyThemeSheet = new StoryTheme({id: storyTheme.id, index: newIndex, left: this.position.left, top: this.position.top, app: this, zIndex, name: tag.name, theme: storyTheme});
+		this.storyThemeSheets.push(storyThemeSheet);
+		await storyThemeSheet.render(true);
+
+		this.config.tags = tags;
+		this.setTags(tags);
+		this.setStoryThemes(storyThemes);
+		this._broadcastStoryTagChange();
+		this.render();
+	}
+
+	async removeStoryTheme(id) {
+		let storyThemes = structuredClone(this.config.storyThemes);
+		if (!storyThemes) return;
+		storyThemes = storyThemes.filter(st => st.id != id);
+		await this.setStoryThemes(storyThemes);
+		const idx = this.storyThemeSheets.findIndex(sts => sts.themeId == id);
+		this.storyThemeSheets.splice(idx, 1);
+		await this._broadcastStoryTagChange();
+	}
+
+	async _onRemoveTag(target) {
+		//event.preventDefault();
+		//event.stopPropagation();
+		//event.target.blur();
+
+		//const id = event.target.dataset.id;
+		//const type = event.target.dataset.type;
+		const id = target.dataset.id;
+		const type = target.dataset.type;
+		const value = target.dataset.value;
 
 		if (type === "story") {
-			if (!(await confirmDelete("Litm.other.tag"))) return;
+			if (!(await utils.confirmDelete(value))) return;
 
 			if (game.user.isGM)
 				return this.setTags(this.config.tags.filter((t) => t.id !== id));
+			this._broadcastStoryTagChange();
 			return this._broadcastUpdate(
 				"tags",
 				this.config.tags.filter((t) => t.id !== id),
 			);
 		} else {
-			return this._removeTagFromActor({ actorId: type, id });
+			this._broadcastStoryTagChange();
+			return this._removeTagFromActor({ actorId: type, id, value });
 		}
 	}
 
@@ -517,15 +738,17 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 				flags: { "foundryvtt-litm": { type: "tag", values: tag.values, isBurnt: false } },
 			},
 		]);
+		this._broadcastStoryTagChange();
 		return this._broadcastRender();
 	}
 
 	async _updateTagsOnActor({ id, tags }) {
 		const actor = game.actors.get(id);
+		this._broadcastStoryTagChange();
 		return actor.updateEmbeddedDocuments("ActiveEffect", tags);
 	}
 
-	async _removeTagFromActor({ actorId, id }) {
+	async _removeTagFromActor({ actorId, id, value }) {
 		const actor = game.actors.get(actorId);
 
 		if (!actor)
@@ -534,20 +757,35 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			});
 		if (!actor.isOwner) return;
 
-		if (!(await confirmDelete("Litm.other.tag"))) return;
+		if (!(await utils.confirmDelete(value))) return;
 
+		this._broadcastStoryTagChange();
 		await actor.deleteEmbeddedDocuments("ActiveEffect", [id]);
 		return this._broadcastRender();
 	}
 
+	async renderRollDialogs() {
+		const actorSheets = [...foundry.applications.instances.values()];//.filter(app => app instanceof foundry.applications.sheets.CharacterSheet);
+		for (const sheet of actorSheets) {
+			if (sheet._roll?.rendered)
+				sheet._roll.render();
+		}
+	}
+
 	/**  Start Socket Methods  */
 	_broadcastUpdate(component, data) {
-		dispatch({ app: "story-tags", type: "update", component, data });
+		utils.dispatch({ app: "story-tags", type: "update", component, data });
 	}
 
 	_broadcastRender() {
-		dispatch({ app: "story-tags", type: "render" });
+		utils.dispatch({ app: "story-tags", type: "render" });
 		this.render();
+	}
+
+	_broadcastStoryTagChange() {
+		const isGM = game.user.isGM;
+		const user = game.user.id;
+		return game.socket.emit("system.foundryvtt-litm", { event: "storyTagChange", senderId: user, isGM });
 	}
 
 	async _doUpdate(component, data) {
@@ -561,7 +799,31 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			if (storyTag) {
 				storyTag.isBurnt = tag.state == "burned";
 				this.setTags(this.tags);
+				this.render();
 				return;
+			}
+		}
+
+		if (this.storyThemes?.length) {
+			for (const storyTheme of this.storyThemes) {
+				if (storyTheme.id == tag.id) {
+					storyTheme.isBurnt = tag.state == "burned";
+					await this.setStoryThemes(this.storyThemes);
+					this.storyThemeSheets.find(s => s.themeId == storyTheme.id)?.render();
+					this.render();
+					return;
+				}
+
+				for (const storyThemeTag of storyTheme.tags ?? []) {
+					if (storyThemeTag.id == tag.id)
+					{
+						storyThemeTag.isBurnt = tag.state == "burned";
+						await this.setStoryThemes(this.storyThemes);
+						this.storyThemeSheets.find(s => s.themeId == storyTheme.id)?.render();
+						this.render();
+						return;
+					}
+				}
 			}
 		}
 
@@ -588,5 +850,42 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 	}
 
+	async openStoryThemes() {
+		if (this.__storyThemesOpened) return;
+		const storyThemes = this.storyThemes;
+		const rect = this.element.getBoundingClientRect();
+		const style = getComputedStyle(this.element);
+		const left = rect.left;
+		const top = rect.top;
+
+		if (this.storyThemeSheets.length > storyThemes.length) {
+			this.storyThemeSheets.length = storyThemes.length;
+		} else if (this.storyThemeSheets.length < storyThemes.length) {
+			this.storyThemeSheets.push(...Array(storyThemes.length - this.storyThemeSheets.length).fill(null));
+		}
+
+		for (let index = storyThemes.length - 1; index >= 0; index--) {
+			const storyTheme = storyThemes[index];
+			const zIndex = parseInt(style.zIndex) - storyThemes.length + index;
+
+			let storyThemeSheet;
+			if (this.storyThemeSheets[index] == null) {
+				storyThemeSheet = new StoryTheme({id: storyTheme.id, index, left, top, app: this, zIndex});
+			} else {
+				storyThemeSheet = this.storyThemeSheets[index];
+			}
+
+			if (!storyThemeSheet.rendered)
+			{
+				await storyThemeSheet.render(true);
+				await storyThemeSheet.moveToParents({left, top});
+				storyThemeSheet.sendBehind();
+			}
+
+			if (this.storyThemeSheets[index] == null)
+				this.storyThemeSheets[index] = storyThemeSheet;
+		}
+		this.__storyThemesOpened = true;
+	}
 	/**  End Socket Methods  */
 }

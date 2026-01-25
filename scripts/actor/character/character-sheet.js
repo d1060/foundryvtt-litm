@@ -1,9 +1,7 @@
-import { confirmDelete, dispatch } from "../../utils.js";
 import V2 from "../../v2sheets.js";
 import SpecialImprovements from "../../apps/special-improvements.js";
 import { Sockets } from "../../system/sockets.js";
 import Fellowship from "../../apps/fellowship.js";
-import { localize as t, showAdvancementHint, showImageDialog } from "../../utils.js";
 import { ThemeSheet } from "../../item/theme/theme-sheet.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api
@@ -51,7 +49,9 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			increase: this.#doIncrease,
 			doOpen: this.#doOpen,
 			doClose: this.#doClose,
+			activate: this.#doActivate,
 			select: this.#doSelect,
+			burn: this.#doBurn,
 			doShowFellowship: this.#doShowFellowship,
 			selectStatusLevel: this.#onSelectStatusLevel,
 			showAdvancementHint: this.#showAdvancementHint,
@@ -111,13 +111,78 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		else this._roll.render(true);
 	}
 
-	resetRollDialog() {
-		this._roll.reset();
+	async resetRollDialog() {
+		await this._roll.reset();
 		if (this.options?.document?._sheet?.rendered)
 			this.render();
 	}
 
-	async toggleBurnTag(tag) {
+	async toggleActivateTag(tag, selected) {
+		switch (tag.type) {
+			case "powerTag": {
+				const parentTheme = this.items.find(
+					(i) =>
+						i.type === "theme" &&
+						i.system.powerTags.some((t) => t.id === tag.id),
+				);
+				if (parentTheme == null) {
+					Fellowship.activateTag(tag);
+					break;
+				}
+				const { powerTags } = parentTheme.system.toObject();
+				const pTag = powerTags.find((t) => t.id === tag.id);
+				pTag.isActive = !tag.isActive;
+				await this.actor.updateEmbeddedDocuments("Item", [
+					{
+						_id: parentTheme.id,
+						"system.powerTags": powerTags,
+					},
+				]);
+
+				if (this._roll?.rendered) {
+					this._roll.updateTag(pTag);
+				}
+				break;
+			}
+			case "themeTag": {
+				if (tag.id == "fellowship") {
+					Fellowship.activateTag(tag);
+					break;
+				}
+
+				const theme = this.items.get(tag.id);
+				theme.isActive = !tag.isActive;
+				await this.actor.updateEmbeddedDocuments("Item", [
+					{
+						_id: theme.id,
+						"system.isActive": !tag.isActive,
+					},
+				]);
+				if (this._roll?.rendered) {
+					this._roll.updateTag(theme);
+				}
+				break;
+			}
+			case "backpack": {
+				const backpack = this.items.find((i) => i.type === "backpack");
+				const { contents } = backpack.system.toObject();
+				const bTag = contents.find((i) => i.id === tag.id);
+				bTag.isActive = !tag.isActive;
+				await this.actor.updateEmbeddedDocuments("Item", [
+					{
+						_id: backpack.id,
+						"system.contents": contents,
+					},
+				]);
+				if (this._roll?.rendered) {
+					this._roll.updateTag(bTag);
+				}
+				break;
+			}
+		}
+	}
+
+	async toggleBurnTag(tag, toBurn) {
 		switch (tag.type) {
 			case "powerTag": {
 				const parentTheme = this.items.find(
@@ -130,7 +195,12 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 					break;
 				}
 				const { powerTags } = parentTheme.system.toObject();
-				powerTags.find((t) => t.id === tag.id).isBurnt = !tag.isBurnt;
+
+				if (toBurn)
+					powerTags.find((t) => t.id === tag.id).toBurn = !tag.toBurn;
+				else
+					powerTags.find((t) => t.id === tag.id).isBurnt = !tag.isBurnt;
+
 				await this.actor.updateEmbeddedDocuments("Item", [
 					{
 						_id: parentTheme.id,
@@ -146,18 +216,29 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				}
 
 				const theme = this.items.get(tag.id);
-				await this.actor.updateEmbeddedDocuments("Item", [
-					{
+				let dataUpdate = {
 						_id: theme.id,
 						"system.isBurnt": !tag.isBurnt,
-					},
-				]);
+				};
+
+				if (toBurn)
+					dataUpdate = {
+						_id: theme.id,
+						"system.toBurn": !tag.toBurn,
+					};
+
+				await this.actor.updateEmbeddedDocuments("Item", [dataUpdate]);
 				break;
 			}
 			case "backpack": {
 				const backpack = this.items.find((i) => i.type === "backpack");
 				const { contents } = backpack.system.toObject();
-				contents.find((i) => i.id === tag.id).isBurnt = !tag.isBurnt;
+
+				if (toBurn)
+					contents.find((t) => t.id === tag.id).toBurn = !tag.toBurn;
+				else
+					contents.find((i) => i.id === tag.id).isBurnt = !tag.isBurnt;
+
 				await this.actor.updateEmbeddedDocuments("Item", [
 					{
 						_id: backpack.id,
@@ -175,12 +256,14 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				i.type === "theme" &&
 				i.system.weaknessTags.some((t) => t.id === tag.id),
 		);
+		if (!parentTheme) return null;
 		this.actor.updateEmbeddedDocuments("Item", [
 			{
 				_id: parentTheme.id,
 				"system.experience": parentTheme.system.experience + 1,
 			},
 		]);
+		return parentTheme;
 	}
 
 	/** @override */
@@ -190,7 +273,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			this.items
 				.filter((i) => i.type === "theme")
 				.sort((a, b) => a.sort - b.sort)
-				.map((i) => i.sheet._prepareContext()),
+				.map((i, index) => i.sheet._prepareContext({index})),
 		);
 		if (this.actor.system?.promise == null) { this.actor.system.promise = 0; }
 		const note = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.system.note);
@@ -210,9 +293,8 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			note,
 			themes,
 			_id: this.actor.id,
-			burntTags: this._roll.characterTags.filter(
-				(t) => t.isBurnt || t.state === "burned",
-			),
+			toBurnTags: this._roll.characterTags.filter((t) => t.state === "burned"),
+			burntTags: this._roll.characterTags.filter((t) => t.isBurnt),
 			img: this.actor.img,
 			name: this.actor.name,
 			promise: this.actor.system.promise,
@@ -222,6 +304,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			tagsFocused: this.#tagsFocused,
 			tagsHovered: this.#tagsHovered,
 			themeHovered: this.#themeHovered,
+			weaknessTagDefaultName: game.i18n.localize("Litm.ui.name-weakness"),
 			showFellowshipTheme: this.actor.system.showFellowshipTheme,
 			fellowship: await this._getFellowship(),
 			showBackpackContextMenu,
@@ -390,10 +473,18 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 	async _onRender(context, options) {
 		await super._onRender(context, options);
-		await V2.updateHeader(this, this.actor.system.scale);
+
+		let currentScale = 1;
+		const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+		if (prefs.sheetViewTags && prefs.sheetViewTags[this.actor._id])
+			currentScale = prefs.sheetViewTags[this.actor._id].scale;
+
+		await V2.updateHeader(this, currentScale);
 		await this.activateListeners(this.element);
 
-        this.setPosition({scale: this.actor.system.scale});
+        this.setPosition({scale: currentScale});
+		if (this._roll?.rendered)
+			this.renderRollDialog();
 	}
 
 	activateListeners(html) {
@@ -455,8 +546,6 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			paddingPx: 0
 		});
 
-		V2.activateListeners(this, html);
-
 		if (Number.parseFloat(game.version) < 13)
 			this.#contextmenu._setPosition = function (html, target) {
 				//this.expandUp = true;
@@ -467,19 +556,25 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	}
 
 	static async #onSubmit(event) {
-		//console.log(`CharacterSheet onSubmit`);
 		const name = event.target.name;
 		const isProseMirror = event.target.classList.contains("prosemirror");
 
 		if (isProseMirror) {
 			this._notesEditorStyle = "display: none;";
 			this.options.document.update({[name] : event.target.value});
+			return;
+		}
+		switch (name) {
+			case "name":
+				this.actor.update({[name] : event.target.value});
+				this.actor.update({"prototypeToken.name" : event.target.value});
+				return;
 		}
 	}
 
 	async _updateObject(event, formData) {
 		const cleaned = await this.#handleUpdateEmbeddedItems(formData);
-		console.log(`CharacterSheet _updateObject`);
+		logger.info(`CharacterSheet _updateObject`);
 		return super._updateObject(event, cleaned);
 	}
 
@@ -500,7 +595,6 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         if (dx > 3 || dx < -3 || dy > 3 || dy < -3) {   // threshold to avoid accidental drags
         	this.isDragging = true;
 
-			//console.log(`Moving Image to ${this.startDragPosition.left + dx} ${this.startDragPosition.top  + dy}`);
 			this.setPosition({
 				left: this.startDragPosition.left + dx,
 				top:  this.startDragPosition.top  + dy
@@ -550,7 +644,6 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const left = parseFloat(notesStyle.left.replace('px', ''));
 		const top = parseFloat(notesStyle.top.replace('px', ''));
 		this.notesStartDragPosition = { left, top };
-		//console.log(`Notes Mouse Down At ${left} ${top}`);
 	}
 
 	async _onNotesMouseMove(event) {
@@ -562,7 +655,6 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         if (dx > 3 || dx < -3 || dy > 3 || dy < -3) {
         	this.isDraggingNotes = true;
 
-			//console.log(`Moving Notes to ${this.notesStartDragPosition.left + dx} ${this.notesStartDragPosition.top + dy}`);
 			const notesPanel = this.element.querySelector(".litm--character-notes");
 			notesPanel.style.left = (this.notesStartDragPosition.left + dx) + 'px';
 			notesPanel.style.top = (this.notesStartDragPosition.top + dy) + 'px';
@@ -571,7 +663,6 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 	async _onNotesMouseUp(event) {
 		if (!event) return;
-		//console.log(`Notes Mouse Up`);
 		this.notesStartX = 0;
 		this.notesStartY = 0;
 		this.notesStartDragPosition = {};
@@ -606,10 +697,8 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			"name": value,
 		}]);
 
-		if (game.user.isGM)
-			game.litm.storyTags?.render(true);
-		else
-			Sockets.dispatch("updateStoryTags", {actorId, effectId, value});
+		game.litm.storyTags?.render(true);
+		Sockets.dispatch("updateStoryTags", {actorId, effectId, value});
 	}
 
 	async _onDrop(dragEvent) {
@@ -635,7 +724,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		]);
 
 		game.litm.storyTags.render();
-		dispatch({
+		utils.dispatch({
 			app: "story-tags",
 			type: "render",
 		});
@@ -793,7 +882,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		//const t = event.target;
 		await this.actor.createEmbeddedDocuments("ActiveEffect", [
 			{
-				name: t("Litm.ui.name-tag"),
+				name: utils.localize("Litm.ui.name-tag"),
 				flags: {
 					"foundryvtt-litm": {
 						type: "tag",
@@ -805,7 +894,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		]);
 
 		game.litm.storyTags.render();
-		dispatch({
+		utils.dispatch({
 			app: "story-tags",
 			type: "render",
 		});
@@ -815,7 +904,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const currentThemes = this.actor.items.filter((it) => it.type === "theme").length;
 		this.actor.createEmbeddedDocuments("Item", [
 			{
-				name: `${t("TYPES.Item.theme")} ${currentThemes + 1}`,
+				name: `${utils.localize("TYPES.Item.theme")} ${currentThemes + 1}`,
 				type: "theme",
 			}
 		]);
@@ -823,7 +912,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 	async _addBackpack() {
 		const backpack = {
-			name: t("TYPES.Item.backpack"),
+			name: utils.localize("TYPES.Item.backpack"),
 			type: "backpack"
 		};
 
@@ -832,18 +921,18 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 	async _removeTheme(id) {
 		const item = this.items.get(id);
-		if (!(await confirmDelete(`TYPES.Item.${item.type}`))) return;
+		if (!(await utils.confirmDelete(`TYPES.Item.${item.type}`))) return;
 		return item.delete();
 	}
 
 	async _removeEffect(id) {
 		const effect = this.actor.effects.get(id);
-		if (!(await confirmDelete())) return;
+		if (!(await utils.confirmDelete())) return;
 
 		await effect.delete();
 
 		game.litm.storyTags.render();
-		dispatch({
+		utils.dispatch({
 			app: "story-tags",
 			type: "render",
 		});
@@ -933,6 +1022,17 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		}
 	}
 
+	static async #doActivate(event, target) {
+		if (event.detail > 1) return;
+		event.preventDefault();
+		event.stopPropagation();
+		const id = event.target.dataset.id;
+		const selected = event.target.hasAttribute("data-selected");
+		let tag = this.system.allTags.find((t) => t.id === id);
+		this.toggleActivateTag(tag, selected);
+		this.render();
+	}
+
 	static async #doSelect(event, target) {
 		// Prevent double clicks from selecting the tag
 		if (event.detail > 1) return;
@@ -963,6 +1063,17 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		}
 
 		// Render the roll dialog if it's open
+		if (this._roll.rendered) this._roll.render();
+		this.render();
+	}
+
+	static async #doBurn(event, target) {
+		if (event.detail > 1) return;
+		event.preventDefault();
+		event.stopPropagation();
+		const id = event.target.dataset.id;
+		let tag = this.system.allTags.find((t) => t.id === id);
+		this.toggleBurnTag(tag, false);
 		if (this._roll.rendered) this._roll.render();
 		this.render();
 	}
@@ -1003,16 +1114,14 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				flags: flags,
 			}]);
 
-			if (game.user.isGM)
-				game.litm.storyTags?.render(true);
-			else
-				Sockets.dispatch("updateStoryTags", {actorId, effectId, index, checked});
+			game.litm.storyTags?.render(true);
+			Sockets.dispatch("updateStoryTags", {actorId, effectId, index, checked});
 		}
 	}
 
 	static async #showAdvancementHint(event) {
 		const type = event.target.dataset.type;
-		showAdvancementHint(type);
+		utils.showAdvancementHint(type);
 	}
 
 	static async #onEditImprovement(event) {
@@ -1067,7 +1176,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		if (!themeImprovement) return;
 		if (!themeImprovement.name || themeImprovement.name == "") return;
 
-		if (!(await confirmDelete(themeImprovement.name))) return;
+		if (!(await utils.confirmDelete(themeImprovement.name))) return;
 
 		themeImprovement.improvementId = null;
 		themeImprovement.name = null;
@@ -1299,7 +1408,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				condition: element => canEdit(element, this.actor),
 				callback: async element => {
 					const portrait = await PIXI.Texture.fromURL(this.actor.img);
-					await showImageDialog(this.actor.img, this.actor.name, true, game.user, portrait.width, portrait.height);
+					await utils.showImageDialog(this.actor.img, this.actor.name, true, game.user, portrait.width, portrait.height);
 				},
 			},
 		];

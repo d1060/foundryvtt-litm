@@ -73,8 +73,8 @@
 			"path": "lang/no.json"
 		},
 		{
-			"lang": "pt",
-			"name": "Português",
+			"lang": "pt-BR",
+			"name": "Português (Brasileiro)",
 			"path": "lang/pt.json"
 		}
 	],
@@ -82,7 +82,7 @@
 	"compatibility": {
 		"minimum": 12,
 		"verified": 13,
-		"maximum": 13
+		"maximum": 15
 	},
 	"packs": [
 		{

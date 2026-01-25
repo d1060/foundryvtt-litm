@@ -120,7 +120,6 @@ export default class Fellowship extends HandlebarsApplicationMixin(ApplicationV2
     async _onRender(context, options) {
         await super._onRender(context, options);
         await V2.updateHeader(this);
-        V2.updateResizeHandle(this);
         await this.activateListeners(this.element);
     }
 
@@ -136,15 +135,13 @@ export default class Fellowship extends HandlebarsApplicationMixin(ApplicationV2
                 span.addEventListener("keydown", ev => {
                     if (ev.key === "Enter") {
                         ev.preventDefault();
-                        this._setText(ev);
+						span.blur();
                     }
                 });
 
                 // Optional: submit also when clicking away
                 span.addEventListener("blur", (ev) => {this._setText(ev)});
         });
-
-        V2.activateListeners(this, html);
     }
 
     async _setText(event) {
@@ -391,6 +388,26 @@ export default class Fellowship extends HandlebarsApplicationMixin(ApplicationV2
         }
     }
 
+    static async activateTag(tag) {
+		const fellowship = game.settings.get("foundryvtt-litm", "fellowship");
+        if (tag.id == 'fellowship') {
+			fellowship.system.isActive = !fellowship.system.isActive;
+            this.update("system.isActive", fellowship.system.isActive);
+        } else {
+            let myTag = fellowship.system.powerTags.find(t => t.id == tag.id);
+            if (myTag) {
+				myTag.isActive = !myTag.isActive;
+                this.update("system.powerTags", fellowship.system.powerTags);
+                return;
+            }
+            myTag = fellowship.system.weakness.find(t => t.id == tag.id);
+            if (myTag) {
+				myTag.isActive = !myTag.isActive;
+                this.update("system.weakness", fellowship.system.weakness);
+            }
+        }
+    }
+
 	async update(attrib, value) {
 		if (game.user.isGM) {
 			foundry.utils.setProperty(this.fellowship, attrib, value);
@@ -417,13 +434,13 @@ export default class Fellowship extends HandlebarsApplicationMixin(ApplicationV2
 	static broadcastFellowshipUpdate() {
 		const isGM = game.user.isGM;
 		const user = game.user.id;
-		return game.socket.emit("system.litm", { app: "character-sheet", type: "renderFellowship", event: "renderFellowship", senderId: user, isGM, user});
+		return game.socket.emit("system.foundryvtt-litm", { app: "character-sheet", type: "renderFellowship", event: "renderFellowship", senderId: user, isGM, user});
 	}
 
 	static requestFellowshipUpdate(attrib, value) {
 		const isGM = game.user.isGM;
 		const user = game.user.id;
-		return game.socket.emit("system.litm", { app: "character-sheet", type: "updateFellowship", event: "updateFellowship", attrib, value, senderId: user, isGM, user});
+		return game.socket.emit("system.foundryvtt-litm", { app: "character-sheet", type: "updateFellowship", event: "updateFellowship", attrib, value, senderId: user, isGM, user});
 	}
 
 	static async renderFellowship() {

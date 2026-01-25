@@ -1,8 +1,6 @@
-import { info } from "../logger.js";
-
 export class HandlebarsHelpers {
 	static register() {
-		info("Registering Handlebars Helpers...");
+		logger.info("Registering Handlebars Helpers...");
 
 		Handlebars.registerHelper("add", (...args) => {
 			args.pop();
@@ -74,7 +72,7 @@ export class HandlebarsPartials {
 	];
 
 	static register() {
-		info("Registering Handlebars Partials...");
+		logger.info("Registering Handlebars Partials...");
 		foundry.applications.handlebars.loadTemplates(HandlebarsPartials.partials);
 	}
 }

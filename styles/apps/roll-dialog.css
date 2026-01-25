@@ -154,6 +154,40 @@
 		}
 	}
 
+	& .litm--roll-story-themes {
+		position: relative;
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		gap: 2px;
+
+		justify-items: center;
+  		align-items: start;
+
+		& .litm--roll-story-theme {
+			position: relative;
+			display: inline-flex;
+			flex-direction: column;
+
+			& .litm--roll-story-theme-list {
+				padding: 0;
+				margin: 0;
+				gap: 2px;
+				list-style: none;
+				display: inline-flex;
+  				flex-direction: column;
+  				align-items: center;
+
+				border: 1px solid #b3a186;
+		        border-radius: 6px;
+				padding: 2px;
+
+				& > li {
+ 					width: auto;
+				}
+			}
+		}
+	}
+
 	& .litm--roll-dialog-tags-summary {
 		display: flex;
 		flex-direction: column;

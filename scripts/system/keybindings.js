@@ -1,10 +1,8 @@
-import { localize as t } from "../utils.js";
-
 export class KeyBindings {
 	static register() {
 		game.keybindings.register("foundryvtt-litm", "openDiceRoller", {
-			name: t("Litm.ui.dice-roller"),
-			hint: t("Litm.ui.dice-roller-hint"),
+			name: utils.localize("Litm.ui.dice-roller"),
+			hint: utils.localize("Litm.ui.dice-roller-hint"),
 			editable: [
 				{
 					key: "KeyR",

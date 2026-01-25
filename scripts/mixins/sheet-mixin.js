@@ -1,5 +1,3 @@
-import { localize as t } from "../utils.js";
-
 export const SheetMixin = (Base) =>
 	class extends Base {
 		isEditing = false;
@@ -48,7 +46,7 @@ export const SheetMixin = (Base) =>
 			buttons.unshift({
 				class: "litm--sheet-scale-button",
 				icon: "fas fa-arrows-alt-h",
-				tooltip: t("Resize"),
+				tooltip: utils.localize("Resize"),
 				onclick: () => {},
 			});
 
@@ -128,9 +126,9 @@ export const SheetMixin = (Base) =>
 				document.removeEventListener(eventNames[0], mousemove);
 				document.removeEventListener(eventNames[1], mouseup);
 
-				this.setPosition({
-					scale: this.#currentScale,
-				});
+				//this.setPosition({
+				//	scale: this.#currentScale,
+				//});
 			};
 
 			document.addEventListener(eventNames[0], mousemove);

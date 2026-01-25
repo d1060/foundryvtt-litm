@@ -32,8 +32,14 @@ export class Enrichers {
 	static #enrichTags() {
 		const tooltip = game.i18n.localize("Litm.ui.drag-apply");
 		const enrichTags = ([_text, tag, status]) => {
-			if (tag.startsWith("-"))
+			if (tag.startsWith("--"))
 				return $(
+					`<mark class="litm--weaknessTag" draggable="true" data-tooltip="${tooltip}"><i class="fa fa-angle-double-down"></i>${tag.replace(/^--/, "")}${
+						status ? `:${status}` : ""
+					}</mark>`,
+				)[0];
+			if (tag.startsWith("-"))
+				return $(	
 					`<mark class="litm--limit">${tag.replace(/^-/, "")}${
 						status ? `:${status}` : ""
 					}</mark>`,

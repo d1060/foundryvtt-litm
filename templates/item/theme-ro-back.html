@@ -8,19 +8,27 @@
 		<div class="litm--theme-legend">
 			<span>{{localize "Litm.themes.special-improvements"}}</span>
 		</div>
-		<button type="button" data-dblclick="flip" data-name="{{data.name}}" class="litm--theme-title" data-id="{{data._id}}" {{#if (includes @root.rollTags
-			data._id 'id' )}}data-selected{{/if}} {{#if data.system.isActive}}data-action="select"
-			data-tooltip="{{localize (ifThen data.system.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}" {{/if}}>
-			<!-- isActive checkbox -->
-			<span class="litm--sro">{{localize (tagActiveString data.system true)}}</span>
-			<span class="litm--checkbox litm--checkbox-with-bg {{checked data.system.isActive}}"></span>
-			<!-- Name input -->
-			<span class="litm--theme-name">{{data.name}}</span>
-			<!-- isBurnt checkbox -->
-			<span class="litm--sro">{{localize (ifThen data.system.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}</span>
-			<span class="litm--burn {{checked (or data.system.isBurnt (includes @root.burntTags data._id 'id'))}}"
-				aria-hidden="true"></span>
-		</button>
+		<div class="litm--theme-header">
+			<button type="button" data-dblclick="flip" data-name="{{data.name}}" class="litm--theme-title" data-id="{{data._id}}" {{#if data.system.isActive}}data-action="activate"
+				data-tooltip="{{localize (ifThen data.system.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}" {{/if}}>
+				<!-- isActive checkbox -->
+				<span class="litm--sro">{{localize (tagActiveString data.system true)}}</span>
+				<span class="litm--checkbox litm--checkbox-with-bg {{checked data.system.isActive}}"></span>
+			</button>
+			<button type="button" data-dblclick="flip" data-name="{{data.name}}" class="litm--theme-title label" data-id="{{data._id}}" {{#if (includes @root.rollTags
+				data._id 'id' )}}data-selected{{/if}} {{#if data.system.isActive}}data-action="select"
+				data-tooltip="{{localize (ifThen data.system.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}" {{/if}}>
+				<!-- Name input -->
+				<span class="litm--theme-name">{{data.name}}</span>
+			</button>
+			<button type="button" data-dblclick="flip" data-name="{{data.name}}" class="litm--theme-title" data-id="{{data._id}}" {{#if data.system.isActive}}data-action="burn"
+				data-tooltip="{{localize (ifThen data.system.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}" {{/if}}>
+				<!-- isBurnt checkbox -->
+				<span class="litm--sro">{{localize (ifThen data.system.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}</span>
+				<span class="litm--burn {{checked (or data.system.isBurnt (includes @root.burntTags data._id 'id'))}} {{#if (includes @root.toBurnTags data._id 'id')}}selected{{/if}}"
+					aria-hidden="true"></span>
+			</button>
+		</div>
 		<ul class="litm--special-improvements" data-dblclick="flip" data-id="{{data._id}}" >
 			{{#each data.system.specialImprovements as |specialImprovement|}}
             <li data-id="{{specialImprovement.id}}"

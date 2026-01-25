@@ -1,5 +1,4 @@
 import Fellowship from "./fellowship.js";
-import { stringDistance } from "../utils.js";
 import V2 from "../v2sheets.js";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 export default class SpecialImprovements extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -73,7 +72,6 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
     async _onRender(force, options) {
         await super._onRender(force, options);
         await V2.updateHeader(this);
-        await V2.updateResizeHandle(this);
         await this.activateListeners(this.element);
 		if (this.closestRawTheme) {
 			const themebook = this.element.querySelector(`[data-themebook="${this.closestRawTheme}"]`);
@@ -91,8 +89,8 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
     }
 
     activateListeners(html) {
-        V2.activateListeners(this, html);
-    }
+
+	}
 
     static async #onSubmit(event, target) {
 
@@ -244,7 +242,7 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 			const themes = CONFIG.litm.theme_levels[level];
 			for (const theme of themes) {
 				const themeName = game.i18n.localize(`Litm.themes.${theme}`);
-				const similarity = stringDistance(actorThemeName, themeName);
+				const similarity = utils.stringDistance(actorThemeName, themeName);
 				if (similarity < lowestSimilarity) {
 					lowestSimilarity = similarity;
 					closestThemeId = theme;

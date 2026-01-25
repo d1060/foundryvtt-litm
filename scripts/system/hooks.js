@@ -1,11 +1,11 @@
-import { error, info } from "../logger.js";
-import { sleep, localize as t } from "../utils.js";
 import { Sockets } from "./sockets.js";
 import { CharacterData } from "../actor/character/character-data.js";
+import Randomizer from "../apps/randomizer.js";
+import V2 from "../v2sheets.js";
 
 export class LitmHooks {
 	static register() {
-		info("Registering Hooks...");
+		logger.info("Registering Hooks...");
 		LitmHooks.#addLinkPreloadsToHead();
 		LitmHooks.#addImportToActorSidebar();
 		LitmHooks.#iconOnlyHeaderButtons();
@@ -23,6 +23,8 @@ export class LitmHooks {
 		LitmHooks.#addStoryTagsToControls();
 		LitmHooks.#popOutCompatiblity();
 		LitmHooks.#rendeWelcomeScreen();
+		LitmHooks.#renderNewHero();
+		LitmHooks.#applicationV2Hooks();
 	}
 
 	static #addLinkPreloadsToHead() {
@@ -101,7 +103,7 @@ export class LitmHooks {
 
 		for (const asset of assets) {
 			const link = Object.assign(document.createElement("link"), {
-				rel: "preload",
+				rel: "prefetch",
 				href: asset,
 				as: "image",
 				type: "image/webp",
@@ -119,18 +121,18 @@ export class LitmHooks {
 				`);
 
 		const buttons = [
-			{ action: "configure-sheet", icon: "fas fa-cog", label: t("Configure") },
+			{ action: "configure-sheet", icon: "fas fa-cog", label: utils.localize("Configure") },
 			{
 				action: "configure-token",
 				icon: "fas fa-user-circle",
-				label: t("TOKEN.Title"),
+				label: utils.localize("TOKEN.Title"),
 			},
 			{
 				action: "share-image",
 				icon: "fas fa-eye",
-				label: t("JOURNAL.ActionShow"),
+				label: utils.localize("JOURNAL.ActionShow"),
 			},
-			{ action: "close", icon: "fas fa-times", label: t("Close") },
+			{ action: "close", icon: "fas fa-times", label: utils.localize("Close") },
 		];
 
 		for (const hook of [
@@ -177,7 +179,7 @@ export class LitmHooks {
 				.filter(Boolean);
 
 			if (validationErrors.length) {
-				error("Validation errors", validationErrors);
+				logger.error("Validation errors", validationErrors);
 				ui.notifications.error("Litm.ui.error-validating-item", {
 					localize: true,
 				});
@@ -190,9 +192,9 @@ export class LitmHooks {
 		Hooks.on("renderSidebarTab", (app, html) => {
 			if (app.id !== "actors") return;
 			const button = $(
-				`<button class="litm--import-actor" data-tooltip="${t(
+				`<button class="litm--import-actor" data-tooltip="${utils.localize(
 					"Litm.ui.import-actor",
-				)}" aria-label="${t(
+				)}" aria-label="${utils.localize(
 					"Litm.ui.import-actor",
 				)}"><i class="fas fa-file-import"></i></button>`,
 			);
@@ -265,7 +267,7 @@ export class LitmHooks {
 							for (const tag of roll.litm.weaknessTags.filter(
 								(t) => t.type === "weaknessTag",
 							))
-								await actor.sheet.gainExperience(tag);
+							await actor.sheet.gainExperience(tag);
 							roll.options.gainedExp = true;
 							app.update({ rolls: [roll] });
 							break;
@@ -305,7 +307,7 @@ export class LitmHooks {
 							const actor = game.actors.get(data.actorId);
 							actor.sheet.renderRollDialog();
 							ui.notifications.warn(
-								game.i18n.format("Litm.ui.roll-rejected", { name: t("You") }),
+								game.i18n.format("Litm.ui.roll-rejected", { name: utils.localize("You") }),
 							);
 							// Dispatch order to reopen
 							Sockets.dispatch("rejectRoll", {
@@ -330,7 +332,7 @@ export class LitmHooks {
 		const callback = (_, options) => {
 			// Add context menu options to tracked rolls
 			const createEffect = ([key, effect], category) => ({
-				name: `${t(category)}: ${t(`Litm.effects.${key}.key`)}`,
+				name: `${utils.localize(category)}: ${utils.localize(`Litm.effects.${key}.key`)}`,
 				icon: `<i class="${effect.icon}"></i>`,
 				condition: (li) => {
 					if (typeof li.find === "function")
@@ -343,11 +345,11 @@ export class LitmHooks {
 				callback: () => {
 					ChatMessage.create({
 						content: `<div class="litm dice-roll">
-							<div class="dice-flavor">${t(`Litm.effects.${key}.key`)}</div>
+							<div class="dice-flavor">${utils.localize(`Litm.effects.${key}.key`)}</div>
 							<div class="dice-effect">
-								<p><em>${t(effect.description)}</em></p>
-								<p>${t(effect.action)}</p>
-								<p><strong>${t("Litm.other.cost")}:</strong> ${t(effect.cost)}</p>
+								<p><em>${utils.localize(effect.description)}</em></p>
+								<p>${utils.localize(effect.action)}</p>
+								<p><strong>${utils.localize("Litm.other.cost")}:</strong> ${utils.localize(effect.cost)}</p>
 							</div>
 						</div>
 						`,
@@ -360,7 +362,7 @@ export class LitmHooks {
 
 			// Add context menu option to change roll types
 			const createTypeChange = (type) => ({
-				name: `${t("Litm.ui.change-roll-type")}: ${t(`Litm.ui.roll-${type}`)}`,
+				name: `${utils.localize("Litm.ui.change-roll-type")}: ${utils.localize(`Litm.ui.roll-${type}`)}`,
 				icon: '<i class="fas fa-dice"></i>',
 				condition: (li) => {
 					if (typeof li.find === "function")
@@ -433,7 +435,7 @@ export class LitmHooks {
 		Hooks.on("createActor", async (actor, data, userId) => {
 			if (actor.type !== "character") return;
 			if (userId == game.user.id) {
-				CharacterData.randomizeImage(actor);
+				CharacterData.randomizeNameAndImage(actor);
 				CharacterData.createThemes(actor);
 			}
 		});
@@ -467,8 +469,16 @@ export class LitmHooks {
 		game.litm.storyTags = app;
 
 		Hooks.once("ready", async (_app, html) => {
-			if (game.settings.get("foundryvtt-litm", "show_tag_window_on_load") && game.user.isGM) {
-				app.render(true);
+			if (game.settings.get("foundryvtt-litm", "show_tag_window_on_load"))
+			{
+				const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+				if (prefs.storyTags == null || prefs.storyTags)
+				{
+					await app.render(true);
+					if (prefs.storyTagsPosition) {
+						app.setPosition({ left: prefs.storyTagsPosition[0], top: prefs.storyTagsPosition[1] });
+					}
+				}
 			}
 		});
 	}
@@ -558,7 +568,7 @@ export class LitmHooks {
 				if (tokenControls.tools.find((t) => t.name === "story-tags")) return;
 				tokenControls.tools.push({
 					name: "story-tags",
-					title: t("Litm.tags.story", "Litm.other.tags"),
+					title: utils.localize("Litm.tags.story", "Litm.other.tags"),
 					icon: "fas fa-tags",
 					button: true,
 					onClick: () => {
@@ -572,7 +582,7 @@ export class LitmHooks {
 			} else if (!tokenControls.tools["story-tags"])
 				tokenControls.tools["story-tags"] = {
 					name: "story-tags",
-					title: t("Litm.tags.story", "Litm.other.tags"),
+					title: utils.localize("Litm.tags.story", "Litm.other.tags"),
 					icon: "fas fa-tags",
 					button: true,
 					onClick: () => {
@@ -596,8 +606,168 @@ export class LitmHooks {
 		});
 	}
 
+	static async #createHowToPlayMacro() {
+		const macro_name = "How to Play";
+		let macro = game.macros.find(m =>
+			m.name === macro_name &&
+			m.author?.id === game.user.id
+		);
+
+		if (!macro) {
+			macro = await Macro.create({
+				name: macro_name,
+				type: "script",
+				ownership: {
+					default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
+					[game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+				},
+				img: "icons/svg/scroll.svg",
+				command: `new foundry.applications.apps.ImagePopout({ window: { title: "How to Play"} , src: "systems/foundryvtt-litm/assets/media/HowToPlay.jpg"}).render(true);`
+			});
+		}
+
+		if (macro) {
+			const hotbar = game.user.hotbar;
+			for (let slot = 1; slot <= 50; slot++) {
+				if (hotbar[slot]) {
+					const slottedMacro = game.macros.get(hotbar[slot]);
+					if (slottedMacro && slottedMacro.name == macro_name)
+						return;
+					else if (slottedMacro == null)
+						hotbar[slot] = null;
+				}
+
+				if (!hotbar[slot]) {
+					await game.user.assignHotbarMacro(macro, slot);
+					return slot;
+				}
+			}
+		}
+	}
+
+	static async #createStoryTagsMacro() {
+		const macro_name = game.i18n.localize("Litm.tags.story-tags");
+		let macro = game.macros.find(m =>
+			m.name === macro_name &&
+			m.author?.id === game.user.id
+		);
+
+		if (!macro) {
+			macro = await Macro.create({
+				name: macro_name,
+				type: "script",
+				ownership: {
+					default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
+					[game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+				},
+				img: "icons/svg/paper-and-feather.svg",
+				command: `if (game.litm.storyTags?.rendered) `+
+							`game.litm.storyTags?.close(); ` +
+							`else ` +
+							`{ `+
+								`await game.litm.storyTags?.render(true); `+
+								`const defaults = game.litm.StoryTagApp.DEFAULT_OPTIONS; ` +
+								`game.litm.storyTags?.setPosition({ left: defaults.position.left, top: defaults.position.top }); `+
+							`}`
+			});
+		}
+
+		if (macro) {
+			const hotbar = game.user.hotbar;
+			for (let slotGroup = 1; slotGroup <= 5; slotGroup++) {
+				const slot = slotGroup * 10;
+				if (hotbar[slot]) {
+					const slottedMacro = game.macros.get(hotbar[slot]);
+					if (slottedMacro && slottedMacro.name == macro_name)
+						return;
+					else if (slottedMacro == null)
+						hotbar[slot] = null;
+				}
+
+				if (!hotbar[slot]) {
+					await game.user.assignHotbarMacro(macro, slot);
+					return slot;
+				}
+			}
+		}
+	}
+
+	static #renderNewHero() {
+		Hooks.on("renderActorDirectory", async function(app, html) {
+			const renderedHTML = await foundry.applications.handlebars.renderTemplate(
+				"systems/foundryvtt-litm/templates/ui/buttons.html"
+			);
+
+			const footer = html.querySelector("#actors .directory-footer");
+			await footer.insertAdjacentHTML("beforeend", renderedHTML);
+
+			footer.querySelector(".character-generator-button").addEventListener("click", async () => {
+				if (game.users.some(u => u.isGM && u.active))
+				{
+					if (game.user.isGM) {
+						Randomizer.newCharacter(game.user.id);
+					}
+					else
+					{
+						const isGM = game.user.isGM;
+						const senderId = game.user.id;
+
+						game.socket.emit("system.foundryvtt-litm", {
+							app: "character-sheet",
+							event: "createNewCharacter",
+							isGM,
+							senderId,
+							user: game.user
+						});
+					}
+				}
+				else
+				{
+					const message = game.i18n.localize("Litm.ui.noGM-message");
+					const title = game.i18n.localize("Litm.ui.noGM");
+					foundry.applications.handlebars.renderTemplate(
+						"systems/shadowdark/templates/dialog/warn.hbs",
+						{message}
+					).then(html => {
+						foundry.applications.api.DialogV2.wait({
+							classes: ["app", "window-app", "litm", "litm--no-gm", "themed", "theme-light"],
+							window: {
+								resizable: false,
+								title,
+							},
+							content: html,
+							buttons: [
+								{
+									action: 'Ok',
+									default: true,
+									icon: "fa fa-check",
+									label: `${game.i18n.localize("Litm.ui.ok")}`,
+								},
+							],
+							default: "Yes",
+						});
+					});
+				}
+			});
+		});
+	}
+
+	static #applicationV2Hooks() {
+		// Hooks.on("positionApplicationV2", (app, position) => {
+		// 	if (!(app instanceof foundry.applications.api.ApplicationV2)) return;
+
+		// 	if (app instanceof foundry.applications.api.StoryTagApp) {
+		// 		const { top, left, width, height, scale } = position;
+		// 		LOGGER.INFO("Moved Story Tag App to:", left, top);
+		// 	}
+		// });
+	}
+
 	static #rendeWelcomeScreen() {
 		Hooks.once("ready", async () => {
+			this.#createHowToPlayMacro();
+			this.#createStoryTagsMacro();
+
 			if (game.settings.get("foundryvtt-litm", "welcomed")) return;
 			if (!game.user.isGM) return;
 
@@ -759,6 +929,10 @@ export class LitmHooks {
 					adventure?.[0]?.sheet.render(true);
 				})
 			});
+		});
+
+		Hooks.on("renderApplicationV2", (app, html, context, options) => {
+			V2.activateListeners(app, html);
 		});
 
 		Hooks.on("importAdventure", async () => {

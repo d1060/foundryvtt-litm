@@ -1,12 +1,12 @@
-import V2 from "../v2sheets.js";
 import { Sockets } from "../system/sockets.js";
-import { sortTags, localize as t, stringHash } from "../utils.js";
+import Fellowship from "./fellowship.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 	#tagState = [];
 	#shouldRoll = () => false;
 	#modifier = 0;
+	#firstPrepare = true;
 
 	constructor(actorId, characterTags = [], options = {}) {
 		super({}, options);
@@ -102,6 +102,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			weaknessTags,
 			positiveStatuses,
 			negativeStatuses,
+			storyThemes: tags.storyThemes,
 			modifier: Number(modifier) || 0,
 		});
 
@@ -127,6 +128,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				: CONFIG.litm.roll.formula ||
 					"2d6 + (@burnedValue + @powerValue + @positiveStatusValue - @weaknessValue - @negativeStatusValue + @modifier)";
 
+		const actor = game.actors.get(actorId);
+		logger.warn(`${actor?.name} (${actorId}) is performing a roll with modifiers: ${burnedValue} + ${powerValue} + ${positiveStatusValue} - ${weaknessValue} - ${negativeStatusValue} + ${modifier}.`);
 		// Roll
 		const roll = new game.litm.LitmRoll(
 			formula,
@@ -159,7 +162,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			});
 
 		// Reset roll dialog
-		res.rolls[0]?.actor?.sheet.resetRollDialog();
+		await res.rolls[0]?.actor?.sheet.resetRollDialog();
 		Sockets.dispatch("resetRollDialog", { actorId });
 
 		if (roll.litm?.burnedTags?.length) {
@@ -192,35 +195,71 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			}
 		}
 
+		if (roll.litm?.weaknessTags?.length) {
+			const weaknessTag = roll.litm.weaknessTags[0];
+			const actor = game.actors.get(roll.litm.actorId);
+			if (actor && weaknessTag) {
+				if (await actor.sheet.gainExperience(weaknessTag) == null) {
+					const fellowship = game.settings.get("foundryvtt-litm", "fellowship");
+					if (fellowship && fellowship.system.weakness.some(w => w.id == weaknessTag.id) && fellowship.system.experience < 3) {
+						fellowship.system.experience ++;
+						Fellowship.update("system.experience", fellowship.system.experience);
+					}
+				}
+			}
+		}
+
 		return res;
 	}
 
 	static calculatePower(tags) {
-		const burnedValue = tags.burnedTags.length * 3;
+		let burnedValue = tags.burnedTags.length * 3;
+		let powerValue = tags.powerTags.length;
+		let weaknessValue = tags.weaknessTags.length;
 
-		const powerValue = tags.powerTags.length;
+		let positiveStatusValue = 0;
+		for (const positiveStatus of tags.positiveStatuses) {
+			if (positiveStatus.value != null) {
+				const thisValue = Number.parseInt(positiveStatus.value);
+				if (thisValue > positiveStatusValue) positiveStatusValue = thisValue;
+			}
+			else if (positiveStatus.values?.length) {
+				for (let i = positiveStatus.values.length - 1; i >= 0; i--) {
+					if (positiveStatus.values[i] != null) {
+						const thisValue = Number.parseInt(positiveStatus.values[i]);
+						if (thisValue > positiveStatusValue) positiveStatusValue = thisValue;
+						break;
+					}
+				}
+			}
+		}
 
-		const weaknessValue = tags.weaknessTags.length;
-
-		const positiveStatusValue = tags.positiveStatuses.reduce(
-			(a, t) => a + Number.parseInt(t.value),
-			0,
-		);
-
-		const negativeStatusValue = tags.negativeStatuses.reduce(
-			(a, t) => a + Number.parseInt(t.value),
-			0,
-		);
+		let negativeStatusValue = 0;
+		for (const negativeStatus of tags.negativeStatuses) {
+			if (negativeStatus.value != null) {
+				const thisValue = Number.parseInt(negativeStatus.value);
+				if (thisValue > negativeStatusValue) negativeStatusValue = thisValue;
+			}
+			else if (negativeStatus.values?.length) {
+				for (let i = negativeStatus.values.length - 1; i >= 0; i--) {
+					if (negativeStatus.values[i] != null) {
+						const thisValue = Number.parseInt(negativeStatus.values[i]);
+						if (thisValue > negativeStatusValue) negativeStatusValue = thisValue;
+						break;
+					}
+				}
+			}
+		}
 
 		const modifier = Number(tags.modifier) || 0;
 
-		const totalPower =
-			burnedValue +
-			powerValue +
-			positiveStatusValue -
-			weaknessValue -
-			negativeStatusValue +
-			modifier;
+		const totalPower 
+			= burnedValue
+			+ powerValue
+			+ positiveStatusValue 
+			- weaknessValue 
+			- negativeStatusValue 
+			+ modifier;
 
 		return {
 			burnedValue,
@@ -234,19 +273,11 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	static #filterTags(tags) {
-		const burnedTags = tags.filter((t) => t.state === "burned");
-		const powerTags = tags.filter(
-			(t) => t.type !== "status" && t.state === "positive",
-		);
-		const weaknessTags = tags.filter(
-			(t) => t.type !== "status" && t.state === "negative",
-		);
-		const positiveStatuses = tags.filter(
-			(t) => t.type === "status" && t.state === "positive",
-		);
-		const negativeStatuses = tags.filter(
-			(t) => t.type === "status" && t.state === "negative",
-		);
+		const burnedTags = tags.filter((t) => t?.state === "burned");
+		const powerTags = tags.filter( (t) => t?.type !== "status" && t?.state === "positive", );
+		const weaknessTags = tags.filter( (t) => t?.type !== "status" && t?.state === "negative", );
+		const positiveStatuses = tags.filter( (t) => t?.type === "status" && t?.state === "positive", );
+		const negativeStatuses = tags.filter( (t) => t?.type === "status" && t?.state === "negative", );
 
 		return {
 			burnedTags,
@@ -318,7 +349,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			if (targetTag.includes('-')) {
 				const parts = targetTag.split("-");
 				mappedTargetTags.push({
-					id: `${stringHash(parts[0])}`,
+					id: `${utils.stringHash(parts[0])}`,
 					name: parts[0],
 					state: "",
 					states: ",negative",
@@ -327,7 +358,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				});
 			} else {
 				mappedTargetTags.push({
-					id: `${stringHash(targetTag)}`,
+					id: `${utils.stringHash(targetTag)}`,
 					name: targetTag,
 					state: "",
 					states: ",negative",
@@ -339,10 +370,35 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	get totalPower() {
-		const state = [...this.#tagState, ...this.characterTags, ...this.targetTags];
+		const state = [...this.#tagState, ...this.characterTags.filter(t => t.isActive), ...this.targetTags];
+
+		for (const storyTheme of this.storyThemes ?? []) {
+			if (storyTheme.state != null && storyTheme.state != "") {
+				state.push(LitmRollDialog.storyThemeToTag(storyTheme));
+			}
+
+			for (const tag of storyTheme.tags ?? []) {
+				if (tag.state != null && tag.state != "") {
+					state.push(tag);
+				}
+			}
+		}
+
+		for (const tag of state) {
+			if (tag.value == null && tag.values != null && tag.values?.length) {
+				for (let i = tag.values.length - 1; i >= 0; i--) {
+					if (tag.values[i] != null) {
+						tag.value = Number.parseInt(tag.values[i]);
+						break;
+					}
+				}
+			}
+		}
+		
 		const tags = LitmRollDialog.#filterTags(state);
 		const { totalPower } = LitmRollDialog.calculatePower({
 			...tags,
+			storyThemes: this.storyThemes,
 			modifier: this.#modifier,
 		});
 		return totalPower;
@@ -352,31 +408,52 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 	async _prepareContext(options) {
 		const data = {};
 		const skipModeration = this.#shouldRoll();
+		const config = game.settings.get("foundryvtt-litm", "storytags");
+		this.storyThemes = structuredClone(config.storyThemes);
+		if (this.#firstPrepare) {
+			await this._resetStoryThemeTagsStates(config);
+		}
+		if (this.storyThemes?.length) {
+			for (const storyTheme of this.storyThemes) {
+				storyTheme.title = LitmRollDialog.storyThemeToTag(storyTheme);
+				storyTheme.title = LitmRollDialog.classifyTag(storyTheme.title);
+
+				for (let tag of storyTheme.tags ?? []) {
+					tag = LitmRollDialog.classifyTag(tag);
+				}
+			}
+		}
+
+		this.#firstPrepare = false;
 
 		return {
 			...data,
 			actorId: this.actorId,
-			characterTags: sortTags(this.characterTags),
+			characterTags: utils.sortTags(this.characterTags.filter(t => t.isActive)),
 			rollTypes: {
 				quick: "Litm.ui.roll-quick",
 				tracked: "Litm.ui.roll-tracked",
 				mitigate: "Litm.ui.roll-mitigate",
 			},
 			skipModeration,
-			statuses: sortTags(this.statuses),
-			tags: sortTags(this.tags),
-			gmTags: sortTags(this.gmTags),
+			statuses: utils.sortTags(this.statuses),
+			tags: utils.sortTags(this.tags),
+			gmTags: utils.sortTags(this.gmTags),
 			targetTags: this.targetTags,
 			isGM: game.user.isGM,
 			title: this.rollName,
 			type: this.type,
 			totalPower: this.totalPower,
 			modifier: this.#modifier,
+			storyThemes: this.storyThemes,
 		};
 	}
 
+	async _onFirstRender(context, options) {
+
+	}
+
 	async _onRender(force, options) {
-		await V2.updateResizeHandle(this);
 		await this.activateListeners(this.element);
 	}
 
@@ -415,12 +492,11 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	static async #onSubmit(event, target) {
-		console.log(`LitmRollDialog #onSubmit`);
+		//logger.info(`LitmRollDialog #onSubmit`);
 	}
 
 	addTag(tag, toBurn) {
-		tag.state =
-			tag.type === "weaknessTag" ? "negative" : toBurn ? "burned" : "positive";
+		tag.state  =  tag.type === "weaknessTag" ? "negative" : toBurn ? "burned" : "positive";
 		tag.states = (tag.type === "weaknessTag" ? ",negative" : (",positive" + (tag.isSingleUse ? "" : ",burned")));
 
 		this.characterTags.push(tag);
@@ -436,22 +512,61 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.#dispatchUpdate();
 	}
 
+	updateTag(tag) {
+		const cTag = this.characterTags.find((t) => t.id == tag.id);
+		if (cTag) {
+			cTag.isActive = tag.isActive;
+			cTag.isBurnt = tag.isBurnt;
+		}
+
+		this.setTotalPower();
+		this.#dispatchUpdate();
+	}
+
 	getFilteredArrayFromFormData(formData) {
-		const allTags = [...this.#tagState, ...this.characterTags];
-		return Object.entries(formData)
-			.filter(([_, v]) => !!v)
-			.map(([key]) => allTags.find((t) => t.id === key));
+		const allTags = [...this.#tagState, ...this.characterTags.filter(t => t.isActive)];
+		const entries = Object.entries(formData).filter(([_, v]) => !!v);
+		const tags = entries.map(([key]) => allTags.find((t) => t.id === key));
+
+		if (!this.storyThemes) this.storyThemes = [];
+		for (let a = 0; a < this.storyThemes.length; a++) {
+			const storyTheme = this.storyThemes[a];
+			if (!storyTheme.tags) storyTheme.tags = [];
+
+			for (let i = 0; i < storyTheme.tags.length; i++) {
+				const tag = storyTheme.tags[i];
+				
+				const entry = entries.find(e => e[0] == tag.id);
+				if (entry) {
+					tag.state = entry[1];
+					tags.push(tag);
+				} else {
+					tag.state = "";
+				}
+			}
+
+			const entry = entries.find(e => e[0] == storyTheme.id);
+			if (entry) {
+				storyTheme.state = entry[1];
+				tags.push(LitmRollDialog.storyThemeToTag(storyTheme));
+			} else {
+				storyTheme.state = "";
+			}
+		}
+		return tags;
 	}
 
 	getFormTags(element) {
 
 	}
 
-	reset() {
+	async reset() {
 		this.characterTags = [];
 		this.#tagState = [];
 		this.#modifier = 0;
 		this.#shouldRoll = () => game.settings.get("foundryvtt-litm", "skip_roll_moderation");
+		const config = await game.settings.get("foundryvtt-litm", "storytags");
+		await this._resetStoryThemeTagsStates(config);
 		if (this.actor.sheet.rendered) this.actor.sheet.render(true);
 	}
 
@@ -498,10 +613,12 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 	}
 
-	_handleCheckboxChange(event) {
+	async _handleCheckboxChange(event) {
 		const checkbox = event.currentTarget;
 		const { name: id, value } = checkbox;
 		const { type } = checkbox.dataset;
+		let valueChanged = false;
+		let storyThemesChanged = false;
 
 		switch (type) {
 			case "powerTag":
@@ -509,29 +626,143 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			case "backpack":
 			case "weaknessTag": {
 				const tag = this.characterTags.find((t) => t.id === id);
-				if (tag) tag.state = value;
+				if (tag) {
+					valueChanged = true;
+					tag.state = value;
+				} 
+				else {
+					if (this.storyThemes?.length) {
+						for (const storyTheme of this.storyThemes) {
+							if (storyTheme.id == id) {
+								storyTheme.state = value;
+								valueChanged = true;
+								storyThemesChanged = true;
+								continue;
+							}
+							for (const tag of storyTheme.tags ?? []) {
+								if (tag.id == id) {
+									tag.state = value;
+									valueChanged = true;
+									storyThemesChanged = true;
+									break;
+								}
+							}
+						}
+					}
+				}
 				break;
 			}
 			default: {
 				const existingTag = this.#tagState.find((t) => t.id === id);
-				if (existingTag) existingTag.state = value;
-				else {
+				if (existingTag) {
+					valueChanged = true;
+					existingTag.state = value;
+				} else {
 					const targetTags = this.targetTags;
 					const tag = [...this.tags, ...this.statuses, ...this.gmTags, ...targetTags].find(
 						(t) => t.id === id,
 					);
 					if (tag) {
+						valueChanged = true;
 						this.#tagState.push({
 							...tag,
 							state: value,
 						});
+					} else {
+						if (this.storyThemes?.length) {
+							for (const storyTheme of this.storyThemes) {
+								if (storyTheme.id == id) {
+									valueChanged = true;
+									storyThemesChanged = true;
+									storyTheme.state = value;
+									continue;
+								}
+								for (const tag of storyTheme.tags ?? []) {
+									if (tag.id == id) {
+										valueChanged = true;
+										storyThemesChanged = true;
+										tag.state = value;
+										break;
+									}
+								}
+							}
+						}
 					}
 				}
 			}
 		}
 
+		let needsRender = false;
+		if (value == "burned" && valueChanged) {
+			[needsRender, storyThemesChanged] = await this._removeAllOtherBurnedTags(type, id, storyThemesChanged);
+		}
+
 		this.setTotalPower();
 		this.#dispatchUpdate();
+
+		if (storyThemesChanged) {
+			const config = await game.settings.get("foundryvtt-litm", "storytags");
+			config.storyThemes = structuredClone(this.storyThemes);
+			await game.settings.set("foundryvtt-litm", "storytags", config);
+		}
+		if (needsRender)
+			this.render(true);
+	}
+
+	async _removeAllOtherBurnedTags(type, id, storyThemesChanged) {
+		let needsRender = false;
+
+		let otherBurnedTags = this.characterTags.filter((t) => t.id !== id && t.state == "burned");
+		if (otherBurnedTags.length)
+		{
+			for (const tag of otherBurnedTags) {
+				needsRender = true;
+				tag.state = "positive";
+			}
+		}
+
+		otherBurnedTags = this.#tagState.filter((t) => t.id !== id && t.state == "burned");
+		if (otherBurnedTags.length) {
+			for (const tag of otherBurnedTags) {
+				needsRender = true;
+				tag.state = "positive";
+			}
+		}
+
+		const targetTags = this.targetTags;
+		otherBurnedTags = [...this.tags, ...this.statuses, ...this.gmTags, ...targetTags].filter(
+			(t) => t.id !== id && t.state == "burned",
+		);
+		if (otherBurnedTags.length) {
+			for (const tag of otherBurnedTags) {
+				needsRender = true;
+				this.#tagState.push({
+					...tag,
+					state: "positive",
+				});
+			}
+		}
+
+		if (this.storyThemes?.length) {
+			for (const storyTheme of this.storyThemes) {
+				if (storyTheme.id != id && storyTheme.state == "burned") {
+					needsRender = true;
+					storyThemesChanged = true;
+					storyTheme.state = "positive";
+					continue;
+				}
+				for (const tag of storyTheme.tags ?? []) {
+					if (tag.id != id && tag.state == "burned") {
+						needsRender = true;
+						storyThemesChanged = true;
+						tag.state = "positive";
+						break;
+					}
+				}
+			}
+		}
+		
+		return [needsRender, storyThemesChanged];
 	}
 
 	_handleModifierChange(event) {
@@ -558,7 +789,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			content: await foundry.applications.handlebars.renderTemplate(
 				"systems/foundryvtt-litm/templates/chat/moderation.html",
 				{
-					title: t("Litm.ui.roll-moderation"),
+					title: utils.localize("Litm.ui.roll-moderation"),
 					id: this.actor.id,
 					rollId: id,
 					type: data.type,
@@ -601,5 +832,50 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		root.querySelectorAll("[data-update='totalPower']").forEach(el => {
 			el.textContent = this.totalPower;
 		});
+	}
+
+	static classifyTag(tag) {
+		let tagName = tag.name.trim();
+		tagName = tagName.replace('[', '');
+		tagName = tagName.replace(']', '');
+		tag.type = "storyThemeTag";
+		if (tagName.startsWith('--')) {
+			tagName = tagName.replace('--', '');
+			tag.type = "weaknessTag";
+		}
+
+		const match = tagName.match(/-(\d+)/);
+		if (match) {
+			tagName = match ? tagName.replace(/-\d+/, "") : tagName,
+			tag.value = match ? Number(match[1]) : null;
+		};
+
+		tag.name = tagName;
+		tag.states = ",negative" + (tag.type != "weaknessTag" ? ( ",positive" + (tag.isSingleUse ? "" : ",burned") ) : "");
+		return tag;
+	}
+
+	static storyThemeToTag(storyTheme) {
+		return {
+			name: storyTheme.name,
+			id: storyTheme.id,
+			isBurnt: storyTheme.isBurnt,
+			value: storyTheme.value,
+			state: storyTheme.state,
+			type: storyTheme.type
+		};
+	}
+
+	async _resetStoryThemeTagsStates(config) {
+		if (!game.user.isGM) return;
+		for (const storyTheme of this.storyThemes ?? []) {
+			storyTheme.title = null;
+			storyTheme.state = null;
+			for (const tag of storyTheme.tags) {
+				tag.state = null;
+			}
+		}
+		config.storyThemes = structuredClone(this.storyThemes);
+		await game.settings.set("foundryvtt-litm", "storytags", config);
 	}
 }

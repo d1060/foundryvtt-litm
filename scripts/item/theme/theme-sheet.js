@@ -2,7 +2,6 @@ import V2 from "../../v2sheets.js";
 import ExternalTextEditor from "../../apps/text-editor.js";
 import SpecialImprovements from "../../apps/special-improvements.js";
 
-import { confirmDelete, showAdvancementHint } from "../../utils.js";
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ItemSheetV2 } = foundry.applications.sheets
 export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
@@ -65,6 +64,9 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 			data = { system: {} };
 		}
 
+		if (options.index && !this.index)
+			this.index = options.index;
+
 		data._id = this.item.id;
 		data.system.weakness = this.item.sheet.system.weakness;
 		data.system.levels = this.item.sheet.system.levels;
@@ -79,6 +81,7 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		data.system.milestone = this.item.sheet.system.milestone;
 		data.system.isActive = this.item.sheet.system.isActive;
 		data.system.isBurnt = this.item.sheet.system.isBurnt;
+		data.system.toBurn = this.item.sheet.system.toBurn;
 		data.system.flipped = this.item.sheet.system.flipped;
 		data.name = this.item.name;
 
@@ -112,7 +115,6 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	async _onRender(context, options) {
 		await super._onRender(context, options);
 		await V2.updateHeader(this);
-		V2.updateResizeHandle(this);
 		await this.activateListeners(this.element);
 		await this.activateEditors();
 	}
@@ -164,7 +166,7 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 				span.addEventListener("keydown", ev => {
 					if (ev.key === "Enter") {
 						ev.preventDefault();
-						this._setText(ev);
+						span.blur();
 					}
 				});
 
@@ -178,18 +180,28 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 				span.addEventListener("keydown", ev => {
 					if (ev.key === "Esc") {
 						ev.preventDefault();
+						span._committed = true;
 						this._closeEditor(ev);
 					}
 				});
 		});
-
-		V2.activateListeners(this, html);
 	}
 
 	async _setText(event) {
+		event.preventDefault();
+		event.stopPropagation();
 		const input = event.target.dataset.input;
-		const value = event.target.innerHTML;
+		let value = event.target.innerHTML;
 		const id = event.target.dataset.id;
+		if (value == "<br>") {
+			if (input == "system.motivation")
+				value = game.i18n.localize("Litm.ui.name-motivation");
+			else
+				value = game.i18n.localize("TYPES.Item.theme") + " " + (this.index + 1);
+
+			event.target.innerHTML = value;
+		}
+		
 		if (input.startsWith("improvement-"))
 		{
 			const theme = this.options.document;
@@ -280,7 +292,7 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	}
 
 	static async #removeTag(event, target) {
-		if (!(await confirmDelete("Litm.other.tag"))) return;
+		if (!(await utils.confirmDelete("Litm.other.tag"))) return;
 		throw new Error("Not implemented");
 	}
 
@@ -355,7 +367,7 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 	static async #showAdvancementHint(event) {
 		const type = event.target.dataset.type;
-		showAdvancementHint(type);
+		utils.showAdvancementHint(type);
 	}
 
 	static async #editImprovement(event) {
@@ -410,7 +422,7 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		if (!themeImprovement) return;
 		if (!themeImprovement.name || themeImprovement.name == "") return;
 
-		if (!(await confirmDelete(themeImprovement.name))) return;
+		if (!(await utils.confirmDelete(themeImprovement.name))) return;
 
 		themeImprovement.improvementId = null;
 		themeImprovement.name = null;

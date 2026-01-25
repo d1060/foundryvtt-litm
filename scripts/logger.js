@@ -4,18 +4,18 @@
  * @property {string} INFO - Info color
  * @property {string} ERROR - Error color
  */
-const Status = {
-	SUCCESS: "hsl(46.61 81.44% 70%)",
+export const Status = {
+	SUCCESS: "#2c3177ff",
 	INFO: "hsl(225.94 10.66% 41.72%)",
-	WARN: "hsl(45 100% 50%)",
-	ERROR: "hsl(6.5deg 42.05% 70%)",
+	WARN: "hsla(45, 91%, 26%, 1.00)",
+	ERROR: "hsla(6, 100%, 33%, 1.00)",
 };
 
 /**
  * @param {Status} status
  * @returns {function}
  */
-function log(status) {
+export function log(status) {
 	/**
 	 * @param  {...string} args
 	 * @returns {void}
@@ -24,7 +24,7 @@ function log(status) {
 		return console.log(
 			`%cLegend in the Mist | %c${args.join("\n")}`,
 			`font-weight: bold; color: ${status};`,
-			"color: hsl(240, 100%, 98%);",
+			"color: hsla(0, 0%, 33%, 1.00);",
 		);
 	};
 }

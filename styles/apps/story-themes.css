@@ -1,0 +1,115 @@
+.app.litm.litm--story-themes {
+    position: absolute;
+    background-image: none;
+    border: 0px solid transparent;
+
+    transition: left 100ms ease-out, top 100ms ease-out;
+
+    color: var(--litm-color);
+    font-family: var(--litm-font-accent);
+    text-align: center;
+
+    & .window-header {
+        display: none;
+        background: none;
+
+        & .window-title {
+            display: none;
+            height: 0px;
+        }
+
+        & .header-control {
+            display: none;
+            color: transparent;
+            width: 0px;
+        }
+
+        & .header-control::before {
+            display: none;
+        }
+    }
+
+    & .litm--story-themes-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-height: 155px;
+        position: relative;
+
+        background-image: url(../../assets/media/story-theme-background.webp);
+        background-size: 100% 100%;
+        background-clip: padding-box;
+
+        border: 20px solid transparent;
+        border-image-source: url("../../assets/media/story-theme-frame.webp");
+        border-image-slice: 20 fill;
+        border-image-width: 20px;
+        border-image-repeat: round;
+        box-sizing: border-box;
+
+        & [contenteditable] {
+            background-color: transparent;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+
+            &:focus {
+                background-color: rgb(0, 0, 0, 0.2);
+                outline: none;
+            }
+        }
+
+        & [data-scratched]::before {
+            content: "";
+            position: absolute;
+            width: 80%;
+            height: calc(5px + 100%);
+            background: url(../../assets/media/scratch.webp) no-repeat center;
+            background-blend-mode: color;
+            background-size: contain;
+            opacity: 0.8;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+
+    & .litm--story-theme-tags  {
+        display: flex;
+        width: 100%;
+        height: auto;
+        text-align: center;
+        font-size: var(--font-size-16);
+        align-items: baseline;
+        justify-content: center;
+        position: relative;
+    }
+
+    & .litm--story-theme {
+        position: relative;
+    }
+
+    & .litm--story-theme-title {
+        font-size: var(--font-size-20);
+        position: relative;
+        top: 0px;
+    }
+
+    & .litm--story-theme-tag  {
+        position: relative;
+    }
+
+    & .litm--story-themes-title {
+        width: 100%;
+        display: block;
+        color: var(--litm-color);
+        font-size: var(--font-size-20);
+        font-family: var(--litm-font-accent);
+        text-align: center;
+        cursor: grab;
+        position: relative;
+        top: 0px;
+        margin-bottom: 5px;
+    }
+}

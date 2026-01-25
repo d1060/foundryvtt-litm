@@ -1,7 +1,9 @@
 <li
     class="litm--tag-item litm--{{ifThen (eq tag.type 'status') 'status' 'tag'}}"
     data-id="{{tag.id}}"
+    data-value="{{tag.name}}"
     data-type="{{source}}"
+    data-context="story-tag"
     data-tooltip="{{localize (concat 'Litm.other.' tag.type)}}: {{tag.name}}{{#if tag.value}}{{concat '-' tag.value}}{{/if}}">
     {{#if (eq tag.type "tag")}}
         <label	class="litm--burn-label">
@@ -33,4 +35,12 @@
                     {{checked status}} />
         {{/each}}
     </div>
+    {{#if isGM}}
+        {{#if (eq source "story")}}
+            <button type="button" class="litm--add-subtag" data-action="makeStoryTheme" data-id="{{tag.id}}" data-tag-type="{{tag.type}}" data-type="{{source}}" data-tooltip="{{localize 'Litm.ui.make-story-theme'}}">
+                <span class="litm--sro">{{localize "Litm.ui.add-tag"}}</span>
+                <i class="far fa-add"></i>
+            </button>
+        {{/if}}
+    {{/if}}
 </li>

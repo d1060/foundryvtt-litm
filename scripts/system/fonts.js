@@ -1,8 +1,6 @@
-import { info } from "../logger.js";
-
 export class Fonts {
 	static register() {
-		info("Registering Fonts...");
+		logger.info("Registering Fonts...");
 		foundry.applications.settings.menus.FontConfig.loadFont("LitM Dice", {
 			fonts: [
 				{

@@ -1,5 +1,4 @@
 import V2 from "../../v2sheets.js";
-import { confirmDelete, localize as t } from "../../utils.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ItemSheetV2 } = foundry.applications.sheets
@@ -64,8 +63,6 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 		html.querySelectorAll("[data-context]")
 			.forEach(el => el.addEventListener("contextmenu", this._onContext.bind(this)));
-
-		V2.activateListeners(this, html);
 	}
 
 	static async #onSubmit(event, form, formData) {
@@ -127,9 +124,10 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 	#addTag() {
 		const item = {
-			name: t("Litm.ui.name-tag"),
+			name: utils.localize("Litm.ui.name-tag"),
 			isActive: false,
 			isBurnt: false,
+			toBurn: false,
 			type: "backpack",
 			id: foundry.utils.randomID(),
 		};
@@ -141,7 +139,7 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	}
 
 	async _removeTag(button) {
-		if (!(await confirmDelete("Litm.other.tag"))) return;
+		if (!(await utils.confirmDelete("Litm.other.tag"))) return;
 
 		const index = button.dataset.id;
 		const contents = this.system.contents;
@@ -152,7 +150,6 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 	static async #onActivateTag(event, target) {
 		event.preventDefault();
-		console.log(`BackpackSheet #onActivateTag`);
 
 		const key = event.target.dataset.key;
 		const index = parseInt(key);
@@ -166,7 +163,6 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 	static async #onBurnTag(event, target) {
 		event.preventDefault();
-		console.log(`BackpackSheet #onBurnTag`);
 
 		const key = event.target.dataset.key;
 		const index = parseInt(key);

@@ -3,26 +3,31 @@
 	class="litm--theme-tag {{#if embedded}}embedded{{/if}}">
 	<!-- Tags embedded in the character sheet have different functionality -->
 	{{#if embedded}}
-		<!-- Select Tag button -->
-		<button type="button" class="litm--theme-tag-button" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}"
-			{{#if (includes @root.rollTags tag.id 'id')}}data-selected{{/if}} {{#if tag.isScratched}}data-scratched{{/if}} {{#if tag.isActive}}data-action="select"
-			{{/if}}
-			{{#if tag.isActive}}data-tooltip="{{localize (ifThen tag.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}"
-			{{/if}}>
-			<!-- isActive indicator -->
-			<span class="litm--checkbox litm--checkbox-with-bg {{checked tag.isActive}}"></span>
-			<!-- Name -->
-			<span class="tag--name">{{tag.name}}</span>
-			<!-- isBurnt indicator -->
-			 {{#unless (eq level 'fellowship')}}
-				<span class="litm--sro">{{localize (ifThen tag.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}</span>
-				<span class="litm--burn {{checked (or tag.isBurnt (includes @root.burntTags tag.id 'id'))}}" aria-hidden="true"></span>
-			{{else}}
-				<span></span>
-				<span></span>
-			{{/unless}}
-
-		</button>
+		<div class="litm--theme-item">
+			<!-- Select Tag button -->
+			<button type="button" class="litm--theme-tag-button" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}"
+				data-action="activate">
+				<!-- isActive indicator -->
+				<span class="litm--checkbox litm--checkbox-with-bg {{checked tag.isActive}}"></span>
+			</button>
+			<button type="button" class="litm--theme-tag-button label" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}"
+				{{#if tag.isScratched}}data-scratched{{/if}} {{#if tag.isActive}}{{#if (includes @root.rollTags tag.id 'id')}}data-selected{{/if}} data-action="select"{{/if}}
+				{{#if tag.isActive}}data-tooltip="{{localize (ifThen tag.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}"{{/if}}>
+				<!-- Name -->
+				<span class="tag--name">{{#if tag.name}}{{tag.name}}{{else}}&nbsp;{{/if}}</span>
+			</button>
+			<button type="button" class="litm--theme-tag-button" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}"
+				{{#if tag.isActive}}data-action="burn"{{/if}}>
+				<!-- isBurnt indicator -->
+				{{#unless (eq level 'fellowship')}}
+					<span class="litm--sro">{{localize (ifThen tag.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}</span>
+					<span class="litm--burn {{checked (or tag.isBurnt (includes @root.burntTags tag.id 'id'))}} {{#if (includes @root.toBurnTags tag.id 'id')}}selected{{/if}}" aria-hidden="true"></span>
+				{{else}}
+					<span></span>
+					<span></span>
+				{{/unless}}
+			</button>
+		</div>
 	{{else}}
 		<!-- Tag functionality in Items -->
 		<!-- isActive checkbox -->

@@ -14,6 +14,7 @@
 		position: relative;
 		margin-left: 14px;
 		margin-right: 14px;
+		min-height: 27px;
 	}
 
 	& .note .editor-edit {
@@ -39,6 +40,8 @@
 		padding-inline: 10px;
 		z-index: 1;
 		background: rgb(16 34 44 / 80%);
+		left: 5px;
+      	width: calc(100% - 20px);
 
 		& .header-control {
 			top: 4px;
@@ -88,7 +91,7 @@
 		position: absolute;
 		top: 26px;
 		left: 2px;
-		width: 100%;
+		width: calc(100% - 6px);
 		display: grid;
 		grid-template-columns: auto 1fr 70px;
 		align-items: center;
@@ -156,9 +159,11 @@
 
 	& .litm--challenge-avatar {
 		position: absolute;
-		top: 0px;
-		height: 380px;
-		width: 100%;
+		top: 5px;
+		left: 10px;
+		right: calc(100% - 20px);
+		min-height: 380px;
+		width: calc(100% - 20px);
 		object-fit: cover;
 		object-position: top;
 		background: var(--litm-color-accent-2);
@@ -167,11 +172,14 @@
 	& .litm--challenge-bg {
 		background: url("../../assets/media/challenge-bg.webp") no-repeat top center;
 		position: absolute;
-		top: 150px;
 		height: 100%;
-		width: 100%;
-		background-size: cover;
+		left: 5px;
+		top: 295px;
 		pointer-events: none;
+		width: calc(100% - 10px);
+		background-size: cover;
+		background-position: center 20%;
+		transform: translateY(-21%);
 	}
 
 	& .editor {
@@ -256,6 +264,7 @@
 			font-weight: 700;
 			text-align: center;
 			line-height: 1;
+			margin-bottom: 5px;
 
 			&:focus {
 				outline: none;
@@ -343,6 +352,7 @@
 						background: url("../../assets/media/limit-value.webp") no-repeat;
 						background-position: top center;
   						background-size: cover;
+						box-shadow: unset;
 						position: relative;
 						width: 45px;
 						height: 27px;
@@ -411,7 +421,16 @@
 			&>* {
 				min-height: 20px;
 				width: 100%;
-				display: block;
+				display: flex;
+				gap: 2px;
+                flex-wrap: wrap;
+                justify-content: center;
+			}
+
+			& mark {
+				display: inline-flex;
+  				align-items: center;
+  				justify-content: center;
 			}
 
 			& #tags {

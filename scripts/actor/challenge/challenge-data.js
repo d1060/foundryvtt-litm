@@ -1,10 +1,9 @@
-import { localize as t } from "../../utils.js";
 export class ChallengeData extends foundry.abstract.TypeDataModel {
 	static defineSchema() {
 		const fields = foundry.data.fields;
 		return {
 			category: new fields.StringField({
-				initial: () => t("Litm.ui.name-category"),
+				initial: () => utils.localize("Litm.ui.name-category"),
 			}),
 			rating: new fields.NumberField({
 				required: true,

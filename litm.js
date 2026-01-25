@@ -1,3 +1,5 @@
+import * as Logger from "./scripts/logger.js";
+import * as Utils from "./scripts/utils.js";
 import { ChallengeData } from "./scripts/actor/challenge/challenge-data.js";
 import { ChallengeSheet } from "./scripts/actor/challenge/challenge-sheet.js";
 import { CharacterData } from "./scripts/actor/character/character-data.js";
@@ -16,7 +18,6 @@ import { ThemeData } from "./scripts/item/theme/theme-data.js";
 import { ThemeSheet } from "./scripts/item/theme/theme-sheet.js";
 import { ThreatData } from "./scripts/item/threat/threat-data.js";
 import { ThreatSheet } from "./scripts/item/threat/threat-sheet.js";
-import { info, success } from "./scripts/logger.js";
 import { LitmConfig } from "./scripts/system/config.js";
 import { Enrichers } from "./scripts/system/enrichers.js";
 import { Fonts } from "./scripts/system/fonts.js";
@@ -38,7 +39,10 @@ SuperCheckbox.Register();
 
 // Init Hook
 Hooks.once("init", () => {
-	info("Initializing Legend in the Mist...");
+	logger.info("Initializing Legend in the Mist...");
+  	globalThis.logger = Logger;
+	globalThis.utils = Utils;
+	
 	game.litm = {
 		data: {
 			TagData,
@@ -53,7 +57,7 @@ Hooks.once("init", () => {
 		StoryTagApp,
 	};
 
-	info("Initializing Config...");
+	logger.info("Initializing Config...");
 	CONFIG.Actor.dataModels.character = CharacterData;
 	CONFIG.Actor.dataModels.challenge = ChallengeData;
 	CONFIG.Actor.trackableAttributes.character =
@@ -65,7 +69,7 @@ Hooks.once("init", () => {
 	CONFIG.Item.dataModels.threat = ThreatData;
 	CONFIG.litm = new LitmConfig();
 
-	info("Registering Sheets...");
+	logger.info("Registering Sheets...");
 	// Unregister the default sheets
 	foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
 	foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
@@ -100,5 +104,5 @@ Hooks.once("init", () => {
 	LitmHooks.register();
 	Sockets.registerListeners();
 
-	success("Successfully initialized Legend in the Mist!");
+	logger.success("Successfully initialized Legend in the Mist!");
 });

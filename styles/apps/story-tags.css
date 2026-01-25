@@ -13,7 +13,7 @@ form.litm.litm--story-tags {
 	min-height: 250px;
 	border-radius: 0px;
 	overflow: hidden;
-	/* overflow: clip; */
+	border: none;
 
 	&:not(.minimized) {
 		outline: 2px solid var(--litm-color);
@@ -56,10 +56,6 @@ form.litm.litm--story-tags {
 		margin-block-start: var(--litm-space-2);
 		overflow-y: auto;
 		flex: 1;
-
-		/* &:last-of-type {
-			height: 100%;
-		} */
 	}
 
 	& hr {
@@ -72,8 +68,8 @@ form.litm.litm--story-tags {
 
 	& .litm--story-tags-container {
 		height: 100%;
-    	display: flex;
-		flex-direction: column;
+    	display: grid;
+		grid-template-rows: 1fr 20px auto;
 	}
 
 	& .litm--story-tags-container > hr {
@@ -195,6 +191,12 @@ form.litm.litm--story-tags {
 							background: var(--litm-color);
 						}
 					}
+				}
+
+				& .litm--add-subtag {
+					width: auto;
+					padding-left: 0px;
+					padding-right: 0px;
 				}
 			}
 		}

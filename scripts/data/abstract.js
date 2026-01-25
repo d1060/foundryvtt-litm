@@ -20,6 +20,10 @@ export class TagData extends foundry.abstract.DataModel {
 				required: true,
 				initial: false,
 			}),
+			toBurn: new fields.BooleanField({
+				required: true,
+				initial: false,
+			}),
 			type: new fields.StringField({
 				required: true,
 				choices: ["weaknessTag", "powerTag", "backpack", "themeTag", "specialImprovement"],

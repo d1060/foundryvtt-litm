@@ -43,6 +43,26 @@
 			{{/each}}
 		</ul>
 		{{/if}}
+		{{#if storyThemes}}
+		<hr />
+		<!-- GM Tags -->
+		<div class="litm--roll-story-themes">
+		{{#each storyThemes as |storyTheme|}}
+			<div class="litm--roll-story-theme">
+				<ul class="litm--roll-story-theme-list">
+				{{#unless storyTheme.isBurnt}}
+					{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=storyTheme.title}}
+				{{/unless}}
+				{{#each storyTheme.tags as |tag|}}
+					{{#unless tag.isBurnt}}
+						{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=tag}}
+					{{/unless}}
+				{{/each}}
+				</ul>
+			</div>
+		{{/each}}
+		</div>
+		{{/if}}
 	</div>
 	<div class="litm--roll-dialog-modifier">
 		<label for="modifier-input">

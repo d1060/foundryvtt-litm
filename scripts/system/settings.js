@@ -43,12 +43,13 @@ export class LitmSettings {
 					level: "fellowship",
 					isActive: true,
 					isBurnt: false,
+					toBurn: false,
 					powerTags: Array(10)
 						.fill()
-						.map((_, i) => this.createTag({name: "", isBurnt: false, isActive: false, isSingleUse: true}, "powerTag")),
+						.map((_, i) => this.createTag({name: "", isBurnt: false, toBurn: false, isActive: false, isSingleUse: true}, "powerTag")),
 					weakness: Array(2)
 						.fill()
-						.map((_, i) => this.createTag({name: "", isBurnt: false, isActive: true, isSingleUse: false}, "weaknessTag")),
+						.map((_, i) => this.createTag({name: "", isBurnt: false, toBurn: false, isActive: true, isSingleUse: false}, "weaknessTag")),
 					specialImprovements: Array(5)
 							.fill()
 							.map((_, i) => ({
@@ -74,6 +75,7 @@ export class LitmSettings {
 			type: Boolean,
 			default: true,
 		});
+
 		game.settings.register("foundryvtt-litm", "skip_roll_moderation", {
 			name: "Litm.settings.skip-roll-moderation",
 			hint: "Litm.settings.skip-roll-moderation-hint",
@@ -81,6 +83,15 @@ export class LitmSettings {
 			config: true,
 			type: Boolean,
 			default: true,
+		});
+
+		game.settings.register("foundryvtt-litm", "user_prefs", {
+			name: "",
+			hint: "",
+			scope: "client",
+			config: false,
+			type: Object,
+			default: {},
 		});
 	}
 }

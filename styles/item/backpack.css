@@ -129,6 +129,13 @@
 					display: flex;
 					cursor: pointer;
 				}
+
+				& .litm--theme-item {
+					display: grid;
+					grid-template-columns: 18px 1fr 18px;
+					width: 100%;
+					position: relative;
+				}
 			}
 		}
 

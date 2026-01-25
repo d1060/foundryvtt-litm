@@ -510,9 +510,31 @@
 			& .litm--theme-meta {
 				padding-block: 6px 12px;
 			}
+
+			& .litm--theme-header {
+				display: grid;
+				grid-template-columns: 30px 1fr 30px;
+				margin-right: 9px;
+			}
+
+			& .litm--theme-item {
+				display: grid;
+				grid-template-columns: 15px 1fr 18px;
+				margin-right: 1px;
+				width: 100%;
+			}
 		}
 
-		& .litm--theme-title,
+		& .litm--theme-title{
+			width: 100%;
+			padding: 0px;
+			position: relative;
+			
+			&.label {
+				justify-content: center;
+			}
+		}
+
 		& .litm--weakness {
 			width: auto;
 			padding: 0px;
@@ -681,9 +703,19 @@
 		opacity: 0.5;
 
 		&[data-click="select"],
+		&[data-action="activate"],
+		&[data-action="burn"],
 		&[data-action="select"] {
 			cursor: pointer;
 			opacity: 1;
+		}
+
+		&.label {
+			position: relative;
+		}
+
+		& > .litm--burn.selected {
+			background-image: url("../../assets/media/burn-50.svg");
 		}
 	}
 

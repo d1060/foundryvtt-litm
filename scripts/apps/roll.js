@@ -1,5 +1,3 @@
-import { localize as t } from "../utils.js";
-
 export class LitmRoll extends Roll {
 	static CHAT_TEMPLATE = "systems/foundryvtt-litm/templates/chat/message.html";
 	static TOOLTIP_TEMPLATE = "systems/foundryvtt-litm/templates/chat/message-tooltip.html";
@@ -19,11 +17,11 @@ export class LitmRoll extends Roll {
 	get flavor() {
 		switch (this.litm.type) {
 			case "mitigate":
-				return t("Litm.ui.roll-mitigate", "Litm.other.outcome");
+				return utils.localize("Litm.ui.roll-mitigate", "Litm.other.outcome");
 			case "tracked":
-				return t("Litm.ui.roll-tracked", "Litm.other.outcome");
+				return utils.localize("Litm.ui.roll-tracked", "Litm.other.outcome");
 			default:
-				return t("Litm.ui.roll-quick", "Litm.other.outcome");
+				return utils.localize("Litm.ui.roll-quick", "Litm.other.outcome");
 		}
 	}
 
@@ -77,6 +75,7 @@ export class LitmRoll extends Roll {
 		isPrivate = false,
 	} = {}) {
 		if (!this._evaluated) await this.evaluate({ async: true });
+		//logger.warn(`Rendering ${this.actor.name}'s roll with formula ${this._formula}.`);
 
 		const chatData = {
 			actor: this.actor,

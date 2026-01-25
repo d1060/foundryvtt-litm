@@ -82,7 +82,13 @@ body {
 	}
 }
 
-.application.dialog .window-resize-handle::after {
+.application.app.litm.dialog {
+	& button {
+		background: #9994;
+	}
+}
+
+.application .window-resize-handle::after {
 	content: "\f337";
 	font-family: "Font Awesome 6 Pro";
 	font-weight: 900;
@@ -92,6 +98,16 @@ body {
 	display: inline-block;
 	transform-origin: center;
 	transform: rotate(45deg);
+	position: relative;
+	left: 2px;
+	top: -2px;
+}
+
+.application.sheet .window-resize-handle::after,
+.application.litm--theme .window-resize-handle::after,
+.application.litm--roll .window-resize-handle::after {
+	left: 0px;
+	top: -1px;
 }
 
 .app.litm,

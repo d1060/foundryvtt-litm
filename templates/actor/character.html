@@ -96,7 +96,8 @@
 			data-item-id="{{fellowship._id}}">
 			{{> systems/foundryvtt-litm/templates/item/theme-card.html 
 				data=fellowship 
-				themesrc=fellowship.themesrc}}
+				themesrc=fellowship.themesrc
+				tagDefaultName=weaknessTagDefaultName}}
 		</div>
 	</div>
 	{{/if}}
@@ -106,7 +107,7 @@
 				class="litm--character-theme item{{#if (eq item.data._id ../themeHovered)}} hovered{{/if}}"
 				data-id="{{item.data._id}}"
 				data-item-id="{{item.data._id}}">
-				{{> systems/foundryvtt-litm/templates/item/theme-card.html data=item.data}}
+				{{> systems/foundryvtt-litm/templates/item/theme-card.html data=item.data tagDefaultName=../weaknessTagDefaultName}}
 			</div>
 		{{/each}}
 	</div>
