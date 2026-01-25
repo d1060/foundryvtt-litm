@@ -1,0 +1,50 @@
+<div class="{{cssClass}} litm--story-tags-container" data-context='menu'>
+	<section>
+		<div class="litm--story-tags-main">
+			<fieldset style="display: contents">
+				<div class="litm--story-tags-section-header"
+					data-action="removeAllTags"
+					data-tooltip="{{localize 'Litm.ui.context-remove-all-tags'}}">
+					<legend>
+						{{localize "Litm.tags.story-tags"}}
+					</legend>
+					{{> systems/foundryvtt-litm/templates/partials/add-button.html id="story"}}
+				</div>
+				<ul>
+					{{#each tags as |tag|}}
+						{{> systems/foundryvtt-litm/templates/partials/tag-item.html tag=tag source="story" editable=true}}
+					{{/each}}
+				</ul>
+			</fieldset>
+		</div>
+	</section>
+	<hr />
+	<section>
+		{{#each actors as |actor|}}
+			<div data-id="{{actor.id}}" class="litm--story-tags-actor">
+				<fieldset style="display: contents">
+					<div class="litm--story-tags-section-header">
+						<legend aria-label="{{actor.name}} tags" data-action="openSheet"
+							data-action="removeActor" data-id="{{actor.id}}"
+							data-tooltip="{{localize 'Litm.ui.click-open-context-remove'}}">
+							<!-- <img src="{{actor.img}}" alt="" aria-hidden="true"> -->
+							{{actor.name}}
+						</legend>
+						{{#if actor.isOwner}} {{> systems/foundryvtt-litm/templates/partials/add-button.html id=actor.id}} {{/if}}
+					</div>
+					<ul>
+						{{#each actor.tags as |tag|}}
+							{{> systems/foundryvtt-litm/templates/partials/tag-item.html tag=tag source=../id editable=actor.isOwner}}
+						{{/each}}
+					</ul>
+				</fieldset>
+			</div>
+		{{else}}
+			<div class="litm--story-tags-no-actors">
+				<p>{{localize "Litm.ui.drop-actors"}}</p>
+				<img src="systems/foundryvtt-litm/assets/media/birb.webp" width="75"
+					aria-hidden="true" />
+			</div>
+		{{/each}}
+	</section>
+</div>

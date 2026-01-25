@@ -1,0 +1,13 @@
+<div class="litm--challenge-divider {{ifThen add 'grid-4' ''}}">
+    <img src="systems/foundryvtt-litm/assets/media/left-div.webp" aria-hidden="true" />
+    <label for="limits">{{localize title}}</label>
+    <img src="systems/foundryvtt-litm/assets/media/right-div.webp" aria-hidden="true" />
+    {{#if add}}
+        <button class="litm--challenge-add" type="button"
+            data-action="{{concat 'add' add}}"
+            aria-label="{{localize (concat 'Litm.ui.add-' add)}}"
+            data-tooltip="{{localize (concat 'Litm.ui.add-' add) }}">
+            <i class="far fa-plus"></i>
+        </button>
+    {{/if}}
+</div>

@@ -1,0 +1,186 @@
+<div class="litm--theme-main {{cssClass}} {{data.system.level}}" autocomplete="off">
+	<div class="litm--theme-top">
+		<img class="litm--theme-border-top" src="{{themesrc}}-theme-border-top.webp" aria-hidden="true" />
+		<div class="litm--theme-top-bg">
+			<div class="litm--theme-meta" style="--theme-src:url('/{{themesrc}}-theme-alt-bg-top.webp');">
+				<input list="litm--themebook" class="litm--theme-meta-part" type="text" name="system.themebook" value="{{data.system.themebook}}" />
+				<datalist id="litm--themebook">
+					{{#each data.system.themebooks as |themebook|}}
+					<option>{{localize (concat "Litm.themes." themebook)}}</option>
+					{{/each}}
+				</datalist>
+				{{#unless (eq data.system.level 'fellowship')}}
+					<select class="litm--theme-meta-part" type="text" name="system.level" value="{{data.system.level}}">
+						{{selectOptions data.system.levels selected=data.system.level}}
+					</select>
+				{{else}}
+					<span class="litm--theme-meta-part"></span>
+				{{/unless}}
+			</div>
+			<div class="litm--theme-legend">
+				<span>{{localize "Litm.tags.power-tags"}}</span><span>・</span><span>{{localize "Litm.tags.weakness-tags"}}</span>
+			</div>
+			<div class="litm--theme-title">
+				<!-- isActive checkbox -->
+				<label class="litm--sro" for="name--isActive" aria-label="{{localize (tagActiveString data.system false)}}"></label>
+				<input class="litm--checkbox litm--checkbox-with-bg" type="checkbox" id="name--isActive" data-path="system.powerTags" data-action="activateTag" name="system.isActive" data-tooltip="{{localize (tagActiveString data.system false)}}" {{checked data.system.isActive}} />
+				<!-- Name input -->
+				<input type="hidden" name="name" id="name" value="{{data.name}}" required />
+				<span class="litm--theme-name" role="textbox" contenteditable data-input="name">{{data.name}}</span>
+				<!-- isBurnt checkbox -->
+				<label>
+					{{#unless (eq data.system.level 'fellowship')}}
+						<span class="litm--sro">{{localize (ifThen data.system.isBurnt "Litm.tags.isBurnt" "Litm.tags.burn")}}</span>
+						<input class="litm--burn" type="checkbox" name="system.isBurnt" data-path="system.powerTags" data-action="burnTag" data-tooltip="{{localize (ifThen data.system.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}" {{checked data.system.isBurnt}} />
+					{{else}}
+						<span></span>
+						<span></span>
+					{{/unless}}
+				</label>
+			</div>
+			<ul class="litm--theme-tags">
+				{{#each data.system.powerTags as |tag|}}
+				{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path="system.powerTags" level=../data.system.level}}
+				{{/each}}
+			</ul>
+			<ul class="litm--weakness">
+				{{#each data.system.weakness as |tag|}}
+				<li style="width: calc(100% - 68px)">
+					<!-- Name -->
+					<input class="litm--weakness-part" type="text" name="system.weaknessTags.{{@index}}.name" value="{{name}}" />
+					<!-- The way foundry validates data these have to be present else validation fails -->
+					<input type="hidden" name="system.weaknessTags.{{@index}}.type" value="{{type}}" />
+					<input type="hidden" name="system.weaknessTags.{{@index}}.id" value="{{id}}" />
+					<input type="hidden" name="system.weaknessTags.{{@index}}.isBurnt" data-dtype="Boolean" value="{{isBurnt}}" />
+					<input type="hidden" name="system.weaknessTags.{{@index}}.isActive" data-dtype="Boolean"
+						value="{{isActive}}" />
+				</li>
+				{{/each}}
+			</ul>
+			<!-- Add Tag button -->
+			<!-- Might Reimplement later -->
+			<!-- <button type="button" data-action="addTag">{{localize "Litm.ui.add-tag"}}</button> -->
+			<div class="litm--theme-progression">
+				<!-- Improve buttons -->
+				<div data-action="increase" data-context="decrease" data-id="system.experience"
+					data-tooltip="{{localize 'Litm.ui.inc-dec'}}">
+					{{#progress-buttons data.system.experience 3}}
+					<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-id="system.experience"></span>
+					{{/progress-buttons}}
+					{{#if (eq data.system.experience 3)}}
+					<span class="advancementHint" data-action="showAdvancementHint" data-type="experience">!</span>
+					{{/if}}
+					<input class="litm--sro" id="experience" type="number" name="system.experience"
+						value="{{data.system.experience}}"  data-id="system.experience"/>
+					<label for="experience" data-id="system.experience">{{localize "Litm.tags.improve"}}</label>
+				</div>
+				<!-- Abandon buttons -->
+				<div data-action="increase" data-context="decrease" data-id="system.decay"
+					data-tooltip="{{localize 'Litm.ui.inc-dec'}}">
+					{{#progress-buttons data.system.decay 3}}
+					<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-id="system.decay"></span>
+					{{/progress-buttons}}
+					{{#if (eq data.system.decay 3)}}
+					<span class="advancementHint" data-action="showAdvancementHint" data-type="decay">!</span>
+					{{/if}}
+					<input type="number" id="decay" class="litm--sro" name="system.decay" value="{{data.system.decay}}" data-id="system.decay" />
+					<label for="decay" data-id="system.decay">{{localize "Litm.tags.abandon"}}</label>
+				</div>
+				<!-- Milestone buttons -->
+				<div data-action="increase" data-context="decrease" data-id="system.milestone"
+					data-tooltip="{{localize 'Litm.ui.inc-dec'}}">
+					{{#progress-buttons data.system.milestone 3}}
+					<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-id="system.milestone"></span>
+					{{/progress-buttons}}
+					{{#if (eq data.system.milestone 3)}}
+					<span class="advancementHint" data-action="showAdvancementHint" data-type="milestone">!</span>
+					{{/if}}
+					<label for="{{data._id}}-milestone" data-id="system.milestone">{{localize "Litm.tags.milestone"}}
+						<input id="{{data._id}}-milestone" type="number" class="litm--sro" name="items.{{data._id}}.system.milestone"
+							value="{{data.system.milestone}}" data-id="system.milestone" />
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="litm--theme-bottom">
+		<img class="litm--theme-border-bottom" src="{{themesrc}}-theme-border-bottom.webp" aria-hidden="true" />
+		<div class="litm--theme-bottom-bg" style="--theme-src:url('/{{themesrc}}-theme-bg-bottom.webp');">
+			<div class="motivation">
+				<label class="litm--sro" for="motivation">{{localize "Litm.other.motivation"}}</label>
+				<input class="litm--sro" type="text" name="system.motivation" id="motivation" value="{{data.system.motivation}}" required />
+				<span role="textbox" contenteditable data-input="system.motivation">{{data.system.motivation}}</span>
+			</div>
+			<div class="note">
+				<span>{{{data.system.note}}}</span>
+				<a class="editor-edit"><i class="fa-solid fa-pen-to-square" data-action="activateEditor" data-target="system.note"></i></a>
+			</div>
+		</div>
+	</div>
+	<div class="litm--theme-sheet-back">
+		<img class="litm--theme-border-back" src="{{themesrc}}-theme-border-full.webp" aria-hidden="true">
+		<div class="litm--theme-sheet-legend">
+			<span>{{localize "Litm.themes.special-improvements"}}</span>
+		</div>
+		<ul class="litm--special-improvements" data-dblclick="flip" data-id="{{data._id}}" >
+			{{#each data.system.specialImprovements as |specialImprovement|}}
+            <li data-id="{{specialImprovement.id}}"
+				data-index="{{@index}}"
+				data-item-id="{{../data._id}}"
+				{{#unless specialImprovement.name}}
+				data-dblclick="flip"
+				{{/unless}}
+                class="litm--special-improvement"
+				data-tooltip="{{#if specialImprovement.improvementId}}{{localize 'Litm.ui.context-edit-remove'}}{{else}}{{localize 'Litm.ui.context-add'}}{{/if}}">
+				{{#if (eq ../edittingSpecialImprovement specialImprovement.id)}}
+					{{#if ../edittingSpecialImprovementName}}
+						<span class="improvement-name" role="textbox" contenteditable data-input="improvement-name" data-path="name" data-id="{{specialImprovement.id}}">{{specialImprovement.name}}</span>
+					{{else}}
+						<div class="improvement-name other-editable" data-action="editImprovement" data-id="{{specialImprovement.id}}" data-type="name">{{#if specialImprovement.name}}{{specialImprovement.name}}{{else}}&nbsp;{{/if}}</div>
+					{{/if}}
+					{{#if ../edittingSpecialImprovementDescription}}
+						<span class="improvement-description" role="textbox" contenteditable data-input="improvement-description" data-path="description" data-id="{{specialImprovement.id}}">{{specialImprovement.description}}</span>
+					{{else}}
+						<div class="improvement-description other-editable" data-action="editImprovement" data-id="{{specialImprovement.id}}" data-type="description">{{#if specialImprovement.renderedDescription}}{{{specialImprovement.renderedDescription}}}{{else}}&nbsp;{{/if}}</div>
+					{{/if}}
+				{{else}}
+                <button type="button"
+                        class="litm--theme-improvement-button"
+                        data-id="{{specialImprovement.id}}"
+						data-type="name"
+						data-index="{{@index}}"
+						{{#unless specialImprovement.name}}
+                        data-dblclick="flip"
+						data-context="menu"
+						{{else}}
+						data-context="remove-improvement"
+						{{/unless}}
+						data-context="remove-improvement"
+                        data-theme-id="{{../data._id}}"
+                        data-name="{{specialImprovement.name}}"
+                        data-action="{{#if specialImprovement.improvementId}}editImprovement{{else}}addImprovement{{/if}}">
+						<div class="improvement-name">{{#if specialImprovement.name}}{{specialImprovement.name}}{{else}}&nbsp;{{/if}}</div>
+                </button>
+                <button type="button"
+                        class="litm--theme-improvement-button"
+                        data-id="{{specialImprovement.id}}"
+						data-type="description"
+						data-index="{{@index}}"
+						{{#unless specialImprovement.name}}
+                        data-dblclick="flip"
+						data-context="menu"
+						{{else}}
+						data-context="remove-improvement"
+						{{/unless}}
+						data-context="remove-improvement"
+                        data-theme-id="{{../data._id}}"
+                        data-name="{{specialImprovement.name}}"
+                        data-action="{{#if specialImprovement.improvementId}}editImprovement{{else}}addImprovement{{/if}}">
+						<div class="improvement-description">{{#if specialImprovement.renderedDescription}}{{{specialImprovement.renderedDescription}}}{{else}}&nbsp;{{/if}}</div>
+                </button>
+				{{/if}}
+            </li>
+            {{/each}}
+		</ul>
+	</div>
+</div>

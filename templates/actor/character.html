@@ -1,0 +1,129 @@
+<div autocomplete="off">
+	<img class="avatar"
+		data-drag=".window-app"
+		src="{{img}}"
+		data-edit="img"
+		alt="{{name}}" />
+	<label class="litm--sro" for="name">{{localize "Name"}}</label>
+	<input type="text"
+		id="name"
+		name="name"
+		value="{{name}}"
+		autocomplete="off"
+		required />
+	<div class="nav-main" data-context="show-hide-fellowship" data-tooltip="{{localize 'Litm.ui.nav-main-tooltip'}}">
+		<div class="nav">
+			<div>
+				<span class="navLabel" id="dice-roll-button--{{data._id}}">{{localize "Litm.ui.roll-title-short"}}</span>
+				<button type="button"
+					data-action="doOpen"
+					data-id="roll"
+					data-tooltip="{{localize 'Litm.ui.roll'}}"
+					aria-labelledby="dice-roll-button--{{_id}}">
+					<img src="systems/foundryvtt-litm/assets/media/dice.webp" alt="Dice" width="100px" />
+				</button>
+			</div>
+			<div>
+				<span class="navLabel" id="note-button--{{_id}}">{{localize "Notes"}}</span>
+				<button type="button"
+					data-action="doOpen"
+					data-id="note"
+					data-tooltip="{{localize 'Notes'}}"
+					aria-labelledby="note-button--{{_id}}">
+					<img src="systems/foundryvtt-litm/assets/media/note.webp" alt="Note" width="80px" />
+				</button>
+			</div>
+		</div>
+		<div class="nav-promise" data-tooltip="{{localize 'Litm.ui.promise-tooltip'}}">
+			<span style="margin-right: 10px;">{{localize "Litm.ui.promise"}}</span>
+			{{#progress-buttons promise 5}}
+			<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-action="increase" data-context="decrease" data-id="system.promise"></span>
+			{{/progress-buttons}}
+			{{#if (eq promise 5)}}
+			<span class="promiseAdvancementHint" data-action="showAdvancementHint" data-type="promise">!</span>
+			{{/if}}
+		</div>
+	</div>
+	<div id="note" class="litm--character-notes" style="{{notesEditorStyle}}">
+		<div class="litm--character-note-wrapper" data-drag="#note">
+			<div class="litm--character-note-header">
+				<span>{{localize 'Notes'}}</span>
+				<div></div>
+				<button type="button"
+					data-action="doClose"
+					data-id="note"
+					data-tooltip="{{localize 'Close'}}">
+					<i class="far fa-xmark"></i>
+				</button>
+			</div>
+			<prose-mirror
+				name="system.note"
+				value="{{note}}"
+				editable="true"
+				button="false">
+				{{{note}}}
+			</prose-mirror>
+		</div>
+	</div>
+	{{#if backpack.id}}
+		<div class="litm--character-backpack item-list"
+			{{#if showBackpackContextMenu}}
+				data-tooltip="{{localize 'Litm.ui.context-edit'}}"
+				data-tooltip-direction="LEFT"
+			{{/if}}
+			data-id="{{backpack.id}}">
+			{{> systems/foundryvtt-litm/templates/item/backpack-ro.html backpack=backpack}}
+		</div>
+	{{else}}
+		<div class="litm--character-backpack"
+			{{#if showBackpackContextMenu}}
+				data-tooltip="{{localize 'Litm.ui.context-edit'}}"
+				data-tooltip-direction="LEFT"
+			{{/if}}
+			>
+			<div class="litm--backpack-lower-area" data-context="backpack"></div>
+			<div class="litm--backpack-upper-area" data-context="backpack"></div>
+			<img width="380px" class="litm--backpack-img"
+				src="systems/foundryvtt-litm/assets/media/backpack.webp"
+				alt="Soft illustration of a rustic backpack" />
+		</div>
+	{{/if}}
+	{{#if showFellowshipTheme}}
+	<div class="litm--character-fellowship">
+		<div
+			class="litm--character-theme item{{#if (eq fellowship._id themeHovered)}} hovered{{/if}}"
+			data-id="{{fellowship._id}}"
+			data-item-id="{{fellowship._id}}">
+			{{> systems/foundryvtt-litm/templates/item/theme-card.html 
+				data=fellowship 
+				themesrc=fellowship.themesrc}}
+		</div>
+	</div>
+	{{/if}}
+	<div class="litm--character-themes item-list">
+		{{#each themes as |item|}}
+			<div
+				class="litm--character-theme item{{#if (eq item.data._id ../themeHovered)}} hovered{{/if}}"
+				data-id="{{item.data._id}}"
+				data-item-id="{{item.data._id}}">
+				{{> systems/foundryvtt-litm/templates/item/theme-card.html data=item.data}}
+			</div>
+		{{/each}}
+	</div>
+	<ul
+		class="litm--character-story-tags {{#if tagsFocused}}focused{{/if}} {{#if tagsHovered}}hovered{{/if}}"
+		data-mousedown="keep-open" data-dblclick="return" data-id="story-tags"
+		id="story-tags" style="{{tagsFocused}}">
+		<li class="litm--story-tag">
+			<button type="button"
+				data-action="addTag"
+				data-id="story-tags">
+				<img src="systems/foundryvtt-litm/assets/media/yellow-leaf.webp" class="litm--red-leaf" alt="Leaf" width="220" />
+				<span><i class="fas fa-plus"></i>{{localize "Litm.ui.add-tag"}}</span>
+			</button>
+		</li>
+		{{#each storyTags as |item|}}
+			{{> systems/foundryvtt-litm/templates/item/leaf-ro.html data=item}}
+		{{/each}}
+	</ul>
+</div>

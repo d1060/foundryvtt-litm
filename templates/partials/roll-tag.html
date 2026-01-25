@@ -1,0 +1,8 @@
+<li>
+	<label class="litm--roll-dialog-tag litm--{{tag.type}}" data-click="toggle-state" for="input-{{tag.id}}"><span
+			class="litm--sro">{{localize "Litm.ui.select"}}</span>
+		<litm-super-checkbox name="{{tag.id}}" id="input-{{tag.id}}" value="{{tag.state}}" data-type="{{tag.type}}"
+			states="{{tag.states}}"></litm-super-checkbox>
+		<span>{{tag.name}}{{ifThen tag.value (concat "-" tag.value) ""}}</span>
+	</label>
+</li>

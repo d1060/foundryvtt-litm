@@ -1,0 +1,28 @@
+.litm.litm--editor {
+    background: url("../../assets/media/editor-bg.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+
+    & .window-header {
+        background: none;
+    }
+
+    & .window-content {
+        margin-left: 2.9%;
+        margin-right: 3.4%;
+        margin-top: 0.97%;
+        margin-bottom: 3.2%;
+    }
+
+    & .window-header {
+        & .header-control {
+            color: var(--litm-color);
+        }
+
+        & .header-button {
+            color: var(--litm-color);
+        }
+    }
+}

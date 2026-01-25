@@ -1,0 +1,35 @@
+<li class="litm--story-tag" data-context="remove-effect" data-id="{{data.id}}">
+    <img
+        class="draggable {{#if (eq data.type 'status')}}litm--green-leaf{{/if}}"
+        data-drag="#story-tags"
+        data-dblclick="return" 
+        src="systems/foundryvtt-litm/assets/media/yellow-leaf.webp"
+        aria-hidden="true"
+        width="220" />
+    <div class="{{data.type}}">
+        <label><span class="litm--sro">{{localize "Name"}}</span>
+            <input type="text"
+                class="litm--character-statuses"
+                data-effect-id="{{data.id}}"
+                name="effects.{{data.id}}.name"
+                value="{{data.name}}" />
+        </label>
+        <div class="litm--story-tag-values">
+            {{#each data.values as |value|}}
+                <div class="litm--story-tag-value">
+                    {{#if (eq ../data.type 'status')}}
+                        <label
+                            for="effects.{{../data.id}}.flags.litm.values.{{@index}}">{{add @index 1}}</label>
+                    {{/if}}
+                    <input id="effects.{{../data.id}}.flags.litm.values.{{@index}}"
+                        name="effects.{{../data.id}}.flags.litm.values"
+                        type="checkbox"
+                        data-mousedown="select-status-level"
+                        data-effect-id="{{../data.id}}"
+                        data-index="{{@index}}"
+                        data-action="selectStatusLevel"
+                        value="{{add @index 1}}" {{checked value}} />
+                </div>
+            {{/each}}
+        </div>
+</li>

@@ -1,0 +1,76 @@
+.app.litm.litm--improvement-editor  {
+    background-image: url("../../assets/media/story-tag-bg.webp");
+    background-size: 100% 100%;
+
+    & .window-header {
+        background: none;
+        position: relative;
+        top: -12px;
+
+        & .header-control {
+            color: var(--litm-color);
+        }
+
+        & .header-button {
+            color: var(--litm-color);
+        }
+    }
+
+    & .window-content {
+        padding-right: 30px;
+        padding-left: 25px;
+    }
+
+    & .litm--improvement-selector-main {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: scroll;
+        margin-bottom: 67px;
+    }
+
+    & .selector-panel {
+        display: flex;
+        flex-direction: column;
+        margin: 10px 10px 10px 10px;
+    }
+
+    & h1 {
+        font-family: "Cloister Black";
+        font-size: 2.5rem;
+        border-bottom: none;
+        margin: 0;
+    }
+
+    & h2 {
+        font-family: PackardAntique;
+        font-size: 1.5rem;
+        border-bottom: none;
+        margin: 0;
+    }
+
+    & .theme-image {
+        margin-right: 10px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    & .odd {
+        background-image: linear-gradient(
+            to right,
+            transparent,
+            rgba(69, 59, 29, 0.15),
+            transparent
+        );
+    }
+
+    & .improvement-name {
+        display: flex;
+        gap: 7px;
+        justify-content: left;
+        align-items: center;
+    }
+}

@@ -1,0 +1,65 @@
+<div class="{{cssClass}} litm--roll-dialog-main" autocomplete="off">
+	<input type="hidden" name="actorId" value="{{actorId}}">
+	<input class="title" type="text" name="title" value="{{title}}" />
+	<div class="litm--roll-dialog-type">
+		<h3 class="litm--sro">{{concat (localize "Litm.other.roll") " " (localize "Type")}}</h3>
+		<div class="litm--roll-dialog-type-choices">{{radioBoxes "type" rollTypes checked=type localize=true}}
+		</div>
+	</div>
+	<div class="litm--roll-dialog-tags-summary">
+		<ul>
+			<!-- Tags selected on Character Sheet -->
+			{{#each characterTags as |tag|}}
+				{{#unless tag.isBurnt}}
+					{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=tag}}
+				{{/unless}}
+			{{/each}}
+		</ul>
+		<hr />
+		<ul>
+			<!-- Statuses -->
+			{{#each statuses as |status|}}
+			{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=status}}
+			{{/each}}
+			<!-- Story Tags -->
+			{{#each tags as |tag|}}
+				{{#unless tag.isBurnt}}
+					{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=tag}}
+				{{/unless}}
+			{{/each}}
+			<!-- Target Tags -->
+			{{#each targetTags as |tag|}}
+				{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=tag}}
+			{{/each}}
+		</ul>
+		{{#if isGM}}
+		<hr />
+		<ul>
+			<!-- GM Tags -->
+			{{#each gmTags as |tag|}}
+				{{#unless tag.isBurnt}}
+					{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=tag}}
+				{{/unless}}
+			{{/each}}
+		</ul>
+		{{/if}}
+	</div>
+	<div class="litm--roll-dialog-modifier">
+		<label for="modifier-input">
+			<span>{{localize "Litm.ui.modifier"}}: </span>
+			<input id="modifier-input" type="number" name="modifier" value="{{modifier}}" data-update="modifier" />
+		</label>
+	</div>
+	<div class="litm--tags-summary-total">
+		<span>{{localize "Litm.ui.total-power"}}: </span>
+		<span data-update="totalPower">{{totalPower}}</span>
+	</div>
+	<button type="button" data-click="add-tag">{{localize "Litm.other.add"}} {{localize "Litm.other.tags"}}</button>
+	<div class="litm--roll-dialog-buttons">
+		<label class="litm--roll-dialog-skip-moderation">
+			<span>{{localize "Litm.ui.skip-moderation"}}</span>
+			<input class="litm--checkbox" type="checkbox" name="shouldRoll" {{checked skipModeration}} />
+		</label>
+		<button type="button" data-action="rollDice">{{localize "Litm.ui.roll"}}</button>
+	</div>
+</div>

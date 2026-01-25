@@ -1,0 +1,36 @@
+<li
+    class="litm--tag-item litm--{{ifThen (eq tag.type 'status') 'status' 'tag'}}"
+    data-id="{{tag.id}}"
+    data-type="{{source}}"
+    data-tooltip="{{localize (concat 'Litm.other.' tag.type)}}: {{tag.name}}{{#if tag.value}}{{concat '-' tag.value}}{{/if}}">
+    {{#if (eq tag.type "tag")}}
+        <label	class="litm--burn-label">
+        <span class="litm--sro">{{localize "Litm.ui.burn-tag"}}</span>
+            <input	class="litm--burn"
+                    type="checkbox"
+                    data-action="burnTag"
+                    name="{{source}}.{{tag.id}}.isBurnt"
+                    data-tooltip="{{localize (ifThen tag.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}" 
+                    {{disabled (not editable)}}
+                    {{checked tag.isBurnt}} />
+        </label>
+    {{/if}}
+    <input	class="litm--tag-item-name {{tag.type}}"
+            type="text"
+            data-focus="select"
+            data-id="{{tag.id}}"
+            data-type="{{source}}"
+            name="{{source}}.{{tag.id}}.name"
+            value="{{tag.name}}"
+            {{ifThen editable "" "readonly"}} />
+    <div class="litm--tag-item-status">
+        {{#each tag.values as |status|}}
+            <input	name="{{../source}}.{{../tag.id}}.values"
+                    type="checkbox"
+                    data-action="selectLevel"
+                    value="{{add @index 1}}"
+                    {{disabled (not ../editable)}}
+                    {{checked status}} />
+        {{/each}}
+    </div>
+</li>

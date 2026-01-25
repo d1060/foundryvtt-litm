@@ -1,0 +1,17 @@
+<div class="litm--backpack-wrapper item" data-item-id="{{backpack.id}}" data-id="{{backpack.id}}">
+	<div class="litm--backpack-lower-area" data-context="backpack"></div>
+	<div class="litm--backpack-upper-area" data-context="backpack"></div>
+	<img width="300px" class="litm--backpack-img" src="systems/foundryvtt-litm/assets/media/backpack.webp"
+		alt="Soft illustration of a rustic backpack" />
+	<img width="250px" class="litm--backpack-bg-frame" src="systems/foundryvtt-litm/assets/media/background-frame.webp"
+		aria-hidden="true">
+	<div class="litm--backpack-bg" data-context="menu" data-context-type="backpack">
+		<div class="meta">{{localize 'Litm.tags.item-tags'}}</div>
+		<div class="title">{{backpack.name}}</div>
+		<ul class="taglist">
+			{{#each backpack.contents as |tag|}}
+				{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path=(concat "items." ../backpack.id ".system.contents") embedded=true remove=false}}
+			{{/each}}
+		</ul>
+	</div>
+</div>

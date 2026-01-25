@@ -1,0 +1,86 @@
+<div class="{{cssClass}}">
+	<img class="litm--challenge-border" src="systems/foundryvtt-litm/assets/media/challenge-border.webp" aria-hidden="true">
+	<div class="litm--challenge-meta">
+		<label class="litm--sro"
+			for="category">{{localize "Litm.other.category"}}</label>
+		<datalist id="litm--challenge-types">
+			{{#each data.system.challenges as |challenge|}}
+				<option>{{localize (concat "Litm.challenges." challenge)}}</option>
+			{{/each}}
+		</datalist>
+		<input list="litm--challenge-types" type="text" data-size-input data-path="system.category" 
+			id="category" name="system.category" value="{{data.system.category}}" />
+		<img src="systems/foundryvtt-litm/assets/media/separator.webp" alt="">
+		<label class="litm--sro"
+			for="rating">{{localize "Litm.other.rating"}}</label>
+		<div role="button" class="litm--challenge-rating" data-action="increase"
+			data-context="decrease" data-name="system.rating">
+			{{#progress-buttons data.system.rating 5}}
+				<span aria-hidden="true" class="{{ifThen @checked 'checked' ''}}"><img
+						src="systems/foundryvtt-litm/assets/media/skull.webp" /></span>
+			{{/progress-buttons}}
+		</div>
+		<input type="hidden" id="rating" name="system.rating"
+			value="{{data.system.rating}}" />
+	</div>
+	<img class="litm--challenge-avatar" src="{{data.img}}" data-edit="img" data-action="changeAvatar" alt="{{data.name}}">
+	<div class="litm--challenge-bg"></div>
+	<div class="litm--challenge-wrapper">
+		<label for="name" class="litm--sro">{{localize "Name"}}</label>
+		<input type="hidden" name="name" id="name" value="{{data.name}}" required />
+		<span class="litm--challenge-name" role="textbox" contenteditable data-input="name" data-path="name">{{data.name}}</span>
+		<label class="litm--sro" for="note">{{localize "Notes"}}</label>
+		<div class="note">
+			<span>{{{data.system.note}}}</span>
+			<a class="editor-edit"><i class="fa-solid fa-pen-to-square" data-action="activateEditor" data-target="system.note"></i></a>
+		</div>
+		{{> systems/foundryvtt-litm/templates/partials/divider.html title="Litm.other.limits" add="limit"}}
+		<div class="litm--challenge-limits">
+			{{#each data.system.limits as |limit|}}
+				<div class="litm--challenge-limit" data-context="remove-limit" data-id="{{@key}}">
+					<div class="litm--challenge-limit-main">
+						<label class="litm--sro" for="limit-{{limit.name}}-value">{{localize "Value"}}</label>
+						<input class="litm--limit-value" type="number" data-path="system.limits" data-key="{{@key}}" data-target-value="value" id="limit-{{limit.name}}-value" name="system.limits.{{@key}}.value" placeholder="-" value="{{limit.value}}" />
+						<label class="litm--sro" for="limit-{{limit.name}}-name">{{localize "Name"}}</label>
+						<input class="litm--limit-label" type="text" data-size-input data-path="system.limits" data-key="{{@key}}" data-target-value="name" id="limit-{{limit.name}}-name" name="system.limits.{{@key}}.name" value="{{limit.name}}" />
+					</div>
+					{{#if limit.value}}
+					<div class="limit-checkboxes" data-limit-id="{{@key}}" {{#if (lt limit.value 6)}}style="grid-template-columns: repeat({{limit.value}}, auto);"{{/if}}>
+						{{#each limit.levels as |level|}}
+							<input class="limit-checkbox" type="checkbox" data-action="selectLimitLevel" data-level="{{@index}}" {{#if level}}checked{{/if}}>
+						{{/each}}
+					</div>
+					{{/if}}
+				</div>
+			{{/each}}
+		</div>
+		{{> systems/foundryvtt-litm/templates/partials/divider.html title="Litm.ui.tags-statuses"}}
+		<label class="litm--sro" for="tags" id="tags-label">{{localize 'Litm.other.tags'}}</label>
+		<div class="litm--challenge-tags">
+			{{#if isEditing}}
+				<span role="textbox" contenteditable data-input="tags" data-path="system.tags" aria-labelledby="tags-label">{{data.system.tags}}</span>
+				<input type="hidden" id="tags" name="system.tags" value="{{data.system.tags}}" required />
+			{{else}}
+				<div id="tags" data-action="toggleEdit">{{{data.system.renderedTags}}}</div>
+			{{/if}}
+		</div>
+		{{> systems/foundryvtt-litm/templates/partials/divider.html title="Litm.ui.special-features"}}
+		<div class="note">
+			<span>{{{data.system.special}}}</span>
+			<a class="editor-edit"><i class="fa-solid fa-pen-to-square" data-action="activateEditor" data-target="system.special"></i></a>
+		</div>
+		{{> systems/foundryvtt-litm/templates/partials/divider.html title="Litm.ui.threats-consequences" add="threat"}}
+		<ul class="litm--challenge-threats item-list">
+			{{#each data.items as |item|}}
+				<li class="item" data-dblclick="edit-item" data-context="remove-threat"
+					data-id="{{item.data.id}}" data-item-id="{{item.data.id}}"
+					data-tooltip="{{localize 'Litm.ui.dblclick-open'}}">
+					<div>> {{item.data.name}}</div>
+					{{#each item.data.system.consequences as |consequence|}}
+						<div>>> {{{consequence}}}</div>
+					{{/each}}
+				</li>
+			{{/each}}
+		</ul>
+	</div>
+</div>

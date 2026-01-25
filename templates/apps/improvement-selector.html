@@ -1,0 +1,28 @@
+<div class="litm--improvement-selector-main" data-scroll="improvement">
+    <div class="selector-panel">
+        {{#each improvements as |i|}}
+            {{#if i.themeName}}
+                <div style="display: flex; margin-top: 10px;" data-themebook="{{i.themeNameId}}">
+                    <div class="theme-image"><img src="{{i.themeImage}}" width="32" height="32" ></div>
+                    <label><h1>{{i.themeName}}</h1></label>
+                </div>
+            {{else}}
+                <div class="{{i.lineStyle}}">
+                    <div class="improvement-name">
+                        {{#if i.selected}}
+                        <img src="/systems/foundryvtt-litm/assets/media/checkbox-c.svg" width="18" height="18" data-action="deselectImprovement" data-index="{{@index}}" data-improvement="{{i.improvement}}" >
+                        {{else}}
+                            {{#if i.canSelect}}
+                                <img src="/systems/foundryvtt-litm/assets/media/checkbox.svg" width="18" height="18" data-action="selectImprovement" data-index="{{@index}}" data-improvement="{{i.improvement}}" >
+                            {{else}}
+                                <div style="width: 18px; height: 18px;">&nbsp;</div>
+                            {{/if}}
+                        {{/if}}
+                        <label><h2>{{i.title}}</h2></label>
+                    </div>
+                    <label>{{{i.renderedDescription}}}</label>
+                </div>
+            {{/if}}
+        {{/each}}
+    </div>
+</div>

@@ -1,0 +1,107 @@
+<!-- Readonly version of the Theme template -->
+<!-- Intended for use embedded on a character sheet -->
+<div class="litm--theme-top">
+	<img class="litm--theme-border-top" src="{{themesrc}}-theme-border-top.webp" aria-hidden="true" />
+	<div class="litm--theme-top-bg">
+		<div class="litm--theme-meta" data-dblclick="flip" data-id="{{data._id}}" style="--theme-src:url('/{{themesrc}}-theme-alt-bg-top.webp');">
+			<span class="litm--theme-meta-part">{{data.system.themebook}}</span>
+			{{#unless (eq data.system.level 'fellowship')}}
+			<span class="litm--theme-meta-part">{{localize data.system.level}}</span>
+			{{else}}
+			<span class="litm--theme-meta-part"></span>
+			{{/unless}}
+		</div>
+		<div class="litm--theme-legend">
+			<span>{{localize "Litm.tags.power-tags"}}</span><span>・</span><span>{{localize "Litm.tags.weakness-tags"}}</span>
+		</div>
+		<button type="button" data-dblclick="flip" data-name="{{data.name}}" class="litm--theme-title" data-id="{{data._id}}" {{#if (includes @root.rollTags
+			data._id 'id' )}}data-selected{{/if}} {{#if data.system.isScratched}}data-scratched-title{{/if}} {{#if data.system.isActive}}data-action="select" data-tooltip="{{localize (ifThen data.system.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}" {{/if}}>
+			<!-- isActive checkbox -->
+			<span class="litm--sro">{{localize (tagActiveString data.system true)}}</span>
+			<span class="litm--checkbox litm--checkbox-with-bg {{checked data.system.isActive}}"></span>
+			<!-- Name input -->
+			<span class="litm--theme-name">{{data.name}}</span>
+			<!-- isBurnt checkbox -->
+			 {{#unless (eq data.system.level 'fellowship')}}
+				<span class="litm--sro">{{localize (ifThen data.system.isBurnt 'Litm.tags.isBurnt' 'Litm.tags.burn')}}</span>
+				<span class="litm--burn {{checked (or data.system.isBurnt (includes @root.burntTags data._id 'id'))}}" aria-hidden="true"></span>
+			{{else}}
+				<span></span>
+				<span></span>
+			{{/unless}}
+		</button>
+		<ul class="litm--theme-tags">
+			{{#each data.system.powerTags as |tag|}}
+			{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path=(concat 'items.' ../data._id '.system.powerTags') themeId=../data._id embedded=true level=../data.system.level}}
+			{{/each}}
+		</ul>
+		<!-- Weakness -->
+		{{#each data.system.weakness as |tag|}}
+		<button type="button" class="litm--weakness" data-action="select" data-dblclick="flip" data-name="{{tag.name}}" 
+			data-tooltip="{{localize 'Litm.ui.toggle-weakness-roll'}}" data-id="{{tag.id}}" {{#if (includes @root.rollTags
+			tag.id 'id' )}}data-selected{{/if}}>
+			<!-- Weakness Name -->
+			<span class="litm--weakness-part">{{#if tag.name}}{{tag.name}}{{else}}&nbsp;{{/if}}</span>
+		</button>
+		{{/each}}
+		<div class="litm--theme-progression" data-dblclick="flip" data-id="{{data._id}}">
+			<!-- Improve buttons -->
+			<div data-action="increase" data-context="decrease" data-id="system.experience"
+				data-tooltip="{{localize 'Litm.ui.inc-dec'}}">
+				{{#progress-buttons data.system.experience 3}}
+				<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-context="decrease" data-id="system.experience"></span>
+				{{/progress-buttons}}
+				{{#if (eq data.system.experience 3)}}
+				<span class="advancementHint" data-action="showAdvancementHint" data-type="experience">!</span>
+				{{/if}}
+				<label for="{{data._id}}-experience" data-context="decrease" data-id="system.experience">{{localize "Litm.tags.improve"}}
+					<input id="{{data._id}}-experience" type="number" class="litm--sro"
+						name="items.{{data._id}}.system.experience" value="{{data.system.experience}}" />
+				</label>
+			</div>
+			<!-- Abandon buttons -->
+			<div data-action="increase" data-context="decrease" data-id="system.decay"
+				data-tooltip="{{localize 'Litm.ui.inc-dec'}}">
+				{{#progress-buttons data.system.decay 3}}
+				<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-context="decrease" data-id="system.decay"></span>
+				{{/progress-buttons}}
+				{{#if (eq data.system.decay 3)}}
+				<span class="advancementHint" data-action="showAdvancementHint" data-type="decay">!</span>
+				{{/if}}
+				<label for="{{data._id}}-decay" data-context="decrease" data-id="system.decay">{{localize "Litm.tags.abandon"}}
+					<input id="{{data._id}}-decay" type="number" class="litm--sro" name="items.{{data._id}}.system.decay"
+						value="{{data.system.decay}}" />
+				</label>
+			</div>
+			<!-- Milestone buttons -->
+			<div data-action="increase" data-context="decrease" data-id="system.milestone"
+				data-tooltip="{{localize 'Litm.ui.inc-dec'}}">
+				{{#progress-buttons data.system.milestone 3}}
+				<span class="litm--checkbox litm--checkbox-with-bg {{#if @checked}}checked{{/if}}" data-context="decrease" data-id="system.milestone"></span>
+				{{/progress-buttons}}
+				{{#if (eq data.system.milestone 3)}}
+				<span class="advancementHint" data-action="showAdvancementHint" data-type="milestone">!</span>
+				{{/if}}
+				<label for="{{data._id}}-milestone" data-context="decrease" data-id="system.milestone">{{localize "Litm.tags.milestone"}}
+					<input id="{{data._id}}-milestone" type="number" class="litm--sro" name="items.{{data._id}}.system.milestone"
+						value="{{data.system.milestone}}" />
+				</label>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="litm--theme-bottom">
+	<img class="litm--theme-border-bottom" src="{{themesrc}}-theme-border-bottom.webp" aria-hidden="true" />
+	<div class="litm--theme-bottom-bg" style="--theme-src:url('/{{themesrc}}-theme-bg-bottom.webp');">
+		<div class="motivation">
+			<span role="textbox">{{data.system.motivation}}</span>
+			<input type="hidden" name="items.{{data._id}}.system.motivation" value="{{data.system.motivation}}" />
+		</div>
+		<div class="note">
+			<div class="editor">
+				{{{data.system.note}}}
+			</div>
+			<input type="hidden" name="items.{{data._id}}.system.note" value="{{data.system.note}}" />
+		</div>
+	</div>
+</div>

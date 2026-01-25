@@ -1,0 +1,16 @@
+<input type="hidden" name="items.{{data._id}}.type" value="{{data.type}}" />
+<div class="litm--theme-background {{data.system.level}}"
+	data-context="menu"
+	data-context-type="theme"
+	data-dblclick="flip"
+	data-tooltip="{{localize 'Litm.ui.context-edit-flip'}}"
+	data-tooltip-direction="LEFT">
+	<div class="litm--theme-inner {{#if data.system.flipped}}is-flipped{{/if}}">
+		<div class="litm--theme-face litm--theme-front">
+            {{> systems/foundryvtt-litm/templates/item/theme-ro.html}}
+		</div>
+		<div class="litm--theme-face litm--theme-back">
+            {{> systems/foundryvtt-litm/templates/item/theme-ro-back.html}}
+		</div>
+	</div>
+</div>
