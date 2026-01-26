@@ -37,4 +37,3 @@ Thank you for wanting to try out this system!
 
 - Thanks to the _**City of Mist**_ Discord for contributing feedback, bug reports and generally being awesome about me barging in the door like I did.
 
-_If you feel like you could contribute something don't hesitate with contacting me @aMediocreDad._
