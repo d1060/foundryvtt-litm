@@ -21,7 +21,7 @@ Thank you for wanting to try out this system!
 
 2. Create a new world using the "Legend in the Mist" system.
 
-\*_This system is published with express permission from **Son of Oak**_
+\*_This is a fan project and is not affiliated with **Son of Oak**_
 
 # Special Thanks
 
