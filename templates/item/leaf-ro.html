@@ -3,7 +3,15 @@
         class="draggable {{#if (eq data.type 'status')}}litm--green-leaf{{/if}}"
         data-drag="#story-tags"
         data-dblclick="return" 
-        src="systems/foundryvtt-litm/assets/media/yellow-leaf.webp"
+        {{#if (eq data.type "status")}}
+            src="systems/foundryvtt-litm/assets/media/yellow-leaf.webp"
+        {{else}}
+            {{#if (eq data.isBurnt true)}}
+            src="systems/foundryvtt-litm/assets/media/burned-leaf.webp"
+            {{else}}
+            src="systems/foundryvtt-litm/assets/media/yellow-leaf.webp"
+            {{/if}}
+        {{/if}}
         aria-hidden="true"
         width="220" />
     <div class="{{data.type}}">

@@ -65,7 +65,8 @@ export class Sockets {
 			const { data } = event;
 
 			for (const actor of game.actors) {
-				if (!actor.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)) continue;
+				if (!actor.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER))
+					continue;
 
 				const app = actor.sheet;
 				if (!app) continue;
@@ -77,6 +78,8 @@ export class Sockets {
 				if (rollDialog.rendered)
 					rollDialog.render(true);
 			}
+
+			game.litm.storyTags?.render(true);
 		});
 	}
 

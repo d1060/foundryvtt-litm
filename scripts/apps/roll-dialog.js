@@ -426,7 +426,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
 		this.#firstPrepare = false;
 
-		return {
+		const context = {
 			...data,
 			actorId: this.actorId,
 			characterTags: utils.sortTags(this.characterTags.filter(t => t.isActive)),
@@ -447,6 +447,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			modifier: this.#modifier,
 			storyThemes: this.storyThemes,
 		};
+		
+		return context;
 	}
 
 	async _onFirstRender(context, options) {

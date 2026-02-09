@@ -39,7 +39,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			burnTag: this.#onBurnTag,
 			selectLevel: this.#onSelectLevel,
 		},
-		dragDrop: [{dropSelector: "form"}],
+		dragDrop: [{dragSelector: "[data-drag]", dropSelector: "form"}],
   	}
 
 	/** @inheritdoc */
@@ -263,9 +263,12 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	#createDragDropHandlers() {
 		return this.options.dragDrop.map((d) => {
 			d.permissions = {
+				dragstart: this._canDragStart.bind(this),
 				drop: this._canDragDrop.bind(this)
 			};
 			d.callbacks = {
+				dragstart: this._onDragStart.bind(this),
+				dragover: this._onDragOver.bind(this),
 				drop: this._onDrop.bind(this)
 			};
 			return new foundry.applications.ux.DragDrop(d);
@@ -276,6 +279,32 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	// Only GM can drop actors onto the board
 	_canDragDrop() {
 		return game.user.isGM;
+	}
+
+	/** @inheritdoc */
+	_canDragStart() {
+		return game.user.isGM;
+	}
+
+	/** @override */
+	async _onDragStart(event) {
+		const li = event.currentTarget;
+		const payload = {
+			type: "storyTag",
+			id: li.dataset.id,
+			name: li.dataset.value,
+			values: li.dataset.values,
+			isBurnt: li.dataset.isburnt
+		};
+
+		if (payload.values != '') payload.isBurnt = 'false';
+
+		event.dataTransfer.setData("text/plain", JSON.stringify(payload));
+		event.dataTransfer.setData("application/json", JSON.stringify(payload));		
+	}
+
+	/** @override */
+	async _onDragOver(event) {
 	}
 
 	/** @override */
@@ -326,8 +355,8 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 							name: e.name,
 							values: e.flags["foundryvtt-litm"].values,
 							isBurnt: e.flags["foundryvtt-litm"].isBurnt,
-							value: e.flags["foundryvtt-litm"].values.findLast((v) => !!v),
-							type: e.flags["foundryvtt-litm"].values.some((v) => !!v) ? "status" : "tag",
+							value: (e.flags["foundryvtt-litm"].values && Array.isArray(e.flags["foundryvtt-litm"].values) ? e.flags["foundryvtt-litm"].values.findLast((v) => !!v) : []),
+							type: (e.flags["foundryvtt-litm"].values && Array.isArray(e.flags["foundryvtt-litm"].values) ? (e.flags["foundryvtt-litm"].values.some((v) => !!v) ? "status" : "tag") : "tag"),
 						}))
 						.sort((a, b) => a.name.localeCompare(b.name))
 						.sort((a, b) =>

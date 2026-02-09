@@ -99,6 +99,7 @@ export class LitmHooks {
 			"systems/foundryvtt-litm/assets/media/top-frame-branches.webp",
 			"systems/foundryvtt-litm/assets/media/variable-might.webp",
 			"systems/foundryvtt-litm/assets/media/yellow-leaf.webp",
+			"systems/foundryvtt-litm/assets/media/burned-leaf.webp",
 		];
 
 		for (const asset of assets) {
@@ -435,7 +436,7 @@ export class LitmHooks {
 		Hooks.on("createActor", async (actor, data, userId) => {
 			if (actor.type !== "character") return;
 			if (userId == game.user.id) {
-				CharacterData.randomizeNameAndImage(actor);
+				CharacterData.randomize(actor);
 				CharacterData.createThemes(actor);
 			}
 		});

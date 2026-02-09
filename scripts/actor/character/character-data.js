@@ -1,6 +1,8 @@
 import Randomizer from '../../apps/randomizer.js';
 
 export class CharacterData extends foundry.abstract.TypeDataModel {
+	static themeKits = null;
+
 	static defineSchema() {
 		const fields = foundry.data.fields;
 		return {
@@ -92,7 +94,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 
 	get statuses() {
 		return this.parent.appliedEffects
-			.filter((item) => item.getFlag("foundryvtt-litm", "values")?.some((v) => !!v))
+			.filter((item) => (item.getFlag("foundryvtt-litm", "values") && Array.isArray(item.getFlag("foundryvtt-litm", "values")) ? item.getFlag("foundryvtt-litm", "values") : [])?.some((v) => !!v))
 			.map((item) => {
 				return {
 					...item.flags["foundryvtt-litm"],
@@ -109,7 +111,7 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 		const storyTags = [];
 		for (const item of this.parent.appliedEffects) {
 			const values = item.getFlag("foundryvtt-litm", "values");
-			if (values?.every((v) => !v)) {
+			if (values && Array.isArray(values) && values?.every((v) => !v)) {
 				storyTags.push({
 					...item.flags["foundryvtt-litm"],
 					type: "tag",
@@ -198,23 +200,29 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 		const existingThemes = actor.items.filter(it => it.type === "theme").length;
 		const missingThemes = Math.max(0, 4 - existingThemes);
 
+		if (this.themeKits == null)
+			this.themeKits = await foundry.utils.fetchJsonWithTimeout("systems/foundryvtt-litm/assets/data/theme-kits.json");
+		let startupKits = structuredClone(this.themeKits.filter(t => t.startup == "true"));
+
 		for (let i = 0; i < missingThemes; i++) {
-				await actor.createEmbeddedDocuments("Item", [{
+			const newTheme = await actor.createEmbeddedDocuments("Item", [{
 				name: `${utils.localize("TYPES.Item.theme")} ${existingThemes + i + 1}`,
 				type: "theme"
 			}]);
+
+			this.randomizeThemeKit(actor, newTheme[0], startupKits);
 		}
 
 		const backpack = actor.items.find(it => it.type === "backpack");
 		if (!backpack) {
-				await actor.createEmbeddedDocuments("Item", [{
+			await actor.createEmbeddedDocuments("Item", [{
 				name: utils.localize("TYPES.Item.backpack"),
 				type: "backpack"
 			}]);
 		}
 	}
 
-	static async randomizeNameAndImage(actor) {
+	static async randomize(actor) {
         const gender = Math.random() >= 0.5 ? 'male' : 'female';
 		await this.randomizeName(actor, gender);
 		await this.randomizeImage(actor, gender);
@@ -233,5 +241,42 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 			actor.img = portrait;
 			await actor.update({"img": actor.img});
 		}
+	}
+
+	static async randomizeThemeKit(actor, theme, startupKits) {
+		const themeIndex = Math.floor(Math.random() * startupKits.length);
+		const themeKitList = startupKits[themeIndex];
+		startupKits.splice(themeIndex, 1);
+
+		const themeKitIndex = Math.floor(Math.random() * themeKitList.kits.length);
+		const themeKit = themeKitList.kits[themeKitIndex];
+
+		// Power Tags.
+		const powerTags = structuredClone(theme.system.powerTags);
+		for (var a = 0; a < 2; a++) {
+			const themeKitPowerTagIndex = Math.floor(Math.random() * themeKit.tags.length);
+			const themeKitPowerTag = themeKit.tags[themeKitPowerTagIndex];
+			themeKit.tags.splice(themeKitPowerTagIndex, 1);
+
+			powerTags[a].name = themeKitPowerTag;
+		}
+
+		// Weakness Tags.
+		const weakness = structuredClone(theme.system.weaknessTags);
+		const themeKitWeaknessIndex = Math.floor(Math.random() * themeKit.weaknesses.length);
+		const themeKitWeakness = themeKit.weaknesses[themeKitWeaknessIndex];
+		themeKit.weaknesses.splice(themeKitWeaknessIndex, 1);
+		weakness[0].name = themeKitWeakness;
+
+		await actor.updateEmbeddedDocuments("Item", [
+			{
+				_id: theme.id,
+				"name": themeKit.title,
+				"system.themebook": themeKitList.theme,
+				"system.motivation": themeKit.mission,
+				"system.powerTags": powerTags,
+				"system.weaknessTags": weakness
+			},
+		]);
 	}
 }

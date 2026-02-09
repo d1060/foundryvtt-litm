@@ -41,9 +41,9 @@ export class ThemeData extends foundry.abstract.TypeDataModel {
 					initial: () =>
 						Array(2)
 							.fill()
-							.map(() => ({
+							.map((_, i) => ({
 								id: foundry.utils.randomID(),
-								name: utils.localize("Litm.ui.name-weakness"),
+								name: `${i < 1 ? `${utils.localize("Litm.ui.name-weakness")}` : ""}`,
 								isActive: true,
 								isBurnt: false,
 								type: "weaknessTag",

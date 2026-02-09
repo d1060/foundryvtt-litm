@@ -89,7 +89,7 @@ export default class Randomizer {
                 const syllabe = syllabeCollection[Math.floor(Math.random() * syllabeCollection.length)];
                 name += syllabe;
             } else if (gender in syllabeCollection) {
-                const syllabe = syllabeCollection[gender][Math.floor(Math.random() * syllabeCollection[[gender]].length)];
+                const syllabe = syllabeCollection[gender][Math.floor(Math.random() * syllabeCollection[gender].length)];
                 name += syllabe;
             }
         }

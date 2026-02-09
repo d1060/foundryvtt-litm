@@ -708,20 +708,66 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const data = JSON.parse(dragData);
 
 		// Handle dropping tags and statuses
-		if (!["tag", "status"].includes(data.type)) return super._onDrop(dragEvent);
+		if (!["tag", "storyTag", "status"].includes(data.type)) return super._onDrop(dragEvent);
 
-		await this.actor.createEmbeddedDocuments("ActiveEffect", [
-			{
-				name: data.name,
-				flags: {
-					"foundryvtt-litm": {
-						type: data.type,
-						values: data.values,
-						isBurnt: data.isBurnt,
+		if (data.type == "storyTag") {
+			data.type = "tag";
+			var values = [null, null, null, null, null, null];
+			if (data.values != '') {
+				data.type = "status";
+
+				var vals = data.values.split(',');
+				for (var v of vals) {
+					if (v) {
+						var vi = parseInt(v) - 1;
+						values[vi] = v;
+					}
+				}
+			}
+			data.values = values;
+		}
+
+		var newTag = true;
+		if (data.type == "status") {
+			const currentTags = await this.actor.getEmbeddedCollection("ActiveEffect");
+			for (const currentTag of currentTags) {
+				if (currentTag.name == data.name && currentTag.flags["foundryvtt-litm"].type == "status") {
+					newTag = false;
+
+					const values = currentTag.flags["foundryvtt-litm"].values;
+					for (const value of data.values) {
+						if (!value) continue;
+
+						const index = parseInt(value) - 1;
+						for (let currentValuesIndex = index; currentValuesIndex <= 5; currentValuesIndex++) {
+							if (!values[currentValuesIndex]) {
+								values[currentValuesIndex] = `${currentValuesIndex + 1}`;
+								break;
+							}
+						}
+					}
+
+					currentTag.flags["foundryvtt-litm"].values = values;
+					await this.actor.updateEmbeddedDocuments("ActiveEffect", [{ _id: currentTag.id, flags: currentTag.flags, }]);
+					break;
+				}
+			}
+		}
+
+		if (newTag) {
+			await this.actor.createEmbeddedDocuments("ActiveEffect", [
+				{
+					name: data.name,
+					flags: {
+						"foundryvtt-litm": {
+							type: data.type,
+							values: data.values,
+							isBurnt: data.isBurnt,
+						},
 					},
 				},
-			},
-		]);
+			]);
+		}
 
 		game.litm.storyTags.render();
 		utils.dispatch({

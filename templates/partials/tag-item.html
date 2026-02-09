@@ -1,12 +1,15 @@
 <li
-    class="litm--tag-item litm--{{ifThen (eq tag.type 'status') 'status' 'tag'}}"
+    class="litm--tag-item draggable litm--{{ifThen (eq tag.type 'status') 'status' 'tag'}}"
     data-id="{{tag.id}}"
+    data-drag="true"
     data-value="{{tag.name}}"
     data-type="{{source}}"
+    data-isBurnt="{{tag.isBurnt}}"
+    data-values="{{#each tag.values as |status|}}{{#if status}}{{status}},{{/if}}{{/each}}"
     data-context="story-tag"
     data-tooltip="{{localize (concat 'Litm.other.' tag.type)}}: {{tag.name}}{{#if tag.value}}{{concat '-' tag.value}}{{/if}}">
     {{#if (eq tag.type "tag")}}
-        <label	class="litm--burn-label">
+        <label class="litm--burn-label">
         <span class="litm--sro">{{localize "Litm.ui.burn-tag"}}</span>
             <input	class="litm--burn"
                     type="checkbox"
