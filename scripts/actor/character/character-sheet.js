@@ -708,7 +708,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const data = JSON.parse(dragData);
 
 		// Handle dropping tags and statuses
-		if (!["tag", "storyTag", "status"].includes(data.type)) return super._onDrop(dragEvent);
+		if (!["tag", "storyTag", "status", "randomName"].includes(data.type)) return super._onDrop(dragEvent);
 
 		if (data.type == "storyTag") {
 			data.type = "tag";
@@ -725,6 +725,11 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				}
 			}
 			data.values = values;
+		}
+
+		if (data.type == "randomName") {
+			this.actor.update({"name": data.name });
+			this.actor.update({"prototypeToken.name": data.name });
 		}
 
 		var newTag = true;
@@ -762,7 +767,8 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 						"foundryvtt-litm": {
 							type: data.type,
 							values: data.values,
-							isBurnt: data.isBurnt,
+							isBurnt: data.isBurnt == 'true',
+							level: data.level,
 						},
 					},
 				},

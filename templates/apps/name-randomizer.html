@@ -1,0 +1,26 @@
+<div class="{{cssClass}} litm--name-generator-container" data-context='menu'>
+    <img class="litm--theme-border-back" src="systems/foundryvtt-litm/assets/media/background-frame.webp" aria-hidden="true">
+    <div class="litm--name-generator-label">{{localize "Litm.ui.name-randomizer-choose"}}</div>
+    <div class="litm--name-generator-select"><select name="name-generator-culture">
+        {{#each cultures as |culture|}}
+            <option name="{{culture}}"{{#if (eq culture ../selected_culture)}}selected{{/if}}>{{culture}}</option>
+        {{/each}}
+    </select></div>
+    <button type="button" class="litm--name-generator-refresh" data-action="doRefresh" data-tooltip="{{localize 'Litm.ui.name-randomizer-refresh'}}">
+        <i class="fas fa-redo"></i>
+    </button>
+    <div class="litm--name-generator-list">
+        <div class="litm--name-generator-list-males">
+            <div class="litm--name-generator-name-header">{{localize "Litm.ui.name-randomizer-male-names"}}</div>
+            {{#each male_names as |name|}}
+                <div data-drag="true" data-value="{{name}}" class="litm--name-generator-name draggable">{{name}}</div>
+            {{/each}}
+        </div>
+        <div class="litm--name-generator-list-females">
+            <div class="litm--name-generator-name-header">{{localize "Litm.ui.name-randomizer-female-names"}}</div>
+            {{#each female_names as |name|}}
+                <div data-drag="true" data-value="{{name}}" class="litm--name-generator-name draggable">{{name}}</div>
+            {{/each}}
+        </div>
+    </div>
+</div>

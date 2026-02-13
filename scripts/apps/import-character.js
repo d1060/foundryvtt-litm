@@ -99,7 +99,10 @@ export async function importCharacter(data) {
 		.flat()
 		.map((tag) => createStatus(tag));
 
+	const gender = Math.random() >= 0.5 ? 'male' : 'female';
+
 	const actorData = {
+		gender,
 		name: data.name,
 		type: "character",
 		system: {

@@ -294,7 +294,8 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 			id: li.dataset.id,
 			name: li.dataset.value,
 			values: li.dataset.values,
-			isBurnt: li.dataset.isburnt
+			isBurnt: li.dataset.isburnt,
+			level: li.dataset.level
 		};
 
 		if (payload.values != '') payload.isBurnt = 'false';
@@ -357,6 +358,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 							isBurnt: e.flags["foundryvtt-litm"].isBurnt,
 							value: (e.flags["foundryvtt-litm"].values && Array.isArray(e.flags["foundryvtt-litm"].values) ? e.flags["foundryvtt-litm"].values.findLast((v) => !!v) : []),
 							type: (e.flags["foundryvtt-litm"].values && Array.isArray(e.flags["foundryvtt-litm"].values) ? (e.flags["foundryvtt-litm"].values.some((v) => !!v) ? "status" : "tag") : "tag"),
+							level: e.flags["foundryvtt-litm"].level,
 						}))
 						.sort((a, b) => a.name.localeCompare(b.name))
 						.sort((a, b) =>

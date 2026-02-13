@@ -32,25 +32,62 @@ export class Enrichers {
 	static #enrichTags() {
 		const tooltip = game.i18n.localize("Litm.ui.drag-apply");
 		const enrichTags = ([_text, tag, status]) => {
-			if (tag.startsWith("--"))
-				return $(
-					`<mark class="litm--weaknessTag" draggable="true" data-tooltip="${tooltip}"><i class="fa fa-angle-double-down"></i>${tag.replace(/^--/, "")}${
-						status ? `:${status}` : ""
-					}</mark>`,
-				)[0];
-			if (tag.startsWith("-"))
-				return $(	
-					`<mark class="litm--limit">${tag.replace(/^-/, "")}${
-						status ? `:${status}` : ""
-					}</mark>`,
-				)[0];
-			if (tag && status)
-				return $(
-					`<mark class="litm--status" draggable="true" data-tooltip="${tooltip}">${tag}-${status}</mark>`,
-				)[0];
-			return $(
-				`<mark class="litm--tag" draggable="true" data-tooltip="${tooltip}">${tag}</mark>`,
-			)[0];
+			let isWeakness = tag.startsWith("--");
+			let isLimit = tag.startsWith("-") && !isWeakness;
+
+			let isGreatness = tag.endsWith("++");
+			let isAdventure = tag.endsWith("+") && !isGreatness;
+
+			let markClass = 'litm--tag';
+			let imageBefore = "";
+
+			if (isWeakness) {
+				markClass = 'litm--weaknessTag';
+				tag = tag.replace(/^--/, "");
+				imageBefore = '<i class="fa fa-angle-double-down"></i>';
+			}
+			else if (isLimit) {
+				markClass = 'litm--limit';
+				tag = tag.replace(/^-/, "");
+			}
+			else if (status) {
+				markClass = 'litm--status';
+			}
+
+			let level = 'origin';
+			if (isGreatness && !isWeakness) {
+				level = 'greatness';
+				tag = tag.replace(/\+\+$/, "");
+				imageBefore = '<i class="litm--greatness-icon"></i>';
+			}
+			if (isAdventure && !isWeakness) {
+				level = 'adventure';
+				tag = tag.replace(/\+$/, "");
+				imageBefore = '<i class="litm--adventure-icon"></i>';
+			}
+
+			const enrichedTag = $(`<mark class="${markClass}" draggable="true" ${status ? `data-status="${status}" `:""}data-level="${level}" data-tooltip="${tooltip}">${imageBefore}${tag}${status ? `-${status}`:""}</mark>`)[0];
+			return enrichedTag;
+		
+			// if (tag.startsWith("--"))
+			// 	return $(
+			// 		`<mark class="litm--weaknessTag" draggable="true" data-tooltip="${tooltip}"><i class="fa fa-angle-double-down"></i>${tag.replace(/^--/, "")}${
+			// 			status ? `:${status}` : ""
+			// 		}</mark>`,
+			// 	)[0];
+			// if (tag.startsWith("-"))
+			// 	return $(	
+			// 		`<mark class="litm--limit">${tag.replace(/^-/, "")}${
+			// 			status ? `:${status}` : ""
+			// 		}</mark>`,
+			// 	)[0];
+			// if (tag && status)
+			// 	return $(
+			// 		`<mark class="litm--status" draggable="true" data-tooltip="${tooltip}">${tag}-${status}</mark>`,
+			// 	)[0];
+			// return $(
+			// 	`<mark class="litm--tag" draggable="true" data-tooltip="${tooltip}">${tag}</mark>`,
+			// )[0];
 		};
 		CONFIG.TextEditor.enrichers.push({
 			pattern: CONFIG.litm.tagStringRe,

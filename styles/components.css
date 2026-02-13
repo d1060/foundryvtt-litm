@@ -200,6 +200,26 @@
 	&.litm--backpack {
 		background: color-mix(in hsl, var(--litm-color-accent-bg) 60%, transparent);
 	}
+
+	& .litm--adventure-icon {
+		background-image: url("../assets/media/adventure-icon.webp");
+		width: 14px;
+		height: 14px;
+		min-width: 14px;
+		min-height: 14px;
+		background-size: 14px 14px;
+		margin-right: 2px;
+	}
+
+	& .litm--greatness-icon {
+		background-image: url("../assets/media/greatness-icon.webp");
+		width: 14px;
+		height: 14px;
+		min-width: 14px;
+		min-height: 14px;
+		background-size: 14px 14px;
+		margin-right: 2px;
+	}
 }
 
 :where(.litm--kbd) {

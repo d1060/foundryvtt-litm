@@ -29,6 +29,8 @@ import { LitmHooks } from "./scripts/system/hooks.js";
 import { KeyBindings } from "./scripts/system/keybindings.js";
 import { LitmSettings } from "./scripts/system/settings.js";
 import { Sockets } from "./scripts/system/sockets.js";
+import Randomizer from "./scripts/apps/randomizer.js";
+import NameRandomizer from "./scripts/apps/name_randomizer.js";
 
 // Set the logo to the LitM logo
 $("#logo").attr("src", "systems/foundryvtt-litm/assets/media/logo.webp");
@@ -55,6 +57,7 @@ Hooks.once("init", () => {
 		LitmRollDialog,
 		LitmRoll,
 		StoryTagApp,
+		NameRandomizer,
 	};
 
 	logger.info("Initializing Config...");
@@ -103,6 +106,7 @@ Hooks.once("init", () => {
 	LitmSettings.register();
 	LitmHooks.register();
 	Sockets.registerListeners();
+	Randomizer.loadNameChains();
 
 	logger.success("Successfully initialized Legend in the Mist!");
 });

@@ -70,6 +70,10 @@ export class LitmRoll extends Roll {
 		return this.options.modifier || 0;
 	}
 
+	get might() {
+		return this.options.might || 0;
+	}
+
 	async render({
 		template = this.constructor.CHAT_TEMPLATE,
 		isPrivate = false,
@@ -84,6 +88,7 @@ export class LitmRoll extends Roll {
 			outcome: isPrivate ? "???" : this.outcome,
 			power: isPrivate ? "???" : this.power,
 			result: isPrivate ? "???" : this.result,
+			might: isPrivate ? "???" : this.might,
 			title: this.litm.title,
 			tooltip: isPrivate ? "" : await this.getTooltip(),
 			total: isPrivate ? "" : Math.round(this.total * 100) / 100,
@@ -110,7 +115,7 @@ export class LitmRoll extends Roll {
 
 	getTooltipData() {
 		const { label: outcome } = this.outcome;
-		return {
+		const data = {
 			mitigate: this.litm.type === "mitigate" && outcome === "success",
 			burnedTags: this.litm.burnedTags,
 			powerTags: this.litm.powerTags,
@@ -118,6 +123,26 @@ export class LitmRoll extends Roll {
 			positiveStatuses: this.litm.positiveStatuses,
 			negativeStatuses: this.litm.negativeStatuses,
 			modifier: this.modifier,
+			might: this.might,
 		};
+
+		let labelKey = "";
+		switch (data.might) {
+			case -6:
+				labelKey = "Litm.ui.extremely_imperiled";
+				break;
+			case -3:
+				labelKey = "Litm.ui.imperiled";
+				break;
+			case 3:
+				labelKey = "Litm.ui.favored";
+				break;
+			case 6:
+				labelKey = "Litm.ui.extremely_favored";
+				break;
+		}
+
+		data.mightLabel = game.i18n.localize(labelKey);
+		return data;
 	}
 }

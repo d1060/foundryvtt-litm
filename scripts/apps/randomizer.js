@@ -1,107 +1,103 @@
-export default class Randomizer {
-    static syllabes = [
-        [
-            "A", "E", "I", "U",
-            "An", "En", "In", "Un",
-            "Ak", "Ek", "Ik", "Uk",
-            "Ar", "Er", "Ir", "Or", "Ur",
-            "As", "Es",
-            "Al", "El", "Il", "Ol", "Ul",
-            "Ca", "Ce", "Ci", "Co",
-            "Da", "De", "Di", "Do", "Du",
-            "La", "Le", "Li", "Lo", "Lu",
-            "Na", "Ne", "Ni", "No", "Nu",
-            "Tha", "The", "Thu",
-            "Thar", "Ther", "Thir", "Thor", "Thur",
-            "Gal", "Gol",
-            "Dor",
-        ],
-        [
-            "", "", "", "",
-            "a", "ae", "ael", "iel",
-            "ar", "er", "ir", "or", "ur",
-            "ag", "eg", "ig", "og", "ug",
-            "an", "en", "in", "on", "un",
-            "e", "o",
-            "ba", "be", "bi", "bo", "bu",
-            "ca", "ce", "ci", "co", "cu",
-            "da", "de", "di", "do", "du",
-            "ga", "ge", "gi", "go", "gu",
-            "la", "le", "li", "ly", "lo", "lu",
-            "da",
-            "mar", "mer", "mir", "mor", "mur",
-            "n", "na", "ne", "ni", "no", "nu",
-            "ran", "ren", "rin", "ron", "run",
-            "va", "ve", "vi", "vo", "vu",
-        ],
-        {
-            male: [
-                "",
-                "e", "i", "o", "u",
-                "ad", "ed", "id", "yd", "od", "ud",
-                "en", "on", "un",
-                "ar", "er", "ir", "or", "ur",
-                "as", "is", "ys", "os", "us",
-                "ck",
-                "dan", "den", "don", "dun",
-                "dal", "dil", "dul",
-                "k",
-                "lan", "lann", "lon", "lun",
-                "las", "les", "lys", "los", "lus",
-                "lur",
-                "lien", "lion", "liun", "lorn",
-                "nar", "ne", "no", "nor", "nu",
-                "nd",
-                "orn",
-                "rak", "ran", "ren", "ron", "run",
-                "ral", "rel", "ril", "rol", "rul",
-                "rien", "rin", "rion", "riun",
-                "wen",
-                "zal", "zan", "zen", "zon",
-                "zar", "zer", "zir", "zor", "zur",
-            ],
-            female: [
-                "e", "a", "an", "in", "yn", "del", "la", "len", "lenn", "lin", "lyn", "lynn", "lar", "lian", "rian", "na", "ni", "wan", "zel", "zin", "zyn", "rel", "wyn",
-            ]
-        }
-    ];
 
-    static replacements = [
-        ["nr", "n", "r"],
-        ["rn", "n", "r"],
-        ["nb", "n"],
-        ["kn", "k", "n"],
-        ["rd", "r", "d"],
-        ["kv", "v"],
-        ["kb", "k", "b"],
-        ["dade", "da", "de"],
-        ["deda", "da", "de"],
-        ["lnl", "ln", "nl"],
-        ["sbo", "so"],
-        ["nn", "n"],
-    ];
+export default class Randomizer {
+    static name_chains;
+
+    static generateNameFromChain(chain, options = {}) {
+        const {
+            minLen = 4,
+            maxLen = 10,
+            capitalize = true,
+            maxAttempts = 50,
+        } = options;
+
+        const {
+            order,
+            startToken,
+            endToken,
+            tables
+        } = chain;
+
+        function sampleNext(context) {
+            const t = tables[context];
+            if (!t) return null;
+
+            const r = Math.floor(Math.random() * t.total) + 1;
+            let lo = 0, hi = t.cumWeights.length - 1;
+
+            while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (r <= t.cumWeights[mid]) hi = mid;
+            else lo = mid + 1;
+            }
+            return t.chars[lo];
+        }
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            let context = startToken.repeat(order);
+            let out = "";
+
+            for (let i = 0; i < maxLen + 5; i++) {
+            const next = sampleNext(context);
+            if (!next || next === endToken) break;
+
+            out += next;
+            context = context.slice(1) + next;
+
+            if (out.length >= maxLen) break;
+            }
+
+            if (out.length < minLen || out.length > maxLen) continue;
+
+            if (capitalize) {
+            out = out.charAt(0).toUpperCase() + out.slice(1);
+            }
+
+            return out;
+        }
+
+        return null;
+    }
+
+    static generateCulturalName(cultures, gender, options = {}) {
+        const culture = cultures[Math.floor(Math.random() * cultures.length)];
+
+        const cultureData = this.name_chains.cultures[culture];
+        if (!cultureData) {
+            throw new Error(`Unknown culture: ${culture}`);
+        }
+
+        const chain = cultureData[gender];
+        if (!chain) {
+            throw new Error(`Unknown gender '${gender}' for culture '${culture}'`);
+        }
+
+        const name = this.generateNameFromChain(chain, options);
+        //logger.info(`Generated ${culture} ${gender} name: ${name}`);
+        return name;
+    }
+
+    static async loadNameChains() {
+        const url = "systems/foundryvtt-litm/assets/data/name-chains.json.gz";
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+
+        const gzBytes = new Uint8Array(await res.arrayBuffer());
+
+        // pako is global when loaded via system.json scripts
+        const jsonText = pako.ungzip(gzBytes, { to: "string" });
+
+        this.name_chains = JSON.parse(jsonText);
+    }
 
     static newName(gender) {
-        let name = '';
-        for (let syllabeCollection of this.syllabes)
-        {
-            if (Array.isArray(syllabeCollection)) {
-                const syllabe = syllabeCollection[Math.floor(Math.random() * syllabeCollection.length)];
-                name += syllabe;
-            } else if (gender in syllabeCollection) {
-                const syllabe = syllabeCollection[gender][Math.floor(Math.random() * syllabeCollection[gender].length)];
-                name += syllabe;
-            }
+        let culture_name = this.generateCulturalName(["west slavic", "south slavic", "north germanic", "west germanic", "central germanic", "baltic", "east slavic"], gender);
+
+        if (gender === "male" && culture_name.endsWith("a")) {
+            culture_name = culture_name.slice(0, -1);
         }
 
-        for (let replacementArray of this.replacements) {
-            if (name.includes(replacementArray[0]))
-            {
-                const replace = replacementArray[Math.floor(Math.random(replacementArray.length - 1)) + 1];
-                name = name.replace(replacementArray[0], replace);
-            }
-        }
-        return name;
+        return culture_name;
     }
 
     static randomizeImage(gender) {
@@ -144,6 +140,7 @@ export default class Randomizer {
 	static newCharacterData() {
         const gender = Math.random() >= 0.5 ? 'male' : 'female';
 		const charData = {
+            gender,
 			name: Randomizer.newName(gender),
             img: Randomizer.randomizeImage(gender),
 			type: "character"

@@ -177,6 +177,18 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		return null;
 	}
 
+	async _onDrop(dragEvent) {
+		if (dragEvent?.dataTransfer == null) return;
+		const dragData = dragEvent.dataTransfer.getData("text/plain");
+		if (dragData.startsWith('http')) return;
+		const data = JSON.parse(dragData);
+
+		if (data.type == "randomName") {
+			this.actor.update({"name": data.name });
+			this.actor.update({"prototypeToken.name": data.name });
+		}
+	}
+
 	// Prevent dropping non-threat items
 	async _onDropItem(event, data) {
 		const item = await Item.implementation.fromDropData(data);
@@ -353,6 +365,8 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const innerHTML = event.target.innerHTML;
 		this.isEditing = false;
 		this.options.document.update({[path]: innerHTML});
+		if (path == "name")
+			this.options.document.update({"prototypeToken.name": innerHTML});
 		this.render();
 	}
 

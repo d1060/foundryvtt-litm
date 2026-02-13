@@ -4,6 +4,7 @@
     data-drag="true"
     data-value="{{tag.name}}"
     data-type="{{source}}"
+    data-level="{{tag.level}}"
     data-isBurnt="{{tag.isBurnt}}"
     data-values="{{#each tag.values as |status|}}{{#if status}}{{status}},{{/if}}{{/each}}"
     data-context="story-tag"
@@ -19,6 +20,13 @@
                     {{disabled (not editable)}}
                     {{checked tag.isBurnt}} />
         </label>
+        {{#if (eq tag.level 'greatness')}}
+            <i class="litm--greatness-icon"></i>
+        {{else}}
+            {{#if (eq tag.level 'adventure')}}
+                <i class="litm--adventure-icon"></i>
+            {{/if}}
+        {{/if}}
     {{/if}}
     <input	class="litm--tag-item-name {{tag.type}}"
             type="text"

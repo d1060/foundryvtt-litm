@@ -109,6 +109,15 @@
 		}
 	}
 
+	& .litm--roll-dialog-imperil {
+		display: flex;
+		justify-content: center;
+		font-family: var(--litm-font-primary);
+		color: var(--litm-color);
+		font-size: var(--font-size-18);
+		height: 14px;
+	}
+
 	& .litm--roll-dialog-modifier {
 		display: flex;
 		justify-content: center;

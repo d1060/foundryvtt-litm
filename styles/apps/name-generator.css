@@ -1,0 +1,81 @@
+.app.litm.litm--name-generator {
+    overflow: visible;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-16);
+    color: var(--litm-color);
+    background-image: url("../../assets/media/theme-bg-top.webp");
+
+    .window-header {
+        background: transparent;
+        position: absolute;
+        right: 0px;
+        top: -3px;
+        width: 100%;
+
+        .header-control {
+            color: black;
+        }
+    }
+
+    .window-resize-handle::after {
+        color: var(--litm-color-bg);
+    }
+}
+
+.app.litm .litm--name-generator-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 32px;
+    margin: 10px;
+
+    .litm--theme-border-back {
+        width: calc(100% + 6px);
+        max-width: unset;
+        height: calc(100% + 10px);
+        position: absolute;
+        left: -2px;
+        top: -6px;
+    }
+}
+
+.litm--name-generator-label {
+    position: relative;
+    font-size: var(--font-size-20);
+}
+
+.litm--name-generator-select {
+    position: relative;
+}
+
+.litm--name-generator-refresh {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    i {
+        font-size: var(--font-size-20);
+    }
+}
+
+.litm--name-generator-list {
+    position: relative;
+    grid-column: span 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 8px;
+}
+
+.litm--name-generator-list-males {
+    position: relative;
+}
+
+.litm--name-generator-list-females {
+    position: relative;
+}
+
+.litm--name-generator-name-header {
+    font-weight: 600;
+    margin: 4px;
+}
+
+.litm--name-generator-name {
+    margin: 2px;
+}

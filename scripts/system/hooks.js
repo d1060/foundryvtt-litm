@@ -30,6 +30,7 @@ export class LitmHooks {
 	static #addLinkPreloadsToHead() {
 		const assets = [
 			"systems/foundryvtt-litm/assets/media/adventure.webp",
+			"systems/foundryvtt-litm/assets/media/adventure-icon.webp",
 			"systems/foundryvtt-litm/assets/media/adventure-theme-alt-bg-top.webp",
 			"systems/foundryvtt-litm/assets/media/adventure-theme-bg-bottom.webp",
 			"systems/foundryvtt-litm/assets/media/adventure-theme-border-bottom.webp",
@@ -58,6 +59,7 @@ export class LitmHooks {
 			"systems/foundryvtt-litm/assets/media/fellowship-theme-border-top.webp",
 			"systems/foundryvtt-litm/assets/media/flowers-top.webp",
 			"systems/foundryvtt-litm/assets/media/greatness.webp",
+			"systems/foundryvtt-litm/assets/media/greatness-icon.webp",
 			"systems/foundryvtt-litm/assets/media/greatness-theme-alt-bg-top.webp",
 			"systems/foundryvtt-litm/assets/media/greatness-theme-bg-bottom.webp",
 			"systems/foundryvtt-litm/assets/media/greatness-theme-border-bottom.webp",
@@ -436,7 +438,7 @@ export class LitmHooks {
 		Hooks.on("createActor", async (actor, data, userId) => {
 			if (actor.type !== "character") return;
 			if (userId == game.user.id) {
-				CharacterData.randomize(actor);
+				//CharacterData.randomize(actor);
 				CharacterData.createThemes(actor);
 			}
 		});
@@ -506,6 +508,8 @@ export class LitmHooks {
 				const text = event.target.textContent;
 				const matches = `{${text}}`.matchAll(CONFIG.litm.tagStringRe);
 				const match = [...matches][0];
+				const level = event.target.dataset.level;
+				const statusLevel = event.target.dataset.status;
 				if (!match) return;
 				const [, tag, status] = match;
 				const data = {
@@ -517,6 +521,8 @@ export class LitmHooks {
 						.map((_, i) => (Number.parseInt(status) === i + 1 ? status : null)),
 					isBurnt: false,
 					value: status,
+					level,
+					statusLevel,
 				};
 				event.originalEvent.dataTransfer.setData(
 					"text/plain",
@@ -624,6 +630,45 @@ export class LitmHooks {
 				},
 				img: "icons/svg/scroll.svg",
 				command: `new foundry.applications.apps.ImagePopout({ window: { title: "How to Play"} , src: "systems/foundryvtt-litm/assets/media/HowToPlay.jpg"}).render(true);`
+			});
+		}
+
+		if (macro) {
+			const hotbar = game.user.hotbar;
+			for (let slot = 1; slot <= 50; slot++) {
+				if (hotbar[slot]) {
+					const slottedMacro = game.macros.get(hotbar[slot]);
+					if (slottedMacro && slottedMacro.name == macro_name)
+						return;
+					else if (slottedMacro == null)
+						hotbar[slot] = null;
+				}
+
+				if (!hotbar[slot]) {
+					await game.user.assignHotbarMacro(macro, slot);
+					return slot;
+				}
+			}
+		}
+	}
+
+	static async #createNameGeneratorMacro() {
+		const macro_name = "Name Generator";
+		let macro = game.macros.find(m =>
+			m.name === macro_name &&
+			m.author?.id === game.user.id
+		);
+
+		if (!macro) {
+			macro = await Macro.create({
+				name: macro_name,
+				type: "script",
+				ownership: {
+					default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE,
+					[game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER
+				},
+				img: "icons/svg/people.svg",
+				command: `new game.litm.NameRandomizer().render(true);`
 			});
 		}
 
@@ -767,6 +812,7 @@ export class LitmHooks {
 	static #rendeWelcomeScreen() {
 		Hooks.once("ready", async () => {
 			this.#createHowToPlayMacro();
+			this.#createNameGeneratorMacro();
 			this.#createStoryTagsMacro();
 
 			if (game.settings.get("foundryvtt-litm", "welcomed")) return;

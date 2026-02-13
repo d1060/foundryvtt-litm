@@ -15,6 +15,12 @@
         aria-hidden="true"
         width="220" />
     <div class="{{data.type}}">
+        {{#if (eq data.level 'adventure')}}
+            <i class="litm--adventure-icon"></i>
+        {{/if}}
+        {{#if (eq data.level 'greatness')}}
+            <i class="litm--greatness-icon"></i>
+        {{/if}}
         <label><span class="litm--sro">{{localize "Name"}}</span>
             <input type="text"
                 class="litm--character-statuses"

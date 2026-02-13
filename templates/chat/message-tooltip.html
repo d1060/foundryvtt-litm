@@ -50,5 +50,8 @@
 		{{#if data.modifier}}
 		{{> section name=(localize 'Litm.ui.modifier') value=data.modifier flavor="" flavorClass=""}}
 		{{/if}}
+		{{#if data.might}}
+		{{> section name=data.mightLabel value=data.might flavor="" flavorClass=""}}
+		{{/if}}
 	</div>
 </div>

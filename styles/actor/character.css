@@ -688,6 +688,34 @@
 				}
 			}
 		}
+
+		& .litm--adventure-icon {
+			background-image: url("../../assets/media/adventure-icon.webp");
+			width: 24px;
+			height: 24px;
+			min-width: 24px;
+			min-height: 24px;
+			background-size: 24px 24px;
+			position: absolute;
+			display: block;
+			top: 35px;
+			left: 28px;
+			filter: brightness(0.4) contrast(1.1);
+		}
+
+		& .litm--greatness-icon {
+			background-image: url("../../assets/media/greatness-icon.webp");
+			width: 24px;
+			height: 24px;
+			min-width: 24px;
+			min-height: 24px;
+			background-size: 24px 24px;
+			position: absolute;
+			display: block;
+			top: 35px;
+			left: 28px;
+			filter: brightness(0.4) contrast(1.1);
+		}
 	}
 
 	& .litm--theme-tag-button {

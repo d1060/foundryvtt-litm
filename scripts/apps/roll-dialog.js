@@ -6,6 +6,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 	#tagState = [];
 	#shouldRoll = () => false;
 	#modifier = 0;
+	#might = 0;
 	#firstPrepare = true;
 
 	constructor(actorId, characterTags = [], options = {}) {
@@ -14,6 +15,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.#tagState = options.tagState || [];
 		this.#shouldRoll = options.shouldRoll || (() => false);
 		this.#modifier = options.modifier || 0;
+		this.#might = options.might || 0;
 
 		this.actorId = actorId;
 		this.characterTags = characterTags;
@@ -89,7 +91,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		} = LitmRollDialog.#filterTags(tags);
 
 		// Values
-		const {
+		let {
 			burnedValue,
 			powerValue,
 			weaknessValue,
@@ -105,6 +107,9 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			storyThemes: tags.storyThemes,
 			modifier: Number(modifier) || 0,
 		});
+		const actor = game.actors.get(actorId);
+		const might = this.rollMight(actor, tags, []) * 3;
+		totalPower += might;
 
 		const formula =
 			typeof CONFIG.litm.roll.formula === "function"
@@ -124,12 +129,13 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 						type,
 						title,
 						modifier,
+						might
 					})
 				: CONFIG.litm.roll.formula ||
-					"2d6 + (@burnedValue + @powerValue + @positiveStatusValue - @weaknessValue - @negativeStatusValue + @modifier)";
+					"2d6 + (@burnedValue + @powerValue + @positiveStatusValue - @weaknessValue - @negativeStatusValue + @modifier + @might)";
 
-		const actor = game.actors.get(actorId);
-		logger.warn(`${actor?.name} (${actorId}) is performing a roll with modifiers: ${burnedValue} + ${powerValue} + ${positiveStatusValue} - ${weaknessValue} - ${negativeStatusValue} + ${modifier}.`);
+		logger.warn(`${actor?.name} (${actorId}) is performing a roll with modifiers: ${burnedValue} + ${powerValue} + ${positiveStatusValue} - ${weaknessValue} - ${negativeStatusValue} + ${modifier} + ${might}.`);
+
 		// Roll
 		const roll = new game.litm.LitmRoll(
 			formula,
@@ -140,6 +146,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				weaknessValue,
 				negativeStatusValue,
 				modifier: Number(modifier) || 0,
+				might
 			},
 			{
 				actorId,
@@ -153,13 +160,14 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				speaker,
 				totalPower,
 				modifier,
+				might
 			},
 		);
 
 		const res = await roll.toMessage({
 				speaker,
 				flavor: title,
-			});
+		});
 
 		// Reset roll dialog
 		await res.rolls[0]?.actor?.sheet.resetRollDialog();
@@ -216,42 +224,75 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		let burnedValue = tags.burnedTags.length * 3;
 		let powerValue = tags.powerTags.length;
 		let weaknessValue = tags.weaknessTags.length;
+		let tooltip = "";
+		for (const tag of tags.burnedTags) {
+			tooltip += tag.name + " +3<br>";
+		}
+		for (const tag of tags.powerTags) {
+			tooltip += tag.name + " +1<br>";
+		}
+		for (const tag of tags.weaknessTags) {
+			tooltip += tag.name + " -1<br>";
+		}
 
 		let positiveStatusValue = 0;
+		let positiveStatusName = "";
 		for (const positiveStatus of tags.positiveStatuses) {
 			if (positiveStatus.value != null) {
 				const thisValue = Number.parseInt(positiveStatus.value);
-				if (thisValue > positiveStatusValue) positiveStatusValue = thisValue;
+				if (thisValue > positiveStatusValue) {
+					positiveStatusValue = thisValue;
+					positiveStatusName = positiveStatus.name;
+				}
 			}
 			else if (positiveStatus.values?.length) {
 				for (let i = positiveStatus.values.length - 1; i >= 0; i--) {
 					if (positiveStatus.values[i] != null) {
 						const thisValue = Number.parseInt(positiveStatus.values[i]);
-						if (thisValue > positiveStatusValue) positiveStatusValue = thisValue;
+						if (thisValue > positiveStatusValue) {
+							 positiveStatusValue = thisValue;
+							 positiveStatusName = positiveStatus.name;
+						}
 						break;
 					}
 				}
 			}
 		}
 
+		if (positiveStatusValue)
+			tooltip += positiveStatusName + " +" + positiveStatusValue + "<br>";
+
 		let negativeStatusValue = 0;
+		let negativeStatusName = "";
 		for (const negativeStatus of tags.negativeStatuses) {
 			if (negativeStatus.value != null) {
 				const thisValue = Number.parseInt(negativeStatus.value);
-				if (thisValue > negativeStatusValue) negativeStatusValue = thisValue;
+				if (thisValue > negativeStatusValue) {
+					negativeStatusValue = thisValue;
+					negativeStatusName = negativeStatus.name;
+				}
 			}
 			else if (negativeStatus.values?.length) {
 				for (let i = negativeStatus.values.length - 1; i >= 0; i--) {
 					if (negativeStatus.values[i] != null) {
 						const thisValue = Number.parseInt(negativeStatus.values[i]);
-						if (thisValue > negativeStatusValue) negativeStatusValue = thisValue;
+						if (thisValue > negativeStatusValue) {
+							negativeStatusValue = thisValue;
+							negativeStatusName = negativeStatus.name;
+						}
 						break;
 					}
 				}
 			}
 		}
 
+		if (negativeStatusValue)
+			tooltip += negativeStatusName + " +" + negativeStatusValue + "<br>";
+
 		const modifier = Number(tags.modifier) || 0;
+
+		if (modifier)
+			tooltip += game.i18n.localize("Litm.ui.modifier") + " " + (modifier > 0 ? "+" : "") + modifier + "<br>";
 
 		const totalPower 
 			= burnedValue
@@ -269,6 +310,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			negativeStatusValue,
 			totalPower,
 			modifier,
+			tooltip
 		};
 	}
 
@@ -396,11 +438,17 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 		
 		const tags = LitmRollDialog.#filterTags(state);
-		const { totalPower } = LitmRollDialog.calculatePower({
+		let { totalPower, tooltip } = LitmRollDialog.calculatePower({
 			...tags,
 			storyThemes: this.storyThemes,
 			modifier: this.#modifier,
 		});
+		const might = LitmRollDialog.rollMight(this.actor, this.tags, this.characterTags);
+		totalPower += might * 3;
+		if (might)
+			tooltip += game.i18n.localize( LitmRollDialog.mightLocKey(might) ) + "<br>";
+
+		this.tooltip = tooltip;
 		return totalPower;
 	}
 
@@ -426,6 +474,9 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
 		this.#firstPrepare = false;
 
+		const rollMight = LitmRollDialog.rollMight(this.actor, this.tags, this.characterTags);
+		let imperil = LitmRollDialog.mightLocKey(rollMight);
+
 		const context = {
 			...data,
 			actorId: this.actorId,
@@ -446,7 +497,14 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 			totalPower: this.totalPower,
 			modifier: this.#modifier,
 			storyThemes: this.storyThemes,
+			imperil,
+			rollMight,
+			tooltip: this.tooltip
 		};
+
+		for (const tag of context.characterTags) {
+			tag.level = LitmRollDialog.tagLevel(this.actor, tag);
+		}
 		
 		return context;
 	}
@@ -504,6 +562,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.characterTags.push(tag);
 
 		this.setTotalPower();
+		this.setMightDifferences();
+		this.setPowerTooltip();
 		this.#dispatchUpdate();
 	}
 
@@ -511,6 +571,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.characterTags = this.characterTags.filter((t) => t.id !== tag.id);
 
 		this.setTotalPower();
+		this.setMightDifferences();
+		this.setPowerTooltip();
 		this.#dispatchUpdate();
 	}
 
@@ -522,6 +584,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 
 		this.setTotalPower();
+		this.setMightDifferences();
+		this.setPowerTooltip();
 		this.#dispatchUpdate();
 	}
 
@@ -700,6 +764,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 
 		this.setTotalPower();
+		this.setMightDifferences();
+		this.setPowerTooltip();
 		this.#dispatchUpdate();
 
 		if (storyThemesChanged) {
@@ -772,6 +838,8 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.#modifier = Number(input.value) || 0;
 
 		this.setTotalPower();
+		this.setMightDifferences();
+		this.setPowerTooltip();
 		this.#dispatchUpdate();
 	}
 
@@ -779,10 +847,13 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		const id = foundry.utils.randomID();
 		const userId = game.user.id;
 		const tags = LitmRollDialog.#filterTags(data.tags);
-		const { totalPower } = game.litm.methods.calculatePower({
+		let { totalPower } = game.litm.methods.calculatePower({
 			...tags,
 			modifier: data.modifier,
 		});
+		const might = LitmRollDialog.rollMight(this.actor, this.tags, this.characterTags);
+		totalPower += might * 3;
+
 		const recipients = Object.entries(this.actor.ownership)
 			.filter((u) => u[1] === 3 && u[0] !== "default")
 			.map((u) => u[0]);
@@ -836,6 +907,27 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		});
 	}
 
+	setMightDifferences() {
+		if (this.element == null) return;
+		const root = this.element instanceof HTMLElement ? this.element : this.element[0];
+		const el = root.querySelector(".litm--roll-dialog-imperil-label");
+		if (!el) return;
+
+		const rollMight = LitmRollDialog.rollMight(this.actor, this.tags, this.characterTags);
+		let imperil = LitmRollDialog.mightLocKey(rollMight);
+
+		el.textContent = game.i18n.localize(imperil);
+	}
+
+	setPowerTooltip() {
+		if (this.element == null) return;
+		const root = this.element instanceof HTMLElement ? this.element : this.element[0];
+		const el = root.querySelector("[data-update='totalPower']");
+		if (!el) return;
+
+		el.dataset.tooltip = this.tooltip;
+	}
+
 	static classifyTag(tag) {
 		let tagName = tag.name.trim();
 		tagName = tagName.replace('[', '');
@@ -879,5 +971,90 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 		config.storyThemes = structuredClone(this.storyThemes);
 		await game.settings.set("foundryvtt-litm", "storytags", config);
+	}
+
+	static rollMight(actor, tags, characterTags) {
+		let might = 0;
+		let opposingMight = 0;
+
+		if (!actor) return 0;
+
+		for (const tag of characterTags) {
+			if (!tag.state) continue;
+			let level = this.tagLevel(actor, tag);
+
+			switch (level) {
+				case 'adventure':
+					if (tag.state != 'negative') {
+						if (might < 1) might = 1;
+					}
+				break;
+				case 'greatness':
+					if (tag.state != 'negative') {
+						if (might < 2) might = 2;
+					}
+				break;
+			}
+		}
+
+		for (const tag of tags) {
+			if (!tag.state) continue;
+
+			let level = '';
+			if (tag.level) {
+				level = tag.level;
+			} else  {
+				level = this.tagLevel(actor, tag);
+			}
+
+			switch (level) {
+				case 'adventure':
+					if (tag.state == 'negative') {
+						if (opposingMight < 1) opposingMight = 1;
+					} else {
+						if (might < 1) might = 1;
+					}
+				break;
+				case 'greatness':
+					if (tag.state == 'negative') {
+						if (opposingMight < 2) opposingMight = 2;
+					} else {
+						if (might < 2) might = 2;
+					}
+				break;
+			}
+		}
+
+		return might - opposingMight;
+	}
+
+	static tagLevel(actor, tag) {
+		let level = '';
+
+		let theme = actor.items?.find(i => i.id == tag.id);
+		if (!theme) {
+			theme = actor.items?.find(i => i.system.allTags?.some(t => t.id == tag.id));
+		}
+
+		if (theme) {
+			level = theme.system.level ?? '';
+		}
+		return level;
+	}
+
+	static mightLocKey(might) {
+		switch (might) {
+			case -2:
+				return "Litm.ui.extremely_imperiled";
+			case -1:
+				return "Litm.ui.imperiled";
+			case 0:
+				return "";
+			case 1:
+				return "Litm.ui.favored";
+			case 2:
+				return "Litm.ui.extremely_favored";
+		}
+		return null;
 	}
 }

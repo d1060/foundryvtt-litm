@@ -16,6 +16,9 @@
 			"ko-fi": "amediocredad"
 		}
 	],
+	"scripts": [
+		"scripts/vendor/pako.min.js"
+	],
 	"esmodules": [
 		"litm.js"
 	],
