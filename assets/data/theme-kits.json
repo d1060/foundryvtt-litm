@@ -149,6 +149,132 @@
                     "pitiful looks"
                 ],
                 "mission": "I wish something would make me forget my pain – for good!"
+            },
+            {
+                "title": "Mountain Solitude",
+                "tags": [
+                    "walking staff",
+                    "animals of these parts",
+                    "evaluate strangers",
+                    "nimble climber",
+                    "invigorating vistas",
+                    "hard to impress",
+                    "forage for food and herbs",
+                    "find or build shelter",
+                    "leave me alone"
+                ],
+                "weaknesses": [
+                    "making friends",
+                    "disheveled and unkempt",
+                    "crowded places",
+                    "eccentric"
+                ],
+                "mission": "Rise above the fray."
+            },
+            {
+                "title": "Red Marshal",
+                "tags": [
+                    "the Red Armor",
+                    "support from the village",
+                    "adjudicating disputes",
+                    "speak with authority",
+                    "Fort Gherdorn",
+                    "shortsword",
+                    "martial training",
+                    "brace myself",
+                    "keep the peace"
+                ],
+                "weaknesses": [
+                    "mystical threats",
+                    "highhanded pomposity",
+                    "village secrets",
+                    "challenged authority"
+                ],
+                "mission": "I am sworn to protect the Dales and their people."
+            },
+            {
+                "title": "Crossroads Chatter",
+                "tags": [
+                    "lip-loosening beverage",
+                    "wayfarer camaraderie",
+                    "charm with chitchat",
+                    "start a counter rumor",
+                    "at home in every inn",
+                    "knows all the main roads",
+                    "eavesdrop on conversations",
+                    "avoid notice",
+                    "take good news with bad"
+                ],
+                "weaknesses": [
+                    "travelers in a hurry",
+                    "snubbed by householders",
+                    "traumatized witnesses",
+                    "too sensational"
+                ],
+                "mission": "The best trading commodity is a juicy tale you haven’t heard yet."
+            },
+            {
+                "title": "Town Dweller",
+                "tags": [
+                    "fine clothes",
+                    "knows a [specialized artisan]",
+                    "asking around town",
+                    "bribe and a wink",
+                    "crowded markets",
+                    "ample free time",
+                    "well-read",
+                    "affluent",
+                    "the more the merrier"
+                ],
+                "weaknesses": [
+                    "unaccustomed to outdoor activities",
+                    "snobby standards",
+                    "rural gatherings",
+                    "overcharged for goods"
+                ],
+                "mission": "I have every comfort I need in this town."
+            },
+            {
+                "title": "Wanderlands Wise",
+                "tags": [
+                    "wanderer’s cloak",
+                    "fugitives and survivors",
+                    "intimidation",
+                    "find quick cover",
+                    "camp anywhere",
+                    "not expected to know customs",
+                    "navigating wastelands",
+                    "stealthy avoidance",
+                    "beware the Twilight"
+                ],
+                "weaknesses": [
+                    "night terrors",
+                    "foreign ways",
+                    "mild agoraphobia",
+                    "never truly belongs"
+                ],
+                "mission": "Keep moving if you want to stay alive."
+            },
+            {
+                "title": "Well-Regarded",
+                "tags": [
+                    "gifts from well-wishers",
+                    "my close-knit circle",
+                    "public speaking",
+                    "shielded by my reputation",
+                    "the Folkhearth",
+                    "allowed to intervene",
+                    "timely gossip",
+                    "befriend anyone",
+                    "apologize sincerely"
+                ],
+                "weaknesses": [
+                    "public figure",
+                    "self-aggrandizing",
+                    "houses of ill-repute",
+                    "jealous spite"
+                ],
+                "mission": "Make new friends, but keep the old."
             }
         ]
     },
@@ -281,6 +407,90 @@
                     "witch hunters"
                 ],
                 "mission": "The next ritual must be held according to our customs."
+            },
+            {
+                "title": "Keeper of the Oldways",
+                "tags": [
+                    "dispense wisdom",
+                    "a heritage to be proud of",
+                    "protective charms",
+                    "Oldways shrines",
+                    "folk remedies",
+                    "steadfast believer",
+                    "recall old stories",
+                    "kindle warm feelings",
+                    "ritual of safe journey"
+                ],
+                "weaknesses": [
+                    "ignorant of the outside world",
+                    "Oldways duties",
+                    "wary of change",
+                    "indignant youth"
+                ],
+                "mission": "Trust in the Oldways; they must never be forgotten."
+            },
+            {
+                "title": "Love of the Land",
+                "tags": [
+                    "trek outdoors",
+                    "refreshed by nature",
+                    "farming tools",
+                    "local animals",
+                    "know the dangers here",
+                    "knows [choose area]",
+                    "rebuke exploiters and defilers",
+                    "steward the land",
+                    "commune with the land"
+                ],
+                "weaknesses": [
+                    "oblivious to discomfort",
+                    "lose track of time",
+                    "puts land before people",
+                    "rampant harvesting"
+                ],
+                "mission": "Though I’m but its steward, I’ll protect this land with my life."
+            },
+            {
+                "title": "Twilight Love",
+                "tags": [
+                    "hide our love",
+                    "acts of self sacrifice",
+                    "Ring of Protection",
+                    "I see them in my dreams",
+                    "secret knowledge of Twilight",
+                    "defying taboos",
+                    "stand up for outcasts",
+                    "“We’ll always find each other”",
+                    "hope-giving daydreams"
+                ],
+                "weaknesses": [
+                    "love is blind",
+                    "worried sick",
+                    "possessive",
+                    "intolerant Dalish folk"
+                ],
+                "mission": "The true love we share is worth it all."
+            },
+            {
+                "title": "Uncover the Truth",
+                "tags": [
+                    "pointed interrogation",
+                    "sift truth from lies",
+                    "evidence [choose item]",
+                    "ancient languages",
+                    "resist distractions",
+                    "fearless",
+                    "proclaim the truth",
+                    "leave no stone unturned",
+                    "theorize into the night"
+                ],
+                "weaknesses": [
+                    "offensive questioning",
+                    "too much to go through",
+                    "obsessive",
+                    "someone covering up"
+                ],
+                "mission": "I need to know."
             }
         ]
     },
@@ -329,27 +539,6 @@
                     "choking fits"
                 ],
                 "mission": "It falls to me alone to continue the legacy of my kind."
-            },
-            {
-                "title": "Forged in War",
-                "tags": [
-                    "find cover",
-					"battered shield",
-					"memento of someone I lost",
-					"fellow refugees",
-					"move through battlefields",
-					"tall tales of heroism",
-					"can handle a blade",
-					"ruthless",
-					"warriors' jargon"
-				],
-				"weaknesses": [
-                    "dishonorable wartime acts",
-					"avenging kinsmen",
-					"nightmares",
-					"old injury"
-                ],
-                "mission": "Are we fated to forever slay one another on the battlefield?"
             },
             {
                 "title": "Mystic Pilgrimage",
@@ -413,6 +602,90 @@
                     "bad knees"
                 ],
                 "mission": "The time has come to set out on a new journey!"
+            },
+            {
+                "title": "Banished & Unburdened",
+                "tags": [
+                    "never look back",
+                    "flamboyant garb",
+                    "recipes from home",
+                    "do it by myself",
+                    "escape capture",
+                    "breaker of taboos",
+                    "forbidden practice [choose]",
+                    "resilient",
+                    "other renegades"
+                ],
+                "weaknesses": [
+                    "I still miss them",
+                    "selfrighteous villagers",
+                    "no place to stay",
+                    "scarred body"
+                ],
+                "mission": "I don’t need them; my path is my own."
+            },
+            {
+                "title": "Life in the Wild",
+                "tags": [
+                    "been through worse",
+                    "wellsupplied pack",
+                    "cherished bow",
+                    "fellow outlanders",
+                    "finding my bearings",
+                    "trusted guide",
+                    "hunting and foraging",
+                    "ferocious when cornered",
+                    "bond with wild animals"
+                ],
+                "weaknesses": [
+                    "raised by beasts",
+                    "recognized by woodland outlaws",
+                    "going hungry",
+                    "missing finger"
+                ],
+                "mission": "People are nothing but polite animals."
+            },
+            {
+                "title": "Lost a Loved One",
+                "tags": [
+                    "grab life by the horns",
+                    "our silver rings",
+                    "their kerchief",
+                    "our family and friends",
+                    "letting things go",
+                    "people sympathize",
+                    "read hidden feelings",
+                    "passionately protective",
+                    "cathartic cry"
+                ],
+                "weaknesses": [
+                    "blame myself",
+                    "blamed by others [choose]",
+                    "where they died",
+                    "never love again"
+                ],
+                "mission": "I will live up to the memory of the one I"
+            },
+            {
+                "title": "Seen the Twilight",
+                "tags": [
+                    "know its many forms",
+                    "[trinket] stolen from them",
+                    "Creature’s claw",
+                    "fellow witness",
+                    "confronting monsters",
+                    "scare others with stories",
+                    "running for my life",
+                    "careful approach",
+                    "Oldways sign of invisibility to Twilight"
+                ],
+                "weaknesses": [
+                    "tainted by Twilight",
+                    "the Twilight hunts me",
+                    "wary of strangers",
+                    "horrific dreams"
+                ],
+                "mission": "The Twilight should never be allowed to return."
             }
         ]
     },
@@ -557,42 +830,18 @@
                 "tags": [
                     "untapped fierceness",
                     "inner compass",
-                    "first to strike, last to give up",
+                    "first to strike",
+                    "last to give up",
                     "“am I really that strong”",
                     "“they'll learn to respect me”",
                     "friends above everything",
-                    "idealist",
+                    "idealist"
+                ],
+                "weaknesses": [
                     "still sees the good in people",
                     "childish smile"
                 ],
-                "weaknesses": [
-                    "hard-headed",
-                    "always blames someone else",
-                    "always something to prove",
-                    "hates being talked down"
-                ],
-                "mission": "Never surrender to darkness or despair"
-            },
-            {
-                "title": "Curious",
-                "tags": [
-                    "learning environment",
-                    "inundate with questions",
-                    "all in my notebook",
-                    "subtle inquiry",
-                    "passion for the truth",
-                    "inventive",
-                    "point out peculiarities",
-                    "recognize false answers",
-                    "deep thinker"
-                ],
-                "weaknesses": [
-                    "overlook danger",
-                    "really annoying",
-                    "prying and invasive",
-                    "those with something to hide"
-                ],
-                "mission": "There’s so much more to see and learn!"
+                "mission": "hard-headed, always blames someone else, always something to prove, hates being talked down"
             },
             {
                 "title": "Jovial Disposition",
@@ -698,6 +947,174 @@
                     "private persons"
                 ],
                 "mission": "Whispered words are mightier than loud proclamations."
+            },
+            {
+                "title": "Foul-Mouthed",
+                "tags": [
+                    "rooted in truth",
+                    "humiliating insult",
+                    "amplifying horn",
+                    "find insecurities",
+                    "scare them away",
+                    "ancient curse words",
+                    "deflate self-importance",
+                    "crass retort",
+                    "resist social pressure"
+                ],
+                "weaknesses": [
+                    "can’t shut my trap",
+                    "insensitive",
+                    "resounding yelling",
+                    "stuck-up decorum"
+                ],
+                "mission": "I take pleasure in expressing my displeasure."
+            },
+            {
+                "title": "Gracious Host",
+                "tags": [
+                    "hungry or weary guests",
+                    "make them comfortable",
+                    "appetizing food",
+                    "conversation starter",
+                    "tension-defusing music",
+                    "fastidious housekeeper",
+                    "raising spirits",
+                    "refuse others’ generosity",
+                    "read the room"
+                ],
+                "weaknesses": [
+                    "not enough dishes",
+                    "need to be liked",
+                    "vicious gossip",
+                    "unwanted guests"
+                ],
+                "mission": "Guests should always feel at home."
+            },
+            {
+                "title": "Grudgingly Helpful",
+                "tags": [
+                    "lend a hand",
+                    "keep them waiting",
+                    "stockpiled supplies",
+                    "make them appreciate it",
+                    "take care of me first",
+                    "inscrutable motives",
+                    "offer comfort",
+                    "refuse to help",
+                    "judge worthiness"
+                ],
+                "weaknesses": [
+                    "my reluctance is remembered",
+                    "stingy",
+                    "terrible first impression",
+                    "needy people"
+                ],
+                "mission": "If I help them right away, how will they learn?"
+            },
+            {
+                "title": "Hot-Headed",
+                "tags": [
+                    "acting boldly",
+                    "scream them into complying",
+                    "ready weapon",
+                    "blow out of proportion",
+                    "lunge at someone",
+                    "cathartic punch",
+                    "taunt the big guy",
+                    "can’t hear through rage",
+                    "push my limits"
+                ],
+                "weaknesses": [
+                    "delicate situations",
+                    "short temper",
+                    "self-destructive",
+                    "calm and logical people"
+                ],
+                "mission": "Don’t make me angry – you’ll regret it."
+            },
+            {
+                "title": "Patient",
+                "tags": [
+                    "laying traps",
+                    "inspire calm alertness",
+                    "timely snack",
+                    "never seem overeager",
+                    "coolheaded",
+                    "calculated timing",
+                    "tolerate moodiness",
+                    "hold back my reaction",
+                    "see the forest for the trees"
+                ],
+                "weaknesses": [
+                    "slow to act",
+                    "fear of failure",
+                    "perfectionism",
+                    "pushy people"
+                ],
+                "mission": "All good things come to those who wait."
+            },
+            {
+                "title": "Prankster",
+                "tags": [
+                    "public humiliation",
+                    "make people laugh",
+                    "tripping twine",
+                    "get people angry",
+                    "indomitable",
+                    "sneaky",
+                    "break tension with a joke",
+                    "ridicule authority",
+                    "defy accepted ways"
+                ],
+                "weaknesses": [
+                    "took it too far",
+                    "inconsiderate",
+                    "illtimed pranks",
+                    "humorless drudges"
+                ],
+                "mission": "Let’s have a good laugh and take them down a peg."
+            },
+            {
+                "title": "Protective",
+                "tags": [
+                    "moments of grave danger",
+                    "make them feel safe",
+                    "battered shield",
+                    "draw attackers to me",
+                    "stand in the way",
+                    "alert to threats",
+                    "show my support",
+                    "overcome pain for them",
+                    "analyze defenses"
+                ],
+                "weaknesses": [
+                    "neglecting myself",
+                    "distracted by worrying",
+                    "overly cautious",
+                    "my protection refused"
+                ],
+                "mission": "Without me, they’re in trouble."
+            },
+            {
+                "title": "Wanderlust",
+                "tags": [
+                    "finding my way",
+                    "marching song",
+                    "old maps",
+                    "making new friends",
+                    "plan my next journey",
+                    "adapt to new situations",
+                    "lead the way",
+                    "I don’t get attached",
+                    "worldly wisdom"
+                ],
+                "weaknesses": [
+                    "tresspassing",
+                    "never content",
+                    "commitment issues",
+                    "narrow-minded folk"
+                ],
+                "mission": "Let’s see what’s beyond the next hill!"
             }
         ]
     },
@@ -725,27 +1142,6 @@
                     "can't resist a competition"
                 ],
                 "mission": "To shoot the perfect shot."
-            },
-            {
-                "title": "Artisan",
-                "tags": [
-                    "jewelry crafting",
-                    "well-equipped workshop",
-                    "nobles and merchants",
-                    "mechanical mechanism",
-                    "plenty of time to work",
-                    "inspect quality",
-                    "gauge a customer",
-                    "young apprentice",
-                    "attention to detail"
-                ],
-                "weaknesses": [
-                    "magical jewels",
-                    "rushed",
-                    "judges by appearances",
-                    "“uncouth savages!”"
-                ],
-                "mission": "I shall make the finest creations this village has ever seen."
             },
             {
                 "title": "Homesteader",
@@ -851,6 +1247,258 @@
                     "tight security"
                 ],
                 "mission": "Everyone’s a mark, they just don’t know it."
+            },
+            {
+                "title": "Angling & Weiring",
+                "tags": [
+                    "cast a line",
+                    "strong net",
+                    "love cooking fish",
+                    "watery traps",
+                    "wetland wading",
+                    "be still and quiet",
+                    "gut and fillet",
+                    "use a live bait",
+                    "contemplative"
+                ],
+                "weaknesses": [
+                    "unsettled waters",
+                    "scarce fish",
+                    "can’t stand noisy folk",
+                    "the smell"
+                ],
+                "mission": "Haul in the water’s bounty with peace and calm."
+            },
+            {
+                "title": "Archery",
+                "tags": [
+                    "marksmanship tricks",
+                    "well-used bow",
+                    "distant targets",
+                    "hobbling shot",
+                    "full quiver",
+                    "careful aim",
+                    "keen eyesight",
+                    "arrowmaker",
+                    "“you miss every shot you don’t take”"
+                ],
+                "weaknesses": [
+                    "shoot while moving",
+                    "close combat",
+                    "showoff",
+                    "hesitates to shoot people"
+                ],
+                "mission": "Practice makes perfect."
+            },
+            {
+                "title": "Cheesemaking",
+                "tags": [
+                    "discern ingredients",
+                    "cheese knife",
+                    "Milkrest folk",
+                    "spread unbearable stench",
+                    "laborer’s stamina",
+                    "meticulous",
+                    "secret family recipes",
+                    "handling dairy livestock",
+                    "competitive"
+                ],
+                "weaknesses": [
+                    "stained and smelly",
+                    "can’t be rushed",
+                    "grumpy when out of cheese",
+                    "unwelcome in Highglade"
+                ],
+                "mission": "Don’t rush; the longer you wait, the better it becomes."
+            },
+            {
+                "title": "Crop Farmer",
+                "tags": [
+                    "put my back into it",
+                    "big hoe",
+                    "provider of food",
+                    "grow rare herbs",
+                    "my own patch of land",
+                    "knows farmland dangers",
+                    "give unsolicited advice",
+                    "my reliable farmhand",
+                    "family has deep roots here"
+                ],
+                "weaknesses": [
+                    "just enough to live off",
+                    "untimely weather",
+                    "earthbound",
+                    "uncouth"
+                ],
+                "mission": "Keep tilling this soil and you’ll be fine."
+            },
+            {
+                "title": "Forest Ken",
+                "tags": [
+                    "hunting and trapping",
+                    "hand axe",
+                    "guide and pathfinder",
+                    "hide in the forest",
+                    "best when I’m alone",
+                    "always alert",
+                    "dealing with forest dwellers",
+                    "hunting dog",
+                    "survivalist"
+                ],
+                "weaknesses": [
+                    "Twilight forests",
+                    "very dense thicket",
+                    "dislikes open places",
+                    "troublesome companions"
+                ],
+                "mission": "To live in the forest, you must follow its ways."
+            },
+            {
+                "title": "Grave Robber",
+                "tags": [
+                    "avoid traps",
+                    "shovel and crowbar",
+                    "fences and smugglers",
+                    "appraise treasures",
+                    "under cover of dark",
+                    "quiet as a mouse",
+                    "ancient Gwyrdolan script",
+                    "muscular crony",
+                    "sheer greed"
+                ],
+                "weaknesses": [
+                    "cursed places",
+                    "well-guarded tombs",
+                    "nihilist",
+                    "despised in society"
+                ],
+                "mission": "They don’t need it, and I do."
+            },
+            {
+                "title": "Hill Crester",
+                "tags": [
+                    "know every knoll",
+                    "sturdy boots",
+                    "run overhill errands",
+                    "rock climbing",
+                    "used to wind and cold",
+                    "good reflexes",
+                    "local flora and fauna",
+                    "traveling alongside companions",
+                    "rugged tenacity"
+                ],
+                "weaknesses": [
+                    "sheer rock face",
+                    "slippery and muddy",
+                    "looks down on lowlanders",
+                    "heavy blizzards"
+                ],
+                "mission": "Those who stay in the valley can’t see the whole picture."
+            },
+            {
+                "title": "Horsemanship",
+                "tags": [
+                    "ranching",
+                    "good saddle",
+                    "my favorite horse",
+                    "cross-country riding",
+                    "faster on well-kept roads",
+                    "sharp turn",
+                    "caring for horses",
+                    "rapport with stablehands",
+                    "bond with horses"
+                ],
+                "weaknesses": [
+                    "stubborn horse",
+                    "prone to injury",
+                    "haughty",
+                    "uneven or soggy ground"
+                ],
+                "mission": "Nothing compares to the wind in my hair when I ride."
+            },
+            {
+                "title": "River Runner",
+                "tags": [
+                    "swimming and diving",
+                    "nimble skiff",
+                    "smuggling fugitives",
+                    "hidden stashes",
+                    "the Shiverwash",
+                    "cutlass",
+                    "escape routes",
+                    "rumors among runners",
+                    "go with the flow"
+                ],
+                "weaknesses": [
+                    "the Marshes",
+                    "rival smugglers",
+                    "unscrupulous",
+                    "ill-repute"
+                ],
+                "mission": "Keep a low profile."
+            },
+            {
+                "title": "Folk Songs",
+                "tags": [
+                    "rhythmic work songs",
+                    "musical instrument [choose]",
+                    "impress a listener",
+                    "heartbreaking keen",
+                    "throat-soothing syrup",
+                    "uplifting jig",
+                    "lore-rich ballads",
+                    "audience singing along",
+                    "preserve local spirit"
+                ],
+                "weaknesses": [
+                    "large gatherings",
+                    "inappropriate time for a song",
+                    "oversentimental",
+                    "harsh critics"
+                ],
+                "mission": "Singing these songs reminds us who we are."
+            },
+            {
+                "title": "Scribe",
+                "tags": [
+                    "ornate calligraphy",
+                    "quill and inkpot",
+                    "convincing verbosity",
+                    "recording details",
+                    "fresh parchment",
+                    "eye for detail",
+                    "ancient languages",
+                    "chroniclers of the past",
+                    "desire to learn"
+                ],
+                "weaknesses": [
+                    "rushed scribbles",
+                    "smudging ink",
+                    "lost in the words",
+                    "illiterate people"
+                ],
+                "mission": "I shall document great deeds with great words."
+            },
+            {
+                "title": "Shrewd Trader",
+                "tags": [
+                    "good judge of character",
+                    "cart heaped with [type of goods]",
+                    "folk with coin to spend",
+                    "convincing promises",
+                    "leverage high demand",
+                    "never overspend",
+                    "read desires and urges",
+                    "steady suppliers",
+                    "forge relationships"
+                ],
+                "weaknesses": [
+                    "giving without receiving",
+                    "competing offer",
+                    "distrustful",
+                    "insular communities"
+                ],
+                "mission": "Squeeze the best deal out of every negotiation."
             }
         ]
     },
@@ -861,46 +1509,25 @@
             {
                 "title": "Strong as an Ox",
                 "tags": [
-					"lift heavy loads",
-					"block a blow",
-					"gloves for better grip",
-					"hurl something heavy",
-					"test of strength",
-					"holds and grapples",
-					"structural weak points",
-					"smash it loudly",
-					"loose clothing",
+                    "lift heavy loads",
+                    "block a blow",
+                    "gloves for better grip",
+                    "hurl something heavy",
+                    "test of strength",
+                    "holds and grapples",
+                    "structural weak points",
+                    "smash it loudly",
+                    "loose clothing",
                     "clobber a bully"
                 ],
                 "weaknesses": [
                     "tongue-tied",
                     "unintentional breakage",
-					"ridiculed as a brute",
-					"exhausting",
-					"reinforced steel"
+                    "ridiculed as a brute",
+                    "exhausting",
+                    "reinforced steel"
                 ],
                 "mission": "Use my strength to help others."
-            },
-            {
-                "title": "Acrobatic Agility",
-                "tags": [
-                    "vault and tumble",
-                    "dodge harm",
-                    "rope and hook",
-                    "tightrope walking",
-                    "swing from a chandelier (or similar)",
-                    "quick climber",
-                    "evaluate weight",
-                    "showmanship",
-                    "feign clumsiness"
-                ],
-                "weaknesses": [
-                    "this will hurt later",
-                    "jealous spectators",
-                    "stretching my luck",
-                    "harder when restrained"
-                ],
-                "mission": "I can make that jump."
             },
             {
                 "title": "Tenacious",
@@ -985,6 +1612,90 @@
                     "uneasy on dry land"
                 ],
                 "mission": "Nowhere do I feel more at home than deep in the murky water."
+            },
+            {
+                "title": "Acute Nose",
+                "tags": [
+                    "follow a scent",
+                    "smell fear",
+                    "nose plugs",
+                    "identify scents",
+                    "refined culinary sense",
+                    "controlled breathing",
+                    "pick out one scent of many",
+                    "guess what they ate",
+                    "unfazed by stench"
+                ],
+                "weaknesses": [
+                    "noseblindness",
+                    "unwashed people",
+                    "overwhelming scents",
+                    "strong winds"
+                ],
+                "mission": "Breathe deep and follow my nose."
+            },
+            {
+                "title": "Keen Eyes",
+                "tags": [
+                    "scan the horizon",
+                    "look out for trouble",
+                    "old spyglass",
+                    "see at night",
+                    "taking aim",
+                    "sentry duty",
+                    "spot small details",
+                    "read lips",
+                    "pretend I didn’t see"
+                ],
+                "weaknesses": [
+                    "squinting headaches",
+                    "resented by private folk",
+                    "more here than meets the eye",
+                    "optical illusions"
+                ],
+                "mission": "I trust my own eyes above all else."
+            },
+            {
+                "title": "Punishment Enduring",
+                "tags": [
+                    "ignore pain",
+                    "quick recovery",
+                    "numbing herbs",
+                    "take the blame",
+                    "hold out for a long time",
+                    "penitent demeanor",
+                    "sense of justice",
+                    "dramatic soliloquy",
+                    "bite my tongue"
+                ],
+                "weaknesses": [
+                    "visible scars",
+                    "cruelty",
+                    "low self-esteem",
+                    "rejects happiness"
+                ],
+                "mission": "Suffer without anyone knowing."
+            },
+            {
+                "title": "Winsome Dancer",
+                "tags": [
+                    "entice observers",
+                    "light on my feet",
+                    "fetching flower wreath",
+                    "never dizzy or tired",
+                    "outdoor dancing",
+                    "ritual dance",
+                    "a sensitive heart",
+                    "inspire joyfulness",
+                    "elusive and coy"
+                ],
+                "weaknesses": [
+                    "attracts Creatures",
+                    "jealousy",
+                    "whimsical and inattentive",
+                    "not the time for dancing"
+                ],
+                "mission": "All I want to do is dance!"
             }
         ]
     },
@@ -2440,6 +3151,93 @@
                     "thick-skinned victims"
                 ],
                 "mission": "This is going to be the biggest prank YET."
+            },
+            {
+                "title": "Craftwork Apprentice",
+                "tags": [
+                    "imitating my work",
+                    "clean up duty",
+                    "relax together after work",
+                    "workbench",
+                    "watch and learn",
+                    "extra tool set",
+                    "observe with fresh eyes",
+                    "can carry a lot",
+                    "can-do attitude"
+                ],
+                "weaknesses": [
+                    "neophyte mistakes",
+                    "too many questions",
+                    "other commitments",
+                    "skittish"
+                ],
+                "mission": "I’m here to teach you, and you’re here to learn."
+            },
+            {
+                "title": "Murder of Crows",
+                "tags": [
+                    "descend from the sky",
+                    "distracting flapping",
+                    "scare the superstitious",
+                    "overlooking perch",
+                    "snatch an item",
+                    "feather quills",
+                    "otherworldly senses",
+                    "sharp claws",
+                    "circle the area"
+                ],
+                "weaknesses": [
+                    "stealing my things",
+                    "“caw",
+                    "caw",
+                    "CAW",
+                    "CAW!”",
+                    "distracted by shiny things",
+                    "enclosed places"
+                ],
+                "mission": "Protect the murder."
+            },
+            {
+                "title": "Nagging Minder",
+                "tags": [
+                    "knows what’s best for me",
+                    "pull me away from danger",
+                    "find a place to rest",
+                    "stand by me",
+                    "admonish my enemies",
+                    "already fixing my next meal",
+                    "poke at my conscience",
+                    "big and strong",
+                    "truly cares"
+                ],
+                "weaknesses": [
+                    "slows me down",
+                    "constant nagging",
+                    "busy doing chores",
+                    "strict and demanding"
+                ],
+                "mission": "“Stick to the straight and narrow, and one day you won’t need me.”"
+            },
+            {
+                "title": "Milkrest Riding Goat",
+                "tags": [
+                    "surefooted",
+                    "running leap",
+                    "country rambling",
+                    "a bag of feed",
+                    "headbutt",
+                    "embroidered saddle",
+                    "stubborn courage",
+                    "haul heavy weight",
+                    "trusted friend"
+                ],
+                "weaknesses": [
+                    "headstrong",
+                    "filthy and smelly",
+                    "ignores me to chew cud",
+                    "hates crowds"
+                ],
+                "mission": "Let’s leap and climb over mountain and gully."
             }
         ]
     },
@@ -2572,138 +3370,510 @@
                     "decomposing body"
                 ],
                 "mission": "I shall rule this world with an army of bone and rotted flesh."
-            }
-        ]
-    },
-    {
-        "theme": "Possessions",
-        "startup": "true",
-        "kits": [
-            {
-                "title": "Handcrafted Pan Flute",
-                "tags": [
-                    "high pitch note",
-                    "lyrics scribbled on parchment",
-                    "play a merry song",
-                    "invite curious animals",
-                    "public performance",
-                    "clean and tune",
-                    "inspire serenity",
-                    "blend notes with the wind",
-                    "rustic design"
-                ],
-                "weaknesses": [
-                    "limited range",
-                    "prone to crack",
-                    "audience had enough",
-                    "simple tunes only"
-                ],
-                "mission": "A peaceful life is all I want."
             },
             {
-                "title": "Impregnable Stronghold",
+                "title": "Cobblebones Reader",
                 "tags": [
-                    "heavy fortifications",
-                    "crocodile moat",
-                    "barricade in",
-                    "secret tunnel",
-                    "arrow slits",
-                    "well and granary",
-                    "bastion of our people",
-                    "only one access road",
-                    "ancient glyphs on walls"
+                    "foretell danger",
+                    "guide to good fortune",
+                    "fudge the outcome",
+                    "dramatic foreshadowing",
+                    "interpret symbolism",
+                    "reading for a promising youth",
+                    "customcrafted Cobblebones set",
+                    "smart gamble",
+                    "encourage a donation"
                 ],
                 "weaknesses": [
-                    "overlooked weak point",
-                    "worn and crumbling",
-                    "life outside continues",
-                    "aerial attacks"
+                    "clouded fate",
+                    "no time to study the stones",
+                    "terrified by what I see",
+                    "often called a charlatan"
                 ],
-                "mission": "We will be safe here, as long as we stand our ground."
+                "mission": "Never read a fate if I wasn’t asked."
             },
             {
-                "title": "Hidden Daggers",
+                "title": "Dowsing",
                 "tags": [
-                    "dipped in poison",
-                    "quick draw sheath",
-                    "wide slash",
-                    "secret compartment in hilt",
-                    "balanced throw",
-                    "whetstone",
-                    "vicious",
-                    "concealed sheath",
-                    "silvered"
+                    "woodland powers",
+                    "village powers",
+                    "follow the flow of water",
+                    "trace power to its origin",
+                    "stronger when barefoot",
+                    "heirloom forked dowsing rod",
+                    "notice weather changes",
+                    "forge a path",
+                    "guiding others"
                 ],
                 "weaknesses": [
-                    "short range",
-                    "require constant sharpening",
-                    "gaining notoriety",
-                    "heavy armor"
+                    "finding relics",
+                    "noise and commotion",
+                    "drawn to dangerous places",
+                    "restless wanderer"
                 ],
-                "mission": "One day, one of these will slit the Baron’s throat."
+                "mission": "When I get the tingle, I have to follow it."
             },
             {
-                "title": "Pilfered Possessions",
+                "title": "Friend of the Vila",
                 "tags": [
-                    "several items of value",
-                    "a little knife",
-                    "fence goods",
-                    "sell it to the owner",
-                    "learn about the owner",
-                    "steal a new batch",
-                    "easy come easy go",
-                    "quickly stash them",
-                    "fancy jewelry"
+                    "ask for help in dire need",
+                    "a miraculous cure",
+                    "minor glamours and illusions",
+                    "preternatural guidance",
+                    "stronger in the Aldenweald",
+                    "charm of camouflage",
+                    "beseech Cunning Creatures",
+                    "measured words"
                 ],
                 "weaknesses": [
-                    "loud jingle",
-                    "I’ve used all the good stuff",
-                    "wanted for banditry",
-                    "cheap trinkets"
+                    "far from the Aldenweald",
+                    "come to them empty-handed",
+                    "bewildering instructions",
+                    "“touched by the fey”"
                 ],
-                "mission": "Who do I have to rob around here to get a few coins?"
+                "mission": "I must never cross them, for I need their help."
             },
             {
-                "title": "Horse & Panoply",
+                "title": "“The Sight”",
                 "tags": [
-                    "plate armor",
-                    "lance",
-                    "ride into battle",
-                    "secret horse commands",
-                    "trample enemies",
-                    "healing salve",
-                    "noble-minded",
-                    "horse barding",
-                    "worthy of the royal court"
+                    "see Unseen beings",
+                    "peer into someone’s soul",
+                    "premonitions of danger",
+                    "pierce through deceit",
+                    "discern magic",
+                    "find a Creature’s weakness",
+                    "perceive remote places",
+                    "hide the fact I know"
                 ],
                 "weaknesses": [
-                    "cumbersome",
-                    "tired after long journey",
-                    "perceived as haughty",
-                    "high maintenance"
+                    "splitting headaches",
+                    "weaker when I’m upset",
+                    "can’t unsee",
+                    "avoided by locals"
                 ],
-                "mission": "I will bring honor to the noble house whose colors I proudly wear."
+                "mission": "Never turn away from the truth."
             },
             {
-                "title": "Untold Riches",
+                "title": "Hearthkeeper",
                 "tags": [
-                    "everyone accepts gold",
-                    "precious gemstones too",
-                    "pay expenses",
-                    "invest in a venture",
-                    "business acumen",
-                    "armored wagon",
-                    "rejoice in good fortune",
-                    "mercenary escort",
-                    "mesmerising glitter"
+                    "strengthen family bonds",
+                    "cleanse with fire",
+                    "listen through flames",
+                    "dispel bad feelings",
+                    "winter nights",
+                    "ash poker",
+                    "promote recovery",
+                    "seasonal house repairs",
+                    "fortify the house"
                 ],
                 "weaknesses": [
-                    "attracts robbers",
-                    "too many expenses",
-                    "reputable spender",
-                    "money can’t buy"
+                    "alone at home",
+                    "needs fresh kindling",
+                    "attracts bloodsuckers",
+                    "often exhausted"
                 ],
-                "mission": "Everything and everyone has a price, and I can pay it."
+                "mission": "I tend this fire as I would a living soul."
+            },
+            {
+                "title": "Hospitality Magic",
+                "tags": [
+                    "shelter guests from harm",
+                    "feast for a village",
+                    "enchanted sleep",
+                    "chores do themselves",
+                    "local history",
+                    "stronger with locals",
+                    "bottomless stew pot",
+                    "entice travelers",
+                    "reputation for safety"
+                ],
+                "weaknesses": [
+                    "hostility between guests",
+                    "must honor guest-right",
+                    "eerie atmosphere",
+                    "no privacy"
+                ],
+                "mission": "Under my roof, my word is the last word."
+            },
+            {
+                "title": "House Spirits",
+                "tags": [
+                    "spirits of warmth",
+                    "fetch objects",
+                    "make little offerings",
+                    "gentle requests",
+                    "read a room’s energy",
+                    "better out of sight",
+                    "hand broom",
+                    "help with cooking",
+                    "house considered lucky"
+                ],
+                "weaknesses": [
+                    "unexpected guests",
+                    "spirits demand attention",
+                    "suspicious neighbors",
+                    "items go missing"
+                ],
+                "mission": "The spirits of my home are like family to me."
+            },
+            {
+                "title": "Magical Garden",
+                "tags": [
+                    "medicinal plants",
+                    "living hedge",
+                    "nourish for resiliency",
+                    "intoxicating pollen",
+                    "daily care",
+                    "rapid sprouting",
+                    "exotic seed bag",
+                    "gather specimen",
+                    "gardening tools"
+                ],
+                "weaknesses": [
+                    "aggressive harvesting",
+                    "invasive species",
+                    "seasonal moods",
+                    "unusual pests"
+                ],
+                "mission": "Grow the rarest plants in my garden."
+            },
+            {
+                "title": "Blessed Brewing",
+                "tags": [
+                    "[choose favorite recipe]",
+                    "mindaltering brews",
+                    "emotion-evoking brews",
+                    "vigor-giving brews",
+                    "fast affecting",
+                    "select good ingredients",
+                    "share a round",
+                    "stashed flask",
+                    "memorable toasts"
+                ],
+                "weaknesses": [
+                    "mixing different brews",
+                    "requires precision",
+                    "often inebriated",
+                    "need constant company"
+                ],
+                "mission": "Drinks are meant to be shared."
+            },
+            {
+                "title": "Crafty Home Cooking",
+                "tags": [
+                    "[choose favorite recipe]",
+                    "recipes against Twilight",
+                    "recipes of healing",
+                    "hide its magical properties",
+                    "food preservation",
+                    "festival food",
+                    "auntie’s recipe book",
+                    "tell ingredients by smell",
+                    "perfect host"
+                ],
+                "weaknesses": [
+                    "fancy food",
+                    "needs a wellequipped kitchen",
+                    "accidental magical poisoning",
+                    "overeager host"
+                ],
+                "mission": "They don’t need to know what’s in it."
+            },
+            {
+                "title": "Folk Cures",
+                "tags": [
+                    "[choose favorite recipe]",
+                    "bodily remedies",
+                    "cures of the soul",
+                    "interpersonal concoctions",
+                    "pest control – natural or not",
+                    "purification mixtures",
+                    "diagnose condition",
+                    "mortar and pestle",
+                    "bandaging and wound care"
+                ],
+                "weaknesses": [
+                    "unnatural anatomy",
+                    "must be followed to the letter",
+                    "ever-jangling backpack",
+                    "hounded by sick clients"
+                ],
+                "mission": "Collecting and preserving the cures of the Dales is my life’s purpose."
+            },
+            {
+                "title": "Wild Harvester",
+                "tags": [
+                    "fungi and moss",
+                    "wise in the ways of growing things",
+                    "smell what’s hidden",
+                    "poison resistance",
+                    "identifying flora",
+                    "untouched wilderness",
+                    "razor-sharp sickle",
+                    "field cooking",
+                    "teas and infusions"
+                ],
+                "weaknesses": [
+                    "cultivated land",
+                    "not the right season",
+                    "always smells like plants",
+                    "people who doubt nature"
+                ],
+                "mission": "The most potent essence can be found in the meanest herb."
+            },
+            {
+                "title": "Boundary Cairns",
+                "tags": [
+                    "repel interlopers",
+                    "detect unusual presence",
+                    "dissipate harmful magic",
+                    "corrode invaders’ equipment",
+                    "strengthen walls and fortifications",
+                    "visions of approaching danger",
+                    "build into natural features",
+                    "awe-striking decorations",
+                    "bless with vigilance"
+                ],
+                "weaknesses": [
+                    "unfamiliar area",
+                    "cairns too far apart",
+                    "always on the fringes",
+                    "constantly on guard"
+                ],
+                "mission": "No danger shall pass here so long as I watch over this place."
+            },
+            {
+                "title": "Dedicated Shrine Tender",
+                "tags": [
+                    "pray at the shrine",
+                    "evoke [choose shrine essence]",
+                    "sense trespassers",
+                    "invest my own vitality",
+                    "shrine history",
+                    "shrine care and repairs",
+                    "ceremonial robes",
+                    "residents of the area",
+                    "donated offerings"
+                ],
+                "weaknesses": [
+                    "disrespectful guests",
+                    "costly regular upkeep",
+                    "trace of the shrine’s power",
+                    "possessive"
+                ],
+                "mission": "Here I find a deeper providence which no other shrine can match."
+            },
+            {
+                "title": "[Enchanted Place]",
+                "tags": [
+                    "know it like the back of my hand",
+                    "nature comes to my aid",
+                    "mesmerise with preternatural beauty",
+                    "omens from the local spirit",
+                    "ask innocent questions",
+                    "restorative rest",
+                    "spirit-marked pebble",
+                    "sense ill-intent",
+                    "gestures of respect"
+                ],
+                "weaknesses": [
+                    "uninvited guests",
+                    "polluting influences",
+                    "hear them always",
+                    "must return often"
+                ],
+                "mission": "I’ll tell no one of this place."
+            },
+            {
+                "title": "Oldways Pilgrim",
+                "tags": [
+                    "identify shrine purpose",
+                    "wayside and traveler shrines",
+                    "healing shrines",
+                    "consecration rituals",
+                    "leave a token behind",
+                    "commune with local spirits",
+                    "engraved offering bowl",
+                    "endure the elements",
+                    "friends in many Dales"
+                ],
+                "weaknesses": [
+                    "not a builder",
+                    "foreign shrines",
+                    "structural damage",
+                    "unaccustomed to company"
+                ],
+                "mission": "Every shrine deserves my utmost respect."
+            },
+            {
+                "title": "Hexes and Blessings",
+                "tags": [
+                    "curse with a bodily affliction",
+                    "bless the kind",
+                    "protective blessings",
+                    "cause a minor accident",
+                    "sense hopes and fears",
+                    "investigate a curse",
+                    "deflect a spell",
+                    "handmade crooked wand",
+                    "intimidation"
+                ],
+                "weaknesses": [
+                    "must perceive the recipient",
+                    "recipient must hear me",
+                    "rebounded curses",
+                    "domineering"
+                ],
+                "mission": "Repay both compassion and cruelty in kind."
+            },
+            {
+                "title": "Oldways Witch",
+                "tags": [
+                    "wisdom and foresight",
+                    "repel the Twilight",
+                    "bewitch a hearth",
+                    "practical spells",
+                    "elaborate rituals",
+                    "omens and weather signs",
+                    "concoct foul medicines",
+                    "preparing charms",
+                    "sacrificial magic"
+                ],
+                "weaknesses": [
+                    "this requires an expert",
+                    "needs justified cause",
+                    "frightening appearance",
+                    "blamed for misfortune"
+                ],
+                "mission": "I follow in the footsteps of the Lady."
+            },
+            {
+                "title": "Practical Magic",
+                "tags": [
+                    "household spells",
+                    "travel spells",
+                    "craft spells",
+                    "ignite fire",
+                    "break an item from afar",
+                    "animate tools",
+                    "rejuvenating tonic",
+                    "compel a person to work",
+                    "industrious"
+                ],
+                "weaknesses": [
+                    "impractical applications",
+                    "weaker with an audience",
+                    "too many spells at once",
+                    "harder for me without magic"
+                ],
+                "mission": "Never go to sleep without finishing the day’s chores."
+            },
+            {
+                "title": "Twilight Lullaby",
+                "tags": [
+                    "put restless spirits to sleep",
+                    "sign of revealing",
+                    "sign of warding",
+                    "beautiful singing voice",
+                    "dolmens",
+                    "ruins",
+                    "and barrows",
+                    "perpetual vigilance",
+                    "incense-ball staff",
+                    "put children to sleep",
+                    "keep silent"
+                ],
+                "weaknesses": [
+                    "sore throat",
+                    "must be able to speak",
+                    "unidentified Creatures",
+                    "angry powerful spirits"
+                ],
+                "mission": "This world is for the living; sleep, honored dead, as you should."
+            },
+            {
+                "title": "Crowling",
+                "tags": [
+                    "grow corvine features",
+                    "an eye for magic",
+                    "I have something of theirs",
+                    "break an enchantment",
+                    "Grandfather Crow",
+                    "sap a practitioner",
+                    "never forget a face",
+                    "swoop and snatch",
+                    "counterspell"
+                ],
+                "weaknesses": [
+                    "sprout feathers",
+                    "I have nothing of theirs",
+                    "beholden to Grandfather Crow",
+                    "ostracized"
+                ],
+                "mission": "Bring all the shiny magic to Grandfather."
+            },
+            {
+                "title": "Curse Eating",
+                "tags": [
+                    "fresh curses",
+                    "digest anything",
+                    "ignore curses",
+                    "sense corruption",
+                    "crossroads",
+                    "a piece of cursed food",
+                    "tolerate pain",
+                    "dispense bitter wisdom",
+                    "kind strangers"
+                ],
+                "weaknesses": [
+                    "ancient curses",
+                    "requires fasting",
+                    "sickly appearance",
+                    "constantly hungry"
+                ],
+                "mission": "It is right that I should take the burden of others’ misfortune."
+            },
+            {
+                "title": "Hexia-Blooded",
+                "tags": [
+                    "glide with underarm webbing",
+                    "rageful curses",
+                    "sacrificial dagger",
+                    "versed in the ways of Twilight",
+                    "the Witchwood",
+                    "summon a true Hexia",
+                    "long sharp teeth",
+                    "mysterious",
+                    "vampiric feeding"
+                ],
+                "weaknesses": [
+                    "beholden to the Witchwood",
+                    "irascible Hexia",
+                    "uncontrolled bloodthirst",
+                    "treated like a monster"
+                ],
+                "mission": "I hunger for the blood of witches and sorcerers."
+            },
+            {
+                "title": "Incredible Hammerstroke",
+                "tags": [
+                    "knock their lights out",
+                    "hammer tricks",
+                    "quick-reach belt loop",
+                    "pound attacks away",
+                    "blacksmith workshop",
+                    "craft the hardest materials",
+                    "wreck structures and devices",
+                    "impress",
+                    "headstrong"
+                ],
+                "weaknesses": [
+                    "well-known locally",
+                    "foot the bill",
+                    "I want to show off",
+                    "nobody cares about my talent"
+                ],
+                "mission": "Let me hit it!"
             }
         ]
     }

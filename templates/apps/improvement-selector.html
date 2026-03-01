@@ -10,10 +10,10 @@
                 <div class="{{i.lineStyle}}">
                     <div class="improvement-name">
                         {{#if i.selected}}
-                        <img src="/systems/foundryvtt-litm/assets/media/checkbox-c.svg" width="18" height="18" data-action="deselectImprovement" data-index="{{@index}}" data-improvement="{{i.improvement}}" >
+                        <img src="/systems/foundryvtt-litm/assets/media/checkbox-c.svg" width="18" height="18" data-action="deselectImprovement" data-id="{{i.id}}" data-index="{{@index}}" data-improvement="{{i.improvement}}" >
                         {{else}}
                             {{#if i.canSelect}}
-                                <img src="/systems/foundryvtt-litm/assets/media/checkbox.svg" width="18" height="18" data-action="selectImprovement" data-index="{{@index}}" data-improvement="{{i.improvement}}" >
+                                <img src="/systems/foundryvtt-litm/assets/media/checkbox.svg" width="18" height="18" data-action="selectImprovement" data-id="{{i.id}}" data-index="{{@index}}" data-improvement="{{i.improvement}}" >
                             {{else}}
                                 <div style="width: 18px; height: 18px;">&nbsp;</div>
                             {{/if}}

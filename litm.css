@@ -4,6 +4,7 @@
 @import "./styles/item/backpack.css";
 @import "./styles/item/theme.css";
 @import "./styles/item/threat.css";
+@import "./styles/item/special-improvement.css";
 @import "./styles/actor/challenge.css";
 @import "./styles/actor/character.css";
 @import "./styles/apps/loot-dialog.css";

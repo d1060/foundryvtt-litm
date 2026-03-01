@@ -429,6 +429,12 @@ export class ThemeSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		themeImprovement.description = null;
 
 		await theme.update({"system.specialImprovements": themeImprovements });
+
+		for (const a of foundry.applications.instances.values()) {
+			if (a instanceof SpecialImprovements) {
+				a.render(true);
+			}
+		}
 	}
 
 	static async getActorAndItemFromId(id) {

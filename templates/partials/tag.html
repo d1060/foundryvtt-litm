@@ -1,5 +1,6 @@
 <li {{#if remove}}data-context="remove-tag" {{/if}} data-id="{{tag.id}}"
 	data-dblclick="flip"
+	{{#if draggable}}draggable="true"{{/if}}
 	class="litm--theme-tag {{#if embedded}}embedded{{/if}}">
 	<!-- Tags embedded in the character sheet have different functionality -->
 	{{#if embedded}}

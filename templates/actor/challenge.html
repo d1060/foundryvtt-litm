@@ -11,14 +11,25 @@
 		<input list="litm--challenge-types" type="text" data-size-input data-path="system.category" 
 			id="category" name="system.category" value="{{data.system.category}}" />
 		<img src="systems/foundryvtt-litm/assets/media/separator.webp" alt="">
-		<label class="litm--sro"
-			for="rating">{{localize "Litm.other.rating"}}</label>
-		<div role="button" class="litm--challenge-rating" data-action="increase"
-			data-context="decrease" data-name="system.rating">
-			{{#progress-buttons data.system.rating 5}}
-				<span aria-hidden="true" class="{{ifThen @checked 'checked' ''}}"><img
-						src="systems/foundryvtt-litm/assets/media/skull.webp" /></span>
-			{{/progress-buttons}}
+		<div style="display: flex;">
+		{{#if (eq data.system.might "origin")}}
+			<img class="litm--challenge-might-icon" src="systems/foundryvtt-litm/assets/media/icons/origin.svg" alt="">
+		{{else if (eq data.system.might "adventure")}}
+			<img class="litm--challenge-might-icon" src="systems/foundryvtt-litm/assets/media/icons/adventure.svg" alt="">
+		{{else if (eq data.system.might "greatness")}}
+			<img class="litm--challenge-might-icon" src="systems/foundryvtt-litm/assets/media/icons/greatness.svg" alt="">
+		{{else if (eq data.system.might "legend")}}
+			<img class="litm--challenge-might-icon" src="systems/foundryvtt-litm/assets/media/icons/legend.svg" alt="">
+		{{/if}}		
+			<label class="litm--sro"
+				for="rating">{{localize "Litm.other.rating"}}</label>
+			<div role="button" class="litm--challenge-rating" data-action="increase"
+				data-context="decrease" data-name="system.rating">
+				{{#progress-buttons data.system.rating 5}}
+					<span aria-hidden="true" class="{{ifThen @checked 'checked' ''}}"><img
+							src="systems/foundryvtt-litm/assets/media/skull.webp" /></span>
+				{{/progress-buttons}}
+			</div>
 		</div>
 		<input type="hidden" id="rating" name="system.rating"
 			value="{{data.system.rating}}" />

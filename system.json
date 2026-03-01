@@ -46,7 +46,12 @@
 					"note"
 				]
 			},
-			"threat": {}
+			"threat": {},
+			"specialImprovement": {
+				"htmlFields": [
+					"note"
+				]
+			}
 		}
 	},
 	"languages": [
@@ -93,6 +98,14 @@
 			"type": "Adventure",
 			"name": "tinderbox-demo",
 			"path": "packs/tinderbox-demo",
+			"system": "foundryvtt-litm",
+			"flags": {}
+		},
+		{
+			"label": "Legend in the Mist Items",
+			"type": "Item",
+			"name": "litm-items",
+			"path": "packs/litm-items",
 			"system": "foundryvtt-litm",
 			"flags": {}
 		}

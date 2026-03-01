@@ -1,19 +1,3 @@
-export function generateUUID() { // Public Domain/MIT
-	var d = new Date().getTime();//Timestamp
-	var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-		var r = Math.random() * 16;//random number between 0 and 16
-		if(d > 0){//Use timestamp until depleted
-			r = (d + r)%16 | 0;
-			d = Math.floor(d/16);
-		} else { //Use microseconds since page-load if supported
-			r = (d2 + r)%16 | 0;
-			d2 = Math.floor(d2/16);
-		}
-		return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-	});
-}
-
 export function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -251,3 +235,87 @@ export async function showImageDialog(image, name, propagate, origin, width, hei
 	}
 }
 
+export async function actorChoiceDialog(options) {
+	if (!options.template) return;
+	if (!options.title) return;
+	if (!options.label) options.label = options.title;
+
+	const playerActors = game.actors.filter(
+		actor => actor.type === "character" && actor.id != options.exclude
+	);
+
+	if (options.addSomeoneElse) {
+		playerActors.push({
+			_id: 'someoneElse',
+			name: "Someone Else",
+			img: 'icons/environment/people/traveler.png'
+		});
+	}
+
+	if (!playerActors.length) return null;
+	
+	const content = await foundry.applications.handlebars.renderTemplate(
+		options.template,
+		{
+			playerActors,
+			data: {
+				item: options.item
+			},
+			label: options.label,
+		}
+	);
+
+	const targetActor = await foundry.applications.api.DialogV2.wait({
+			classes: ["app", "window-app", "litm", "litm--item-transfer", 'themed', 'theme-light'],
+			window: {
+				resizable: false,
+				title: game.i18n.localize(options.title),
+			},
+			content,
+			buttons: [
+				{
+					action: 'select',
+					icon: "fa fa-square-check",
+					label: `${game.i18n.localize("Litm.ui.select")}`,
+					callback: event => {
+						const checkedRadio = event.currentTarget.querySelector("input[type='radio']:checked");
+						return checkedRadio?.getAttribute("id") ?? false;
+					},
+				},
+				{
+					action: 'cancel',
+					icon: "fa fa-square-xmark",
+					label: `${game.i18n.localize("Litm.ui.cancel")}`,
+					callback: () => false,
+				},
+			],
+			default: "select",
+			close: () => logger.info("Closed Actor Choice Dialog"),
+	});
+
+	if (targetActor && targetActor != 'someoneElse')
+		return game.actors.get(targetActor);
+
+	return null;
+}
+
+
+export function storeScrollPositions(app) {
+	app._scrollPositions = {};
+	for (const el of app.element.querySelectorAll("[data-scroll]")) {
+		app._scrollPositions[el.dataset.scroll] = el.scrollTop;
+	}
+}
+
+export function restoreScrollPositions(app) {
+	if (!app._scrollPositions) return;
+
+	for (const el of app.element.querySelectorAll("[data-scroll]")) {
+		const pos = app._scrollPositions[el.dataset.scroll];
+		if (pos !== undefined)
+		{
+			el.scrollTop = pos;
+			//delete app._scrollPositions[el.dataset.scroll];
+		}
+	}
+}

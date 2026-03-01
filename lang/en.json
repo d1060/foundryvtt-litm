@@ -3,6 +3,7 @@
 	"consequence": "Mixed Hit",
 	"failure": "Miss",
 	"greatness": "Greatness",
+	"legend": "Legend",
 	"Litm": {
 		"challenges": {
 			"attacker": "Attacker",
@@ -164,7 +165,7 @@
 			"hedge-magic": "Hedge Magic",
 			"influence": "Influence",
 			"knowledge": "Knowledge",
-			"magic": "Hedge Magic",
+			"magic": "Magic",
 			"mastery": "Mastery",
 			"monstrosity": "Monstrosity",
 			"mystery": "Mystery",
@@ -185,7 +186,7 @@
 			"advancement-decay-title": "REPLACING A THEME",
 			"advancement-milestone-title": "EVOLVING A THEME",
 			"advancement-promise-title": "MOMENT OF FULFILLMENT",
-			"advancement-experience-content": "<p style='margin-bottom: 0px;'>Choose one of the following improvements:</p><ul style='margin-top: 0px;'><li><b>Create a new power tag</b> for this theme, the same way you did during Hero Creation (page 77) or Fellowship Creation (page 139). There is no hard limit for the number of power tags or weakness tags a theme can have.</li><li><b>Remove or add a weakness tag</b> in this theme. Removing a vulnerability sounds like a great idea, but remember it also takes away your ability to Improve. You may prefer to even add a weakness tag, to increase your improvement opportunities.</li><li><b>Gain a Special Improvement</b> for this theme. Each theme type offers five Special Improvements with unique benefits and rules that enhance the theme in some manner. Each Special Improvement can only be chosen once</li><li><b>Reset Abandon, Milestones, or both</b> on this theme. Sometimes improving your theme simply means better focusing and anchoring that aspect of your life so that the winds of change do not transform it.</li><li><b>Mark Promise (page 193)</b>. You do not improve in any visible way, but something is gathering within you, some potential, a new hope, perhaps destiny? You won&quot;t know until this hidden Promise is Fulfilled (page 193).</li></ul>",
+			"advancement-experience-content": "<p style='margin-bottom: 0px;'>Choose one of the following improvements:</p><ul style='margin-top: 0px;'><li><b>Create a new power tag</b> for this theme, the same way you did during Hero Creation (page 77) or Fellowship Creation (page 139). There is no hard limit for the number of power tags or weakness tags a theme can have.</li><li><b>Transfer a power tag</b> for another theme into this one.</li><li><b>Remove or add a weakness tag</b> in this theme. Removing a vulnerability sounds like a great idea, but remember it also takes away your ability to Improve. You may prefer to even add a weakness tag, to increase your improvement opportunities.</li><li><b>Gain a Special Improvement</b> for this theme. Each theme type offers five Special Improvements with unique benefits and rules that enhance the theme in some manner. Each Special Improvement can only be chosen once</li><li><b>Reset Abandon, Milestones, or both</b> on this theme. Sometimes improving your theme simply means better focusing and anchoring that aspect of your life so that the winds of change do not transform it.</li><li><b>Mark Promise (page 193)</b>. You do not improve in any visible way, but something is gathering within you, some potential, a new hope, perhaps destiny? You won&quot;t know until this hidden Promise is Fulfilled (page 193).</li></ul>",
 			"advancement-decay-content": "<p style='margin-bottom: 0px;'>When you replace a theme:</p><ul style='margin-top: 0px; margin-bottom: 0px;'><li><b>Mark Promise (page 193), once.</b> Every change of themes earns one Promise, reflecting the deeper impact left on your Hero from going through this transformation.</li><li><b>Mark Promise again</b> for each power tag beyond the third, each weakness tag beyond the first, and each Special Improvement you have in the theme you are replacing.</li><li><b>Discard your theme&quot;s theme card.</b> This theme is no more.</li><li><b>Create a new nascent theme</b>, the same way you did during Hero Creation (page 77) or Fellowship Creation (page 139), except this theme has only the title tag instead of three power tags. It has a weakness tag and a Quest as usual.</li></ul><p style='margin-top: 0px;'><b>The next two times</b> you would mark Improve on this theme, choose instead a new power tag for it. Once the theme has three power tags, marking Improve and gaining Improvements continue as normal.</p>",
 			"advancement-milestone-content": "<p style='margin-bottom: 0px;'>Follow these steps:</p><ul style='margin-top: 0px;'><li><b>Mark Promise (page 193), once.</b> Every change of themes earns one Promise, reflecting the deeper impact left on your Hero from going through this transformation.</li><li><b>Pick a new title tag</b> for this theme, one that reflects its evolution.</li><li><b>Choose a new theme type, or change the Might of the theme.</b> It cannot stay the same as it was.</li><li><b>Revise your power tags and weakness tags</b> as needed to reflect how they evolved, or replace them altogether with new tags. You may keep them as they are if they fit the new theme.</li><li><b>Revise your Quest to</b> fit your new theme.</li><li><b>Trade unwanted parts of your old theme for new improvements.</b> You may trade each power tag beyond the third, each weakness tag beyond the first, and each Special Improvement to gain an Improvement for your new theme (Improving a Theme, page 187). You may use this improvement as usual to mark Promise. You may also keep your old theme&quot;s Special Improvements, if you wish.</li><li><b>Expanding a Theme.</b> When you would evolve a theme, you can choose to instead “expand” it, so it&quot;ll take even more of your priorities: Replace one of your other themes with a new one that expands on the evolved theme. If you choose to do so, also reset the Milestone tracker on the evolved theme and rewrite its Quest.</li></ul>",
 			"advancement-promise-content": "<p style='margin-bottom: 0px;'>In your Moment of Fulfillment (page 193), you can choose one of the following:</p><ul style='margin-top: 0px;'><li><b>Arrive at Journey’s End (Retirement).</b>Your character has found a place to call home and settle down or withdraw from the world. Choose the place where they retire and describe their new life there. Choose a story tag that describes the greatest advantage of this place, it becomes a permanent story tag that can never be scratched and yet can always be burned for Power.</li><li><b>Be Reforged (Rebuild Hero).</b> Your character goes through a transformation and becomes something completely new. All of your character’s themes are replaced at the same time. In addition, the new character gains:<ul><li>A free improvement for every power tag beyond the first three.</li><li>A free improvement for every weakness tag beyond the first one.</li><li>A free improvement for every Special Improvement.</li><li>All of the old character’s Promise.</li><li>All of the old character’s Moments of Fulfillment.</li></ul></li><li><b>Gain a Quintessence.</b> A unique quality is formed within you, a quality that defines you and remains constant within you forevermore. Possible quintessences are listed on page 194.</li><li><b>Shake The Foundations Of Magic (New Magic).</b> You discover or invent something previously unknown about magic. You develop a new ability, breach a restriction, find a new powerful resource, or similarly change your magic in a groundbreaking way. Give an NPC, group, force, or place (but not a Hero) a permanent story tag that can never be scratched and yet can always be burned for Power.</li><li><b>Speak Words Eternal (Enchantment).</b> In a moment of rare clarity, rage, or mystical connection, you speak or otherwise enact an enchantment that will remain in the world for all time.</li><li><b>Unearth Lost Truths (Discovery).</b> Your character gets a glimpse into secrets buried deep beneath the surface. Choose a subject, a mystery, or an obstacle this secret concerns. Narrator discretion applies.</li></ul>"
@@ -465,6 +466,8 @@
 			"name-randomizer-female-names": "Female Names:",
 			"name-randomizer-title": "Random name generator",
 			"name-tag": "Name your Tag",
+			"new-improvement-name": "New Special Improvement",
+			"new-improvement-description": "Describe the Special Improvement",
 			"name-weakness": "Name your Weakness",
 			"nav-main-tooltip": "<span class='reference'>Right-Click</span> to show/hide the Fellowship Theme",
 			"noGM-message": "You needd an active GM to perform this action.",
@@ -496,6 +499,7 @@
 			"roll-tracked": "Tracked",
 			"roll-tracked-hint": "<span class='reference'>Right-Click</span> to post Effects to chat.",
 			"roll-tracked-success": "You can push your roll by accepting Consequences to get 1 more Power to spend on Effects.",
+			"select": "Select",
 			"selected": "Selected",
 			"show-tag-window-on-load": "Show Tag Manager on load",
 			"show-tag-window-on-load-hint": "If checked, the tag manager will be shown automatically when the game is loaded. You can always click the tag icon to show it manually.",
@@ -512,6 +516,9 @@
 			"toggle-roll": "<span class='reference'>Click</span> to add/remove from dice roll. <br /> <span class='reference'>SHIFT + Click</span> to burn tag on dice roll. <br /> <span class='reference'>ALT/OPTION + Click</span> to burn/unburn tag.",
 			"toggle-weakness-roll": "<span class='reference'>Click</span> to add/remove from dice roll.",
 			"total-power": "Total Power",
+			"transfer": "Transfer Item",
+			"transfer-item": "Select character to receive ",
+			"transfer-item-title": "Transfer to",
 			"user-manual": "Open User Manual",
 			"warn-incompatible-data": "The data you are trying to import is not compatible with this system.",
 			"warn-no-character": "Please assign a character to your user in the bottom-left player configuration menu.",
@@ -543,7 +550,8 @@
 		"Item": {
 			"backpack": "Backpack",
 			"theme": "Theme",
-			"threat": "Threat"
+			"threat": "Threat",
+			"specialImprovement": "Special Improvement"
 		}
 	}
 }

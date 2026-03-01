@@ -220,6 +220,16 @@
 		background-size: 14px 14px;
 		margin-right: 2px;
 	}
+
+	& .litm--legend-icon {
+		background-image: url("../assets/media/legend-icon.webp");
+		width: 14px;
+		height: 14px;
+		min-width: 14px;
+		min-height: 14px;
+		background-size: 14px 14px;
+		margin-right: 2px;
+	}
 }
 
 :where(.litm--kbd) {

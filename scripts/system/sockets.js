@@ -1,5 +1,6 @@
 import Fellowship from "../apps/fellowship.js";
 import Randomizer from "../apps/randomizer.js";
+import { CharacterSheet } from "../actor/character/character-sheet.js";
 
 export class Sockets {
 	static dispatch(event, data) {
@@ -146,6 +147,13 @@ export class Sockets {
 			const actor = game.actors.get(data.actorId);
 			if (actor) {
 				actor.sheet.render(true);
+			}
+		});
+
+		Sockets.on("transferItem", (data) => {
+			const actor = game.actors.get(data.actorId);
+			if (game.user.isGM && actor) {
+				CharacterSheet.addBackpackItem(data.item, data.actorId, data.senderActorId);
 			}
 		});
 	}

@@ -1,0 +1,19 @@
+<div class="litm--special-improvement-wrapper" autocomplete="off" spellcheck="off">
+    <div class="litm--special-improvement-back" aria-hidden="true"></div>
+    <div class="litm--special-improvement-top">
+        <span class="litm--special-improvement-name" role="textbox" contenteditable data-input="name" data-path="name">{{item.name}}</span>
+        <select name="themebook">
+            {{#each themebooks as |t|}}
+                <option name="{{t.theme}}" {{#if (eq ../system.themebook t.theme)}}selected{{/if}}>{{t.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div class="litm--special-improvement-description">
+        {{#if editingDescription}}
+        <span role="textbox" class="litm--special-improvement-description-active" name="description" contenteditable data-input="description" data-path="description" {{#if descriptionPlaceholder}}data-placeholder="{{descriptionPlaceholder}}"{{/if}} aria-labelledby="description-label">{{system.description}}</span>
+        <input type="hidden" id="description" name="hiddenDescription" value="{{system.description}}" required />
+        {{else}}
+        <div role="textbox" class="litm--special-improvement-description-active" name="description" data-action="toggleEditDescription" data-input="description" data-path="description" aria-labelledby="description-label">{{{enrichedDescription}}}</div>
+        {{/if}}
+    </div>
+</div>

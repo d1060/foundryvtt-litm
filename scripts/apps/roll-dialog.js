@@ -994,6 +994,11 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 						if (might < 2) might = 2;
 					}
 				break;
+				case 'legend':
+					if (tag.state != 'negative') {
+						if (might < 3) might = 3;
+					}
+				break;
 			}
 		}
 
@@ -1020,6 +1025,12 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 						if (opposingMight < 2) opposingMight = 2;
 					} else {
 						if (might < 2) might = 2;
+					}
+				case 'legend':
+					if (tag.state == 'negative') {
+						if (opposingMight < 3) opposingMight = 3;
+					} else {
+						if (might < 3) might = 3;
 					}
 				break;
 			}

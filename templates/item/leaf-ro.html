@@ -17,9 +17,10 @@
     <div class="{{data.type}}">
         {{#if (eq data.level 'adventure')}}
             <i class="litm--adventure-icon"></i>
-        {{/if}}
-        {{#if (eq data.level 'greatness')}}
+        {{else if (eq data.level 'greatness')}}
             <i class="litm--greatness-icon"></i>
+        {{else if (eq data.level 'legend')}}
+            <i class="litm--legend-icon"></i>
         {{/if}}
         <label><span class="litm--sro">{{localize "Name"}}</span>
             <input type="text"

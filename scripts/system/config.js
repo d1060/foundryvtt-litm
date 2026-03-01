@@ -117,7 +117,6 @@ export class LitmConfig {
 			"devotion",
 			"mystery",
 			"people",
-			"possessions",
 			"personality",
 			"trade-or-skill",
 			"trait",
@@ -146,6 +145,14 @@ export class LitmConfig {
 			"possessions",
 		]
 	};
+
+    themebook_equivalence = {
+        "mystery" : "knowledge",
+        "hedge-magic" : "magic",
+        "thaumaturgy" : "magic",
+        "rulership" : "dominion",
+        "grand-thaumaturgy" : "magic",
+    };
 
 	theme_src = {
 		origin: "systems/foundryvtt-litm/assets/media/origin",

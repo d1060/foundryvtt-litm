@@ -5,6 +5,9 @@ export class ChallengeData extends foundry.abstract.TypeDataModel {
 			category: new fields.StringField({
 				initial: () => utils.localize("Litm.ui.name-category"),
 			}),
+			might: new fields.StringField({
+				initial: () => '',
+			}),
 			rating: new fields.NumberField({
 				required: true,
 				initial: 1,

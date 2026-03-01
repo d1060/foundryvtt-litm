@@ -35,8 +35,9 @@ export class Enrichers {
 			let isWeakness = tag.startsWith("--");
 			let isLimit = tag.startsWith("-") && !isWeakness;
 
-			let isGreatness = tag.endsWith("++");
-			let isAdventure = tag.endsWith("+") && !isGreatness;
+			let isLegend = tag.endsWith("+++");
+			let isGreatness = tag.endsWith("++") && !isLegend;
+			let isAdventure = tag.endsWith("+") && !isGreatness && !isLegend;
 
 			let markClass = 'litm--tag';
 			let imageBefore = "";
@@ -55,6 +56,11 @@ export class Enrichers {
 			}
 
 			let level = 'origin';
+			if (isLegend && !isWeakness) {
+				level = 'legend';
+				tag = tag.replace(/\+\+\+$/, "");
+				imageBefore = '<i class="litm--legend-icon"></i>';
+			}
 			if (isGreatness && !isWeakness) {
 				level = 'greatness';
 				tag = tag.replace(/\+\+$/, "");
@@ -68,26 +74,6 @@ export class Enrichers {
 
 			const enrichedTag = $(`<mark class="${markClass}" draggable="true" ${status ? `data-status="${status}" `:""}data-level="${level}" data-tooltip="${tooltip}">${imageBefore}${tag}${status ? `-${status}`:""}</mark>`)[0];
 			return enrichedTag;
-		
-			// if (tag.startsWith("--"))
-			// 	return $(
-			// 		`<mark class="litm--weaknessTag" draggable="true" data-tooltip="${tooltip}"><i class="fa fa-angle-double-down"></i>${tag.replace(/^--/, "")}${
-			// 			status ? `:${status}` : ""
-			// 		}</mark>`,
-			// 	)[0];
-			// if (tag.startsWith("-"))
-			// 	return $(	
-			// 		`<mark class="litm--limit">${tag.replace(/^-/, "")}${
-			// 			status ? `:${status}` : ""
-			// 		}</mark>`,
-			// 	)[0];
-			// if (tag && status)
-			// 	return $(
-			// 		`<mark class="litm--status" draggable="true" data-tooltip="${tooltip}">${tag}-${status}</mark>`,
-			// 	)[0];
-			// return $(
-			// 	`<mark class="litm--tag" draggable="true" data-tooltip="${tooltip}">${tag}</mark>`,
-			// )[0];
 		};
 		CONFIG.TextEditor.enrichers.push({
 			pattern: CONFIG.litm.tagStringRe,

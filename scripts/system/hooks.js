@@ -460,6 +460,9 @@ export class LitmHooks {
 				case "backpack":
 					img += "backpack.svg";
 					break;
+				case "specialImprovement":
+					img = "systems/foundryvtt-litm/assets/media/origin.webp";
+					break;
 				default:
 					img = "icons/svg/item-bag.svg";
 			}
@@ -508,8 +511,21 @@ export class LitmHooks {
 				const text = event.target.textContent;
 				const matches = `{${text}}`.matchAll(CONFIG.litm.tagStringRe);
 				const match = [...matches][0];
-				const level = event.target.dataset.level;
+				let level = event.target.dataset.level;
 				const statusLevel = event.target.dataset.status;
+
+ 				const form = event.target.closest("form");
+				const mightImg = form?.querySelector("img.litm--challenge-might-icon");
+				if (mightImg && level == 'origin') {
+					if (mightImg?.src.includes("origin.svg")) {
+					} else if (mightImg?.src.includes("adventure.svg")) {
+						level = 'adventure';
+					} else if (mightImg?.src.includes("greatness.svg")) {
+						level = 'greatness';
+					} else if (mightImg?.src.includes("legend.svg")) {
+						level = 'legend';
+					}
+				} 
 				if (!match) return;
 				const [, tag, status] = match;
 				const data = {

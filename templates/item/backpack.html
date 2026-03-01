@@ -8,7 +8,7 @@
 		<input class="title" name="name" value="{{name}}" />
 		<ul class="taglist">
 			{{#each backpack as |tag|}}
-				{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path="system.contents" readonly=false remove=true}}
+				{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path="system.contents" readonly=false remove=true draggable=true}}
 			{{/each}}
 		</ul>
 		<button type="button" data-click="add-tag">{{localize "Litm.ui.add-tag"}}</button>

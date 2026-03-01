@@ -103,27 +103,37 @@ export default class Randomizer {
     static randomizeImage(gender) {
         const defaultPortraits = {
             male: [
+                'angler.webp',
                 'apple-picker-b.webp',
+                'crestfallen-rider.png',
+                'gerrin.webp',
+                'gerrin-b.webp',
+                'higgins-two-shells.webp',
+                'lumberjack.webp',
+                'mistlor.webp',
+                'old-lamplighter.webp',
                 'red-marshal-a.webp',
                 'red-marshal-c.webp',
+                'silent-wanderer.webp',
+                'suspicious-farmer.webp',
+                'swordsman.webp',
                 'wise-one-c.webp',
                 'wise-one-d.webp',
-                'gerrin.webp',
-                'swordsman.webp',
-                'suspicious-farmer.webp',
-                'crestfallen-rider.png',
             ],
             female: [
                 'apple-picker-a.webp',
                 'apple-picker-c.webp',
+                'gaelle.webp',
+                'hardy-lady.webp',
+                'mistle-of-salthill.webp',
+                'pastoral-priest-or-priestess-mask.webp',
                 'red-marshal-b.webp',
                 'red-marshal-d.webp',
                 'sorrowbalm-mask.webp',
                 'willow-mask.webp',
                 'wise-one-a.webp',
                 'wise-one-b.webp',
-                'hardy-lady.webp',
-                'pastoral-priest-or-priestess-mask.webp',
+                'woman-with-a-cup.webp',
             ]
         };
 

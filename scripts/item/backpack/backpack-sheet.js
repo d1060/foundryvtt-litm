@@ -1,10 +1,15 @@
 import V2 from "../../v2sheets.js";
+import { CharacterSheet } from "../../actor/character/character-sheet.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ItemSheetV2 } = foundry.applications.sheets
+
 export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
+	#dragDrop
+
 	constructor(options) {
 		super(options);
+		this.#dragDrop = this.#createDragDropHandlers();
 	}
 
 	/** @inheritdoc */
@@ -29,7 +34,8 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		actions: {
 			activateTag: this.#onActivateTag,
 			burnTag: this.#onBurnTag,
-		}
+		},
+		dragDrop: [{dragSelector: "[draggable]", dropSelector: "li"}],
   	}
 
 	/** @inheritdoc */
@@ -49,10 +55,156 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		};
 	}
 
+	#createDragDropHandlers() {
+		return this.options.dragDrop.map((d) => {
+			d.permissions = {
+				dragstart: this._canDragStart.bind(this),
+				drop: this._canDragDrop.bind(this)
+			};
+			d.callbacks = {
+				dragstart: this._onDragStart.bind(this),
+				drop: this._onDrop.bind(this)
+			};
+			return new foundry.applications.ux.DragDrop(d);
+		})
+	}
+
+	_canDragDrop() {
+		return true;
+	}
+
+	/** @inheritdoc */
+	_canDragStart() {
+		return true;
+	}
+
+	/** @override */
+	async _onDragStart(event) {
+		const li = event.currentTarget;
+		if (!li) return;
+		const id = li.dataset.id;
+		const item = this.system.parent.system.contents.find(i => i.id == id);
+		const index = this.system.parent.system.contents.findIndex(i => i.id == id);
+
+		const payload = {
+			type: item.type,
+			actorId: this.actor.id,
+			id,
+			index,
+			name: item.name,
+			isActive: item.isActive,
+			isBurnt: item.isBurnt,
+			toBurn: item.toBurn,
+		};
+
+		event.dataTransfer.setData("text/plain", JSON.stringify(payload));
+		event.dataTransfer.setData("application/json", JSON.stringify(payload));		
+	}
+
+	async _onDrop(dragEvent) {
+		const dragData = dragEvent.dataTransfer.getData("text/plain");
+		const data = JSON.parse(dragData);
+
+		// Handle only Actors to begin with
+		if (!["backpack"].includes(data.type)) return;
+
+		const targetId = dragEvent.currentTarget.dataset.id;
+		const contents = structuredClone(this.system.parent.system.contents);
+		const targetIndex = contents.findIndex(i => i.id == targetId);
+
+		if (data.index == targetIndex) return;
+
+		let newIndex = targetIndex;
+
+		if (data.index < targetIndex)
+			newIndex = targetIndex + 1;
+
+		const item = contents.splice(data.index, 1)[0];
+		if (newIndex > data.index) newIndex--;
+		contents.splice(newIndex, 0, item);
+
+		await this.system.parent.update({"system.contents": contents});
+	}
+
+	async _onFirstRender(context, options) {
+		this._createContextMenu(this._getItemContextOptions, "li", {
+			hookName: "LitmBackpackItemContextMenu",
+      		fixed: true,
+    	});
+		super._onFirstRender(context, options);
+	}
+
+	_getItemContextOptions(target) {
+		const canTransfer = function(element, actor) {
+			return game.users.some(u => u.isGM && u.active);
+		};
+
+		const canRemove = function(element, actor) {
+			return true;
+		};
+
+		const options = [
+			{
+				name: game.i18n.localize("Litm.ui.transfer"),
+				icon: '<i class="fas fa-exchange-alt"></i>',
+				condition: element => canTransfer(element, this.actor),
+				callback: (html) => {
+					this._transferItem(html);
+				},
+			},
+			{
+				name: game.i18n.localize("Litm.ui.remove"),
+				icon: "<i class='fas fa-trash'></i>",
+				condition: element => canRemove(element, this.actor),
+				callback: (html) => {
+					this._removeItem(html);
+				},
+			},
+		];
+
+		return options;
+	}
+
+	async _transferItem(domItem) {
+		const item = this.system.parent.system.contents.find(i => i.id == domItem.dataset.id);
+
+		const targetActor = await utils.actorChoiceDialog({
+			template: 'systems/foundryvtt-litm/templates/item/transfer-item.html',
+			title: 'Litm.ui.transfer-item-title',
+			exclude: this.actor.id,
+			item
+		});
+
+		if (targetActor) {
+			const to = targetActor;
+			this.transferItem(item, to);
+		}
+	}
+
+	async transferItem(item, to) {
+		if (game.user.isGM) {
+			CharacterSheet.addBackpackItem(item, to.id, this.actor.id);
+		} else {
+			game.socket.emit("system.foundryvtt-litm", {
+				app: "character-sheet",
+				event: "transferItem",
+				senderId: game.user.id,
+				senderActorId: this.actor.id,
+				actorId: to.id,
+				item
+			});
+		}
+	}
+	
+	async _removeItem(item) {
+		this._removeTag(item);
+	}
+
 	async _onRender(force, options) {
 		await super._onRender(force, options);
 		await V2.updateHeader(this);
 		await this.activateListeners(this.element);
+		this.#dragDrop.forEach((d) => d.bind(this.element));
 	}
 
 	activateListeners(html) {
@@ -60,13 +212,9 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 		html.querySelectorAll("[data-click]")
 			.forEach(el => el.addEventListener("click", this._onClick.bind(this)));
-
-		html.querySelectorAll("[data-context]")
-			.forEach(el => el.addEventListener("contextmenu", this._onContext.bind(this)));
 	}
 
 	static async #onSubmit(event, form, formData) {
-		//event.preventDefault();
 		const name = event.target.name;
 		if (name.startsWith('system.contents')) {
 			const contents = structuredClone(this.system.contents);;
@@ -141,10 +289,11 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	async _removeTag(button) {
 		if (!(await utils.confirmDelete("Litm.other.tag"))) return;
 
-		const index = button.dataset.id;
 		const contents = this.system.contents;
-		contents.splice(index, 1);
+		const index = contents.findIndex(i => i.id == button.dataset.id);
+		if (index < 0) return;
 
+		contents.splice(index, 1);
 		return this.item.update({ "system.contents": contents });
 	}
 

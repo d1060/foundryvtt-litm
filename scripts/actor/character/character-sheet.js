@@ -57,6 +57,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			showAdvancementHint: this.#showAdvancementHint,
 			editImprovement: this.#onEditImprovement,
 		},
+		//dragDrop: [{dropSelector: "form"}],
   	}
 
 	/** @inheritdoc */
@@ -88,14 +89,36 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		return [...this.system.storyTags, ...this.system.statuses];
 	}
 
+	get showFellowship() {
+		const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+		if (prefs.sheetViewTags == null || !prefs.sheetViewTags)
+			prefs.sheetViewTags = {};
+
+		if (prefs.sheetViewTags[this.document.id] == null)
+			prefs.sheetViewTags[this.document.id] = {};
+
+		return prefs.sheetViewTags[this.document.id].showFellowship == true;
+	}
+
+	set showFellowship(show) {
+		const prefs = game.settings.get("foundryvtt-litm", "user_prefs");
+		if (prefs.sheetViewTags == null || !prefs.sheetViewTags)
+			prefs.sheetViewTags = {};
+
+		if (prefs.sheetViewTags[this.document.id] == null)
+			prefs.sheetViewTags[this.document.id] = {};
+
+		prefs.sheetViewTags[this.document.id].showFellowship = show;
+        game.settings.set("foundryvtt-litm", "user_prefs", prefs);
+	}
+
 	_getHeaderControls() {
     	const controls = super._getHeaderControls();
 		controls.unshift({
 			label: 'Litm.ui.fellowship-toggle',
 			icon: "fas fa-user-friends",
 			onClick: (html) => {
-				const showFellowshipTheme = !this.actor.system.showFellowshipTheme;
-				this.actor.update({"system.showFellowshipTheme": showFellowshipTheme });
+				this.showFellowship = !this.showFellowship;
 				this.render();
 			},
 		});
@@ -281,8 +304,8 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			name: this.items.find((i) => i.type === "backpack")?.name,
 			id: this.items.find((i) => i.type === "backpack")?._id,
 			contents: this.system.backpack
-				.sort((a, b) => a.name.localeCompare(b.name))
-				.sort((a, b) => (a.isActive && b.isActive ? 0 : a.isActive ? -1 : 1)),
+				//.sort((a, b) => a.name.localeCompare(b.name))
+				//.sort((a, b) => (a.isActive && b.isActive ? 0 : a.isActive ? -1 : 1)),
 		};
 
 		const showBackpackContextMenu = (this.actor.items.find(i => i.type == 'backpack') == null) || (themes?.length < 4);
@@ -305,18 +328,13 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			tagsHovered: this.#tagsHovered,
 			themeHovered: this.#themeHovered,
 			weaknessTagDefaultName: game.i18n.localize("Litm.ui.name-weakness"),
-			showFellowshipTheme: this.actor.system.showFellowshipTheme,
+			showFellowshipTheme: this.showFellowship,
 			fellowship: await this._getFellowship(),
 			showBackpackContextMenu,
 		};
 	}
 
 	async _onFirstRender(context, options) {
-		// this._createContextMenu(this._getMainContextOptions, ".nav-main", {
-		// 	hookName: "LitmMainContextMenu",
-		// 	jQuery: false,
-      	// 	fixed: true,
-    	// });
 		this._createContextMenu(this._showImage, "[data-edit='img']", {
       		hookName: "_showImage",
       		parentClassHooks: false,
@@ -332,52 +350,6 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     	});
 		super._onFirstRender(context, options);
 	}
-
-	// _getMainContextOptions(target) {
-	// 	const isFellowshipOpen = function(element, actor) {
-	// 		return !!actor.system.showFellowshipTheme;
-	// 	}
-	// 	const options = [
-	// 		{
-	// 			name: game.i18n.localize("Litm.ui.roll-title"),
-	// 			icon: '<i class="fas fa-dice"></i>',
-	// 			callback: (html) => {
-	// 				this.renderRollDialog();					
-	// 			},
-	// 		},
-	// 		{
-	// 			name: game.i18n.localize("Notes"),
-	// 			icon: '<i class="fas fa-book"></i>',
-	// 			callback: (html) => {
-	// 				this.element.querySelector("#note").style.display = "block";
-	// 				this._notesEditorStyle = "display: block;";
-	// 			},
-	// 		},
-	// 		{
-	// 			name: game.i18n.localize('Litm.ui.fellowship-hide-tooltip'),
-	// 			icon: "<i class='fas fa-user-friends'></i>",
-	// 			condition: element => isFellowshipOpen(element, this.actor),
-	// 			callback: (html) => {
-	// 				const actor = this.options.document;
-	// 				const showFellowshipTheme = !actor.system.showFellowshipTheme;
-	// 				actor.update({"system.showFellowshipTheme": showFellowshipTheme });
-	// 				this.render();
-	// 			},
-	// 		},
-	// 		{
-	// 			name: game.i18n.localize('Litm.ui.fellowship-tooltip'),
-	// 			icon: "<i class='fas fa-user-friends'></i>",
-	// 			condition: element => !isFellowshipOpen(element, this.actor),
-	// 			callback: (html) => {
-	// 				const actor = this.options.document;
-	// 				const showFellowshipTheme = !actor.system.showFellowshipTheme;
-	// 				actor.update({"system.showFellowshipTheme": showFellowshipTheme });
-	// 				this.render();
-	// 			},
-	// 		},
-	// 	];
-	// 	return options;
-	// }
 
 	_getItemContextOptions(target) {
 		const canShow = function(element, actor) {
@@ -708,7 +680,12 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const data = JSON.parse(dragData);
 
 		// Handle dropping tags and statuses
-		if (!["tag", "storyTag", "status", "randomName"].includes(data.type)) return super._onDrop(dragEvent);
+		if (!["tag", "storyTag", "status", "randomName", "backpack"].includes(data.type)) return super._onDrop(dragEvent);
+
+		if (data.type == "backpack") {
+			const originalActorId = data["actorId"];
+			CharacterSheet.addBackpackItem(data, this.actor.id, originalActorId);
+		}
 
 		if (data.type == "storyTag") {
 			data.type = "tag";
@@ -883,8 +860,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				event.preventDefault();
 				event.stopPropagation();
 				const actor = this.options.document;
-				const showFellowshipTheme = !actor.system.showFellowshipTheme;
-				actor.update({"system.showFellowshipTheme": showFellowshipTheme });
+				this.showFellowship = !this.showFellowship;
 				this.render();
 				break;
 		}
@@ -1132,8 +1108,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 	static async #doShowFellowship(event) {
 		const actor = this.options.document;
-		const showFellowshipTheme = !actor.system.showFellowshipTheme;
-		await actor.update({"system.showFellowshipTheme": showFellowshipTheme });
+		this.showFellowship = !this.showFellowship;
 		this.render();
 	}
 
@@ -1294,7 +1269,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				items: loot.map((i) => i.name).join(", "),
 			}),
 		);
-		backpack.sheet.render(true);
+		//backpack.sheet.render(true);
 	}
 
 	async #handleUpdateEmbeddedItems(formData) {
@@ -1562,5 +1537,47 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			ro.disconnect();
 			mo.disconnect();
 		};
+	}
+
+	static async addBackpackItem(data, actorId, senderId) {
+		const originalId = data.id;
+
+		delete data["actorId"];
+		delete data["index"];
+		const item = structuredClone(data);
+		item.id = foundry.utils.randomID();
+
+		const actor = game.actors.get(actorId);
+		const backpack = actor.items.find((i) => i.type === "backpack");
+
+		if (!backpack) {
+			error("Litm.ui.error-no-backpack");
+			throw new Error("Litm.ui.error-no-backpack");
+		}
+
+		// Add the loot to the backpack
+		await backpack.update({
+			"system.contents": [...actor.system.backpack, ...[item]],
+		});
+
+		ui.notifications.info(
+			game.i18n.format("Litm.ui.item-transfer-success", {
+				items: [item].map((i) => i.name).join(", "),
+			}),
+		);
+		//backpack.sheet.render(true);
+
+		if (game.user.isGM) {
+			const originalActor = game.actors.get(senderId);
+			if (originalActor) {
+				const originalBackpack = originalActor.items.find((i) => i.type === "backpack");
+				if (originalBackpack) {
+					// Remove the loot from the item
+					await originalBackpack.update({
+						"system.contents": originalBackpack.system.contents.filter((i) => i.id != originalId),
+					});
+				}
+			}
+		}
 	}
 }

@@ -11,7 +11,7 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 			.filter(t => t.improvementId)
 			.map(t => t.improvementId));
 
-		this.rawImprovements = [];
+		this.improvements = [];
   		this.closestRawTheme = null;
 		this.firstPass = true;
 	}
@@ -49,10 +49,9 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
     /** @override */
     async _prepareContext(options) {
 
-		if (this.rawImprovements.length == 0)
-			this.rawImprovements = await this.getImprovements();
+		this.improvements = await this.getImprovements();
 		if (this.firstPass) {
-			this.closestRawTheme = this.getClosestRawTheme();
+			this.closestRawTheme = await this.getClosestTheme();
 			this.firstPass = false;
 		}
 
@@ -61,8 +60,8 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
             value: this.value,
         };
 
-		if (this.rawImprovements?.length)
-			context.improvements = [...this.rawImprovements];
+		if (this.improvements?.length)
+			context.improvements = [...this.improvements];
 		else
 			context.improvements = [];
 
@@ -85,7 +84,7 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 			this.closestRawTheme = null;
 		}
 		else
-			V2._restoreScrollPositions(this);
+			utils.restoreScrollPositions(this);
     }
 
     activateListeners(html) {
@@ -103,34 +102,58 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
         }
 	}
 
+	async allImprovements(theme) {
+		const compendiumSpecialImprovements = game.items.filter(i => i.type === 'specialImprovement');
+		for (const pack of game.packs) {
+			if (pack.metadata.type !== 'Item') continue;
+			const indexes = await pack.getIndex();
+			const ids = indexes
+				.filter(e => e.type === "specialImprovement")
+				.map(e => e._id);
+			if (!ids.length) continue;
+			let docs = await pack.getDocuments({ _id__in: ids });
+			if (theme != null) {
+				docs = docs.filter(d => d.system.themebook === theme);
+			}
+			compendiumSpecialImprovements.push(...docs);
+		}
+		return compendiumSpecialImprovements;
+	}
+
 	async getImprovements() {
 		const improvements = [];
+
+		const compendiumSpecialImprovements = await this.allImprovements();
+
+		const themeImprovements = structuredClone(this.theme.system.specialImprovements);
+		this.selectedImprovements = themeImprovements
+			.filter(t => t.improvementId)
+			.map(t => t.improvementId);
+
 		const levels = Object.keys(CONFIG.litm.theme_levels);
 		for (const level of levels) {
 			const themes = CONFIG.litm.theme_levels[level];
 			for (const theme of themes) {
-				let themeImprovements = this.raw_improvements[theme];
-				if (!themeImprovements) continue;
-
 				let themeImage = `/systems/foundryvtt-litm/assets/media/${level}.webp`;
 				if (level == 'variable')
 					themeImage = `/systems/foundryvtt-litm/assets/media/variable-might.webp`;
-				improvements.push({level, theme, themeImage, themeNameId: theme, themeName: game.i18n.localize(`Litm.themes.${theme}`)});
 
 				let i = 0;
-				for (const improvement of themeImprovements) {
-					const title = game.i18n.localize(`Litm.improvements.${improvement}-title`);
-					const description = game.i18n.localize(`Litm.improvements.${improvement}-description`);
+				const compendiumImprovements = compendiumSpecialImprovements.filter(im => im.system?.themebook === theme);
+				if (!compendiumImprovements.length) continue;
 
+				improvements.push({level, theme, themeImage, themeNameId: theme, themeName: game.i18n.localize(`Litm.themes.${theme}`)});
+				for (const compendiumImprovement of compendiumImprovements) {
 					improvements.push({
 						level,
 						theme,
-						improvement,
-						selected: this.selectedImprovements.some(i => i == improvement),
+						improvement: compendiumImprovement,
+						id: compendiumImprovement.id,
+						selected: this.selectedImprovements.some(i => i == compendiumImprovement.id),
 						canSelect: this.selectedImprovements.length < 5,
-						title,
-						description,
-						renderedDescription: await foundry.applications.ux.TextEditor.implementation.enrichHTML(description),
+						title: compendiumImprovement.name,
+						description: compendiumImprovement.system.description,
+						renderedDescription: await foundry.applications.ux.TextEditor.implementation.enrichHTML(compendiumImprovement.system.description),
 						lineStyle: i % 2 == 1 ? "odd" : "even",
 					});
 					i++;
@@ -142,8 +165,8 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 	}
 
 	static async #selectImprovement(event) {
-		const improvementId = event.target.dataset.improvement;
-		const rawImprovement = this.rawImprovements.find(i => i.improvement == improvementId);
+		const improvementId = event.target.dataset.id;
+		const rawImprovement = this.improvements.find(i => i.id == improvementId);
 		if (!rawImprovement) return;
 
 		const emptyImprovementId = this.firstEmptyImprovement();
@@ -167,16 +190,16 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 		this.selectedImprovements = themeImprovements
 			.filter(t => t.improvementId)
 			.map(t => t.improvementId);
-		this.rawImprovements = await this.getImprovements();
+		this.improvements = await this.getImprovements();
 
 		this.actor?._sheet.render();
-		V2._storeScrollPositions(this);
+		utils.storeScrollPositions(this);
 		this.render();
 	}
 
 	static async #deselectImprovement(event) {
-		const improvementId = event.target.dataset.improvement;
-		const rawImprovement = this.rawImprovements.find(i => i.improvement == improvementId);
+		const improvementId = event.target.dataset.id;
+		const rawImprovement = this.improvements.find(i => i.id == improvementId);
 		if (!rawImprovement) return;
 
 		const themeImprovements = structuredClone(this.theme.system.specialImprovements);
@@ -198,10 +221,10 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 		this.selectedImprovements = themeImprovements
 			.filter(t => t.improvementId)
 			.map(t => t.improvementId);
-		this.rawImprovements = await this.getImprovements();
+		this.improvements = await this.getImprovements();
 
 		this.actor?._sheet.render();
-		V2._storeScrollPositions(this);
+		utils.storeScrollPositions(this);
 		this.render();
 	}
 
@@ -213,7 +236,7 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 		return null;
 	}
 
-	getClosestRawTheme() {
+	async getClosestTheme() {
 		let closestThemeId = null;
 		const levels = Object.keys(CONFIG.litm.theme_levels);
 
@@ -222,12 +245,11 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 			for (const level of levels) {
 				const themes = CONFIG.litm.theme_levels[level];
 				for (const theme of themes) {
-					let themeImprovements = this.raw_improvements[theme];
+					let themeImprovements = await this.allImprovements(theme);
 					if (!themeImprovements) continue;
 
-					let i = 0;
 					for (const improvement of themeImprovements) {
-						if (this.selectedImprovements.some(i => i == improvement)) {
+						if (this.selectedImprovements.some(i => i == improvement.id)) {
 							closestThemeId = theme;
 							return closestThemeId;
 						}
@@ -252,152 +274,7 @@ export default class SpecialImprovements extends HandlebarsApplicationMixin(Appl
 		return closestThemeId;
 	}
 
-
-
-	raw_improvements = {
-        "circumstance" : [
-            "comfort-zone",
-            "expected-role",
-            "familiar-matters",
-            "strength-from-adversity",
-            "trudging-along"
-        ],
-        "devotion" : [
-            "bodyguard",
-            "catch-me-when-i-fall",
-            "deeply-committed",
-            "goes-both-ways",
-            "unwavering"
-        ],
-        "past" : [
-            "face-from-the-past",
-            "lessons-learned",
-            "not-letting-go",
-            "put-it-behind-me",
-            "vivid-memory",
-        ],
-        "people" : [
-			"shared-language",
-			"stand-out",
-			"true-to-my-tribe",
-			"trust-in-legacy",
-            "wisdom-handed-down",
-        ],
-        "personality" : [
-			"adaptable-persona",
-			"big-personality",
-			"infectious-personality",
-			"lasting-impression",
-			"unshakeable",
-        ],
-        "trade-or-skill" : [
-			"deft-remedy",
-			"learn-from-my-mistakes",
-			"practice-makes-perfect",
-			"rehearsed-technique",
-			"resourceful",
-        ],
-        "trait" : [
-			"innate-sense",
-			"made-for-this",
-			"moment-to-shine",
-			"pull-through",
-			"wild-blood",
-        ],
-        "duty" : [
-			"dutiful-anticipation",
-			"grim-determination",
-			"painful-lessons",
-			"driven-by-shame",
-			"unstoppable",
-        ],
-        "influence" : [
-			"follow-me",
-			"friends-everywhere",
-			"long-reach",
-			"overextend",
-			"read-between-the-lines",
-        ],
-        "knowledge" : [
-			"a-known-expert",
-			"always-thinking",
-			"applied-expertise",
-			"inventive-stroke",
-			"flashes-of-insight",
-        ],
-        "prodigious-skill" : [
-			"improved-counter",
-			"create-an-opening",
-			"discerning-eye",
-			"masterpiece",
-			"practiced-maneuver",
-        ],
-        "relic" : [
-			"eternal-bond",
-			"momentary-bearer",
-			"reckless-discharge",
-			"sentinel",
-			"signature-move",
-        ],
-        "uncanny-being" : [
-			"expressive-form",
-			"repel-witchery",
-			"self-discovery",
-			"shifting-form",
-			"strive-to-belong",
-        ],
-        "destiny" : [
-			"as-foretold",
-			"meet-it-head-on",
-			"not-how-it-ends",
-			"reincarnation",
-			"pull-of-destiny",
-        ],
-        "dominion" : [
-			"embodiment-of-the-realm",
-			"good-help-is-hard-to-find",
-			"my-word-is-absolute",
-			"regalia",
-			"untarnished-glory",
-        ],
-        "mastery" : [
-			"always-prepared",
-			"calculated-sacrifice",
-			"foresee-the-outcome",
-			"lifelong-insight",
-			"second-wind",
-        ],
-        "monstrosity" : [
-			"display-of-force",
-			"fine-control",
-			"invulnerability",
-			"magical-trace",
-			"surge-of-power",
-        ],
-        "companion" : [
-			"everyones-best-friend",
-			"here-for-you",
-			"perfect-positioning",
-			"reliable-ally",
-			"retaliation",
-        ],
-        "magic" : [
-			"scholar-of-magic",
-			"ward-breaker",
-			"rote-technique",
-			"reputation-precedes",
-			"inspired-ingenuity",
-        ],
-        "possessions" : [
-			"durable",
-			"favorite-piece",
-			"im-keeping-this",
-			"just-the-thing",
-			"quartermaster",
-        ],
-    };
-
-    raw_improvement_equivalence = {
+    improvement_equivalence = {
         "mystery" : "knowledge",
         "hedge-magic" : "magic",
         "thaumaturgy" : "magic",

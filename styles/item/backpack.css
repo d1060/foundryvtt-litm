@@ -182,3 +182,47 @@
 		pointer-events: all;
 	}
 }
+
+.app.litm.litm--item-transfer {
+	background: url(../../assets/media/background.webp) 0% 0% / cover;
+
+	& .window-header {
+		background: none;
+		position: absolute;
+		width: calc(100% - 5px);
+	}
+
+	& h3 {
+		border-bottom: none;
+		padding-right: 20px;
+	}
+
+	& img {
+		height: 64px;
+		padding-right: 4px;
+		padding-left: 4px;
+	}
+
+	& .actor-selector {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+
+		& .actor input[type=radio] {
+			display: none;
+		}
+
+		& .actor label {
+			display: inline-flex;
+			align-items: center;
+			cursor: pointer;
+		}
+
+		& .actor input[type=radio]:checked + label img {
+			border: 3px solid #78557e;
+		}
+
+		& .actor label:hover {
+			background: rgba(0, 0, 0, 0.0392156863);
+		}
+	}
+}

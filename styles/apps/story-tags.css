@@ -69,7 +69,7 @@ form.litm.litm--story-tags {
 	& .litm--story-tags-container {
 		height: 100%;
     	display: grid;
-		grid-template-rows: 1fr 20px auto;
+		grid-template-rows: auto 20px auto;
 	}
 
 	& .litm--story-tags-container > hr {

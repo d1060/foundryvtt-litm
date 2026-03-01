@@ -73,6 +73,7 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		data.system.special = await foundry.applications.ux.TextEditor.implementation.enrichHTML(data.system.special);
 		data.system.note = await foundry.applications.ux.TextEditor.implementation.enrichHTML(data.system.note);
 		data.system.renderedTags = await foundry.applications.ux.TextEditor.implementation.enrichHTML(data.system.tags);
+		data.system.might = this.options.document.system.might;
 		data.items = await Promise.all(this.items.map((i) => i.sheet._prepareContext()));
 		data.img = this.options.document.img;
 		data.name = this.options.document.name;
@@ -209,7 +210,10 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 	
 	static async #onIncrease(event, target) {
 		const button = event.target.closest(".litm--challenge-rating");
-		this._increase(button);
+		if (event.ctrlKey)
+			this._increaseMight(button);
+		else
+			this._increase(button);
 	}
 
 	static async #onToggleEdit(event, target) {
@@ -292,7 +296,10 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				this._removeThreat(button);
 				break;
 			case "decrease":
-				this._decrease(button);
+				if (event.ctrlKey)
+					this._decreaseMight(button);
+				else
+					this._decrease(button);
 				break;
 		}
 	}
@@ -342,6 +349,50 @@ export class ChallengeSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const value = foundry.utils.getProperty(this.actor, attrib);
 
 		return this.actor.update({ [attrib]: Math.max(value - 1, 1) });
+	}
+
+	async _increaseMight(target) {
+		const might = this.actor.system.might;
+		let newMight = might;
+		if (!might)
+			newMight = 'origin';
+
+		switch (might) {
+			case null:
+			case '':
+				newMight = 'origin';
+				break;
+			case 'origin':
+				newMight = 'adventure';
+				break;
+			case 'adventure':
+				newMight = 'greatness';
+				break;
+			case 'greatness':
+				newMight = 'legend';
+				break;
+		}
+		return this.actor.update({ ['system.might']: newMight });
+	}
+
+	async _decreaseMight(target) {
+		const might = this.actor.system.might;
+		let newMight;
+		switch (might) {
+			case 'origin':
+				newMight = null;
+				break;
+			case 'adventure':
+				newMight = 'origin';
+				break;
+			case 'greatness':
+				newMight = 'adventure';
+				break;
+			case 'legend':
+				newMight = 'greatness';
+				break;
+		}
+		return this.actor.update({ ['system.might']: newMight });
 	}
 
 	_openItemSheet(button) {
