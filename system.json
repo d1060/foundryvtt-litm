@@ -51,6 +51,11 @@
 				"htmlFields": [
 					"note"
 				]
+			},
+			"storyTheme": {
+				"htmlFields": [
+					"note"
+				]
 			}
 		}
 	},

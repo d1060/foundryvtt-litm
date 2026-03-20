@@ -116,6 +116,8 @@ export default class V2 {
 
             prefs.sheetViewTags[app.options.document._id].scale = currentScale;
             game.settings.set("foundryvtt-litm", "user_prefs", prefs);
+
+            app._onScale?.(currentScale);
         };
 
         // Capture the pointer so moves/ups keep firing on *this button*

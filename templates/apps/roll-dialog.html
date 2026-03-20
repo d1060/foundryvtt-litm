@@ -53,7 +53,7 @@
 				{{#unless storyTheme.isBurnt}}
 					{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=storyTheme.title}}
 				{{/unless}}
-				{{#each storyTheme.tags as |tag|}}
+				{{#each storyTheme.system.tags as |tag|}}
 					{{#unless tag.isBurnt}}
 						{{> systems/foundryvtt-litm/templates/partials/roll-tag.html tag=tag}}
 					{{/unless}}

@@ -1,4 +1,4 @@
-import StoryTheme from "./story-theme.js";
+import { StoryTheme } from "./story-theme.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api
 export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -7,6 +7,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	constructor(options) {
 		super();
 		this.#dragDrop = this.#createDragDropHandlers();
+		this.sanitizeStoryThemes();
 		this.storyThemeSheets = [];
 	}
 
@@ -78,6 +79,12 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		{
 			prefs.storyTags = true;
 			game.settings.set("foundryvtt-litm", "user_prefs", prefs);
+		}
+
+		for (const renderedStoryTheme of foundry.applications.instances.values().filter(i => i instanceof StoryTheme)) {
+			if (!renderedStoryTheme.parent && renderedStoryTheme.rendered && this.storyThemeSheets.find(sts => sts.id == renderedStoryTheme.document.id)) {
+				renderedStoryTheme.close();
+			}
 		}
 
 		super._onFirstRender(context, options);
@@ -311,6 +318,8 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	/** @override */
 	async _prepareContext(options)
 	{
+		this.sanitizeStoryThemes();
+
 		const actors = this.actors
 				.filter(a => game.user.isGM || a.isOwner)
 				.sort((a, b) => a.name.localeCompare(b.name))
@@ -438,7 +447,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		const data = JSON.parse(dragData);
 
 		// Handle only Actors to begin with
-		if (!["Actor", "tag", "status"].includes(data.type)) return;
+		if (!["Actor", "Item", "tag", "status"].includes(data.type)) return;
 		const id = data.uuid?.split(".").pop() || data.id;
 
 		// Add tags and statuses to the story / Actor
@@ -453,6 +462,25 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
 			if (game.user.isGM) return this.setTags([...this.tags, data]);
 			return this._broadcastUpdate("tags", [...this.tags, data]);
+		}
+		else if (data.type === "Item")
+		{
+			const storyTheme = game.items.find(i => i.id == id && i.type == "storyTheme");
+			if (storyTheme) {
+				let storyThemes = structuredClone(this.config.storyThemes);
+				if (!storyThemes) storyThemes = [];
+				if (!storyThemes.some(st => st._id == storyTheme.id))
+					storyThemes.push(storyTheme);
+
+				const style = getComputedStyle(this.element);
+				const newIndex = this.storyThemeSheets.length;
+				const zIndex = parseInt(style.zIndex) - storyThemes.length + newIndex;
+				const storyThemeSheet = new StoryTheme({document: storyTheme, id: storyTheme.id, index: newIndex, left: this.position.left, top: this.position.top, app: this, zIndex, name: storyTheme.name, theme: storyTheme});
+				this.storyThemeSheets.push(storyThemeSheet);
+				await storyThemeSheet.render(true);
+				this.setStoryThemes(storyThemes);
+				return;
+			}
 		}
 
 		if (this.config.actors.includes(id)) return;
@@ -690,13 +718,14 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		if (!tag) return;
 		const tags = this.config.tags.filter((t) => t.id != tagId);
 
-		const storyTheme = {
+		const items = await Item.implementation.create([{
 			name: tag.name,
 			type: "storyTheme",
 			tags: [],
 			isBurnt: false,
 			id: foundry.utils.randomID(),
-		};
+		}]);
+		const storyTheme = items[0];
 		let storyThemes = structuredClone(this.config.storyThemes);
 		if (!storyThemes) storyThemes = [];
 		storyThemes.push(storyTheme);
@@ -704,7 +733,7 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		const style = getComputedStyle(this.element);
 		const newIndex = this.storyThemeSheets.length;
 		const zIndex = parseInt(style.zIndex) - storyThemes.length + newIndex;
-		const storyThemeSheet = new StoryTheme({id: storyTheme.id, index: newIndex, left: this.position.left, top: this.position.top, app: this, zIndex, name: tag.name, theme: storyTheme});
+		const storyThemeSheet = new StoryTheme({document: storyTheme, id: storyTheme.id, index: newIndex, left: this.position.left, top: this.position.top, app: this, zIndex, name: tag.name, theme: storyTheme});
 		this.storyThemeSheets.push(storyThemeSheet);
 		await storyThemeSheet.render(true);
 
@@ -718,7 +747,9 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	async removeStoryTheme(id) {
 		let storyThemes = structuredClone(this.config.storyThemes);
 		if (!storyThemes) return;
-		storyThemes = storyThemes.filter(st => st.id != id);
+		const storyThemeSheet = this.storyThemeSheets.find(sts => sts.id == id);
+		storyThemeSheet?.close();
+		storyThemes = storyThemes.filter(st => st._id != id);
 		await this.setStoryThemes(storyThemes);
 		const idx = this.storyThemeSheets.findIndex(sts => sts.themeId == id);
 		this.storyThemeSheets.splice(idx, 1);
@@ -726,12 +757,6 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 	}
 
 	async _onRemoveTag(target) {
-		//event.preventDefault();
-		//event.stopPropagation();
-		//event.target.blur();
-
-		//const id = event.target.dataset.id;
-		//const type = event.target.dataset.type;
 		const id = target.dataset.id;
 		const type = target.dataset.type;
 		const value = target.dataset.value;
@@ -889,23 +914,27 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		const left = rect.left;
 		const top = rect.top;
 
-		if (this.storyThemeSheets.length > storyThemes.length) {
-			this.storyThemeSheets.length = storyThemes.length;
-		} else if (this.storyThemeSheets.length < storyThemes.length) {
-			this.storyThemeSheets.push(...Array(storyThemes.length - this.storyThemeSheets.length).fill(null));
-		}
-
 		for (let index = storyThemes.length - 1; index >= 0; index--) {
 			const storyTheme = storyThemes[index];
-			const zIndex = parseInt(style.zIndex) - storyThemes.length + index;
+			if (this.storyThemeSheets) {
+				const renderedSheet = this.storyThemeSheets.find(sts => sts.id == storyTheme._id)
+				if (renderedSheet && !renderedSheet.rendered) {
+					await renderedSheet.render(true);
+					await renderedSheet.moveToParents({left, top});
+					//renderedSheet.sendBehind();
+				}
 
-			let storyThemeSheet;
-			if (this.storyThemeSheets[index] == null) {
-				storyThemeSheet = new StoryTheme({id: storyTheme.id, index, left, top, app: this, zIndex});
-			} else {
-				storyThemeSheet = this.storyThemeSheets[index];
+				if (renderedSheet)
+					continue;
 			}
 
+			const zIndex = parseInt(style.zIndex) - storyThemes.length + index;
+			const newIndex = this.storyThemeSheets.length;
+			let storyThemeDocument = game.items.find(i => i.id == storyTheme._id);
+			if (!storyThemeDocument) continue;
+
+			const storyThemeSheet = new StoryTheme({document: storyThemeDocument, id: storyThemeDocument.id, index: newIndex, left: this.position.left, top: this.position.top, app: this, zIndex, name: storyThemeDocument.name, theme: storyThemeDocument});
+			this.storyThemeSheets.push(storyThemeSheet);
 			if (!storyThemeSheet.rendered)
 			{
 				await storyThemeSheet.render(true);
@@ -918,5 +947,12 @@ export class StoryTagApp extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 		this.__storyThemesOpened = true;
 	}
-	/**  End Socket Methods  */
+
+	sanitizeStoryThemes() {
+		if (!game.items) return;
+		if (this.config.storyThemes == null || !this.config.storyThemes.length) return;
+		let storyThemes = structuredClone(this.config.storyThemes);
+		let filteredStoryThemes = storyThemes.filter(st => game.items.some(i => i.id == st._id));
+		game.settings.set("foundryvtt-litm", "storytags", { ...this.config, filteredStoryThemes });
+	}
 }

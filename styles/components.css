@@ -209,6 +209,7 @@
 		min-height: 14px;
 		background-size: 14px 14px;
 		margin-right: 2px;
+		display: inline-block;
 	}
 
 	& .litm--greatness-icon {
@@ -219,6 +220,7 @@
 		min-height: 14px;
 		background-size: 14px 14px;
 		margin-right: 2px;
+		display: inline-block;
 	}
 
 	& .litm--legend-icon {
@@ -229,6 +231,7 @@
 		min-height: 14px;
 		background-size: 14px 14px;
 		margin-right: 2px;
+		display: inline-block;
 	}
 }
 

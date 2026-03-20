@@ -419,7 +419,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				state.push(LitmRollDialog.storyThemeToTag(storyTheme));
 			}
 
-			for (const tag of storyTheme.tags ?? []) {
+			for (const tag of storyTheme.system.tags ?? []) {
 				if (tag.state != null && tag.state != "") {
 					state.push(tag);
 				}
@@ -466,7 +466,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				storyTheme.title = LitmRollDialog.storyThemeToTag(storyTheme);
 				storyTheme.title = LitmRollDialog.classifyTag(storyTheme.title);
 
-				for (let tag of storyTheme.tags ?? []) {
+				for (let tag of storyTheme.system.tags ?? []) {
 					tag = LitmRollDialog.classifyTag(tag);
 				}
 			}
@@ -503,7 +503,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		};
 
 		for (const tag of context.characterTags) {
-			tag.level = LitmRollDialog.tagLevel(this.actor, tag);
+			tag.level = LitmRollDialog.tagLevelExcludingName(this.actor, tag);
 		}
 		
 		return context;
@@ -555,11 +555,20 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		//logger.info(`LitmRollDialog #onSubmit`);
 	}
 
-	addTag(tag, toBurn) {
-		tag.state  =  tag.type === "weaknessTag" ? "negative" : toBurn ? "burned" : "positive";
-		tag.states = (tag.type === "weaknessTag" ? ",negative" : (",positive" + (tag.isSingleUse ? "" : ",burned")));
+	async addTag(tag, toBurn) {
+		let isWeakness = tag.type === "weaknessTag";
+		if (tag.name.includes("[--")) isWeakness = true;
 
-		this.characterTags.push(tag);
+		tag.state  =  isWeakness ? "negative" : toBurn ? "burned" : "positive";
+		tag.states = (isWeakness ? ",negative" : (",positive" + (tag.isSingleUse ? "" : ",burned")));
+		tag.enrichedName = await foundry.applications.ux.TextEditor.implementation.enrichHTML(tag.name);
+
+		if (tag.type == "storyTheme") {
+			const mainTag = structuredClone(tag);
+			mainTag.type = "backpack";
+			this.characterTags.push(mainTag);
+		} else
+			this.characterTags.push(tag);
 
 		this.setTotalPower();
 		this.setMightDifferences();
@@ -597,10 +606,10 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		if (!this.storyThemes) this.storyThemes = [];
 		for (let a = 0; a < this.storyThemes.length; a++) {
 			const storyTheme = this.storyThemes[a];
-			if (!storyTheme.tags) storyTheme.tags = [];
+			if (!storyTheme.system.tags) storyTheme.system.tags = [];
 
-			for (let i = 0; i < storyTheme.tags.length; i++) {
-				const tag = storyTheme.tags[i];
+			for (let i = 0; i < storyTheme.system.tags.length; i++) {
+				const tag = storyTheme.system.tags[i];
 				
 				const entry = entries.find(e => e[0] == tag.id);
 				if (entry) {
@@ -611,7 +620,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				}
 			}
 
-			const entry = entries.find(e => e[0] == storyTheme.id);
+			const entry = entries.find(e => e[0] == storyTheme._id);
 			if (entry) {
 				storyTheme.state = entry[1];
 				tags.push(LitmRollDialog.storyThemeToTag(storyTheme));
@@ -699,13 +708,13 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 				else {
 					if (this.storyThemes?.length) {
 						for (const storyTheme of this.storyThemes) {
-							if (storyTheme.id == id) {
+							if (storyTheme._id == id) {
 								storyTheme.state = value;
 								valueChanged = true;
 								storyThemesChanged = true;
 								continue;
 							}
-							for (const tag of storyTheme.tags ?? []) {
+							for (const tag of storyTheme.system.tags ?? []) {
 								if (tag.id == id) {
 									tag.state = value;
 									valueChanged = true;
@@ -737,13 +746,13 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 					} else {
 						if (this.storyThemes?.length) {
 							for (const storyTheme of this.storyThemes) {
-								if (storyTheme.id == id) {
+								if (storyTheme._id == id) {
 									valueChanged = true;
 									storyThemesChanged = true;
 									storyTheme.state = value;
 									continue;
 								}
-								for (const tag of storyTheme.tags ?? []) {
+								for (const tag of storyTheme.system.tags ?? []) {
 									if (tag.id == id) {
 										valueChanged = true;
 										storyThemesChanged = true;
@@ -813,13 +822,13 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
 		if (this.storyThemes?.length) {
 			for (const storyTheme of this.storyThemes) {
-				if (storyTheme.id != id && storyTheme.state == "burned") {
+				if (storyTheme._id != id && storyTheme.state == "burned") {
 					needsRender = true;
 					storyThemesChanged = true;
 					storyTheme.state = "positive";
 					continue;
 				}
-				for (const tag of storyTheme.tags ?? []) {
+				for (const tag of storyTheme.system.tags ?? []) {
 					if (tag.id != id && tag.state == "burned") {
 						needsRender = true;
 						storyThemesChanged = true;
@@ -951,10 +960,10 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	static storyThemeToTag(storyTheme) {
 		return {
-			name: storyTheme.name,
-			id: storyTheme.id,
-			isBurnt: storyTheme.isBurnt,
-			value: storyTheme.value,
+			name: storyTheme.system.name,
+			id: storyTheme._id,
+			isBurnt: storyTheme.system.isBurnt,
+			value: storyTheme.system.value,
 			state: storyTheme.state,
 			type: storyTheme.type
 		};
@@ -965,7 +974,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		for (const storyTheme of this.storyThemes ?? []) {
 			storyTheme.title = null;
 			storyTheme.state = null;
-			for (const tag of storyTheme.tags) {
+			for (const tag of storyTheme.system.tags) {
 				tag.state = null;
 			}
 		}
@@ -1003,6 +1012,7 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		}
 
 		for (const tag of tags) {
+			if (tag == null) continue;
 			if (!tag.state) continue;
 
 			let level = '';
@@ -1041,6 +1051,11 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	static tagLevel(actor, tag) {
 		let level = '';
+		let nameLevel = '';
+
+		if (tag.name.includes("+++]")) nameLevel = 'legend';
+		else if (tag.name.includes("++]")) nameLevel = 'greatness';
+		else if (tag.name.includes("+]")) nameLevel = 'adventure';
 
 		let theme = actor.items?.find(i => i.id == tag.id);
 		if (!theme) {
@@ -1050,6 +1065,25 @@ export class LitmRollDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 		if (theme) {
 			level = theme.system.level ?? '';
 		}
+
+		if (nameLevel == 'legend' || level == 'legend') return 'legend';
+		if (nameLevel == 'greatness' || level == 'greatness') return 'greatness';
+		if (nameLevel == 'adventure' || level == 'adventure') return 'adventure';
+		return '';
+	}
+
+	static tagLevelExcludingName(actor, tag) {
+		let level = '';
+
+		let theme = actor.items?.find(i => i.id == tag.id);
+		if (!theme) {
+			theme = actor.items?.find(i => i.system.allTags?.some(t => t.id == tag.id));
+		}
+
+		if (theme) {
+			level = theme.system.level ?? '';
+		}
+
 		return level;
 	}
 

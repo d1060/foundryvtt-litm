@@ -8,25 +8,65 @@
     color: var(--litm-color);
     font-family: var(--litm-font-accent);
     text-align: center;
+    overflow: visible;
 
     & .window-header {
-        display: none;
         background: none;
-
-        & .window-title {
-            display: none;
-            height: 0px;
-        }
+        position: absolute;
+        right: 0;
+        width: 100%;
 
         & .header-control {
-            display: none;
-            color: transparent;
-            width: 0px;
+            color: var(--litm-color);
         }
 
-        & .header-control::before {
+        & .header-control.fa-ellipsis-vertical {
             display: none;
         }
+
+        & .header-control.fa-passport {
+            display: none;
+        }
+
+        & .litm--sheet-scale-button {
+            color: var(--litm-color);
+        }
+    }
+
+    & .window-content {
+        overflow: visible;
+    }
+
+    & .litm--story-themes-background {
+        background-image: url("/systems/foundryvtt-litm/assets/media/story-theme-background.webp");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position:  absolute;
+        width: calc(100% - 30px);
+        height: calc(100% - 27px);
+        left: 15px;
+        top: 15px;
+    }
+
+    & .litm--story-themes-frame {
+        border: 20px solid transparent;
+        border-image-source: url("../../assets/media/story-theme-frame.webp");
+        border-image-slice: 20 fill;
+        border-image-width: 20px;
+        border-image-repeat: round;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+    }
+
+    & .litm--story-themes-inner-content {
+        position: absolute;
+        top: 25px;
+        width: 100%;
+        padding-left: 20px;
+        padding-right: 20px;
     }
 
     & .litm--story-themes-container {
@@ -37,16 +77,16 @@
         min-height: 155px;
         position: relative;
 
-        background-image: url(../../assets/media/story-theme-background.webp);
+        background-image: none;
         background-size: 100% 100%;
         background-clip: padding-box;
 
-        border: 20px solid transparent;
-        border-image-source: url("../../assets/media/story-theme-frame.webp");
-        border-image-slice: 20 fill;
-        border-image-width: 20px;
-        border-image-repeat: round;
-        box-sizing: border-box;
+		&>img {
+			object-fit: cover;
+			object-position: center;
+			filter: grayscale(1) brightness(2);
+			height: 10px;
+		}
 
         & [contenteditable] {
             background-color: transparent;
@@ -77,6 +117,7 @@
 
     & .litm--story-theme-tags  {
         display: flex;
+        flex-wrap: wrap;
         width: 100%;
         height: auto;
         text-align: center;
@@ -84,6 +125,18 @@
         align-items: baseline;
         justify-content: center;
         position: relative;
+
+        & mark {
+            white-space: normal;
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        &.selected {
+            background: url(../../assets/media/brush.svg) no-repeat center;
+            background-blend-mode: color;
+            background-size: contain;
+        }
     }
 
     & .litm--story-theme {
@@ -100,16 +153,204 @@
         position: relative;
     }
 
+    & .litm--story-themes-title-container {
+        position: relative;
+        display: block;
+        top: -4px;
+        width: auto;
+    }
+
     & .litm--story-themes-title {
         width: 100%;
-        display: block;
         color: var(--litm-color);
         font-size: var(--font-size-20);
         font-family: var(--litm-font-accent);
         text-align: center;
+        justify-content: center;
         cursor: grab;
         position: relative;
         top: 0px;
         margin-bottom: 5px;
+        display: flex;
+        flex-wrap: wrap;
+
+        & mark {
+            white-space: normal;
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        &.selected {
+            background: url(../../assets/media/brush.svg) no-repeat center;
+            background-blend-mode: color;
+            background-size: contain;
+        }
+    }
+
+    & .litm--story-themes-title:active {
+        cursor: grabbing;
+    }
+
+    & .litm--story-themes-image {
+        pointer-events: auto;
+    }
+
+    & .window-resize-handle {
+        background: none;
+        border: none;
+        right: 13px;
+        bottom: 6px;
+    }
+
+    & .litm--story-themes-image {
+        position: absolute;
+        top: -5px;
+        left: -4px;
+        width: 40px;
+        height: 40px;
+    }
+
+    & .litm--story-themes-padlock {
+            position: absolute;
+            top: 0px;
+            right: -20px;
+            width: 24px;
+            height: 24px;
+    }
+
+    & .litm--story-themes-limits {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-items: center;
+        margin-inline: var(--litm-space-3);
+        font-size: var(--font-size-11);
+        height: auto;
+        gap: var(--litm-space-2);
+        list-style: none;
+        padding: 0px;
+        overflow: auto hidden;
+        scrollbar-width: none;
+
+        & .litm--story-themes-limit {
+            flex: 0 0 auto;
+            min-width: max-content;
+            display: inline-grid;
+            grid-template-columns: auto;
+            grid-template-areas: "center"
+                                    "bottom";
+            place-content: center;
+            height: auto;
+            position: relative;
+            isolation: isolate;
+            font-family: var(--litm-font-sc);
+
+            & .litm--story-themes-limit-main {
+                width: auto;
+                height: auto;
+                position: relative;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            &::before {
+                content: "";
+                display: block;
+                position: absolute;
+                background: url("../../assets/media/limit-bg.webp") no-repeat center;
+                background-size: cover;
+                border-radius: 2px;
+                top: 16px;
+                width: 100%;
+                height: 12px;
+            }
+
+            &>* {
+                grid-area: center;
+            }
+
+            & input {
+                background: transparent;
+                border: none;
+                border-radius: 2px;
+                min-width: 10px;
+                color: var(--litm-color-accent);
+                text-align: center;
+                margin-inline: auto;
+                padding-inline: 4px;
+
+                &.litm--limit-label {
+                    z-index: 1;
+                    position: relative;
+                    top: 0px;
+                    background: url("../../assets/media/limit-label.webp") no-repeat center;
+                    background-size: cover;
+                    height: var(--font-size-16);
+                    font-size: 0.6rem;
+                    margin-inline: auto;
+                    text-transform: uppercase;
+                    min-width: 0;
+                    justify-self: center;
+                }
+
+                &.litm--limit-value {
+                    background: url("../../assets/media/limit-value.webp") no-repeat;
+                    background-position: top center;
+                    background-size: cover;
+                    box-shadow: unset;
+                    position: relative;
+                    width: 45px;
+                    height: 27px;
+                    font-size: var(--font-size-16);
+                    padding-top: 5px;
+
+                    &::placeholder {
+                        color: var(--litm-color-primary-bg);
+                    }
+                }
+            }
+        }
+
+        & .limit-checkboxes {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(6, auto);
+            grid-column-gap: 1px;
+            top: 0px;
+            align-items: center;
+            justify-items: center;
+            justify-content: center;
+            grid-area: bottom;
+
+            & .limit-checkbox {
+                width: 12px;
+                height: 12px;
+                accent-color: transparent;
+
+                appearance: none;
+                -webkit-appearance: none;
+                border: 2px solid #aaa;
+                border-radius: 3px;
+                background: transparent;
+                display: grid;
+                place-content: center;
+            }
+
+            & .limit-checkbox::before {
+                width: 12px;
+                height: 12px;
+                content: "";
+                transform: scale(0);
+                transition: transform 0.12s ease-in-out;
+                background-color: #b55131;
+            }
+
+            & .limit-checkbox:checked::before {
+                transform: scale(1);
+                top: -2px;
+                left: -2px;
+            }
+        }
     }
 }

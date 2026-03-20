@@ -402,6 +402,7 @@
 			"add-theme": "Add Theme",
 			"add-threat": "Add Threat",
 			"approve": "Approve",
+			"backpack-filter": "Filter inactive items",
 			"burn-tags": "Burn Tags",
 			"cancel": "Cancel",
 			"change-roll-type": "Change Roll Type",
@@ -416,6 +417,8 @@
 			"context-add-remove-flip": "<span class='reference'>Click</span> to add.<br/><span class='reference'>Right-Click</span> to remove.<br/><span class='reference'>Double-Click</span> to flip.",
 			"context-remove-all-tags": "<span class='reference'>Right-Click</span> to remove all story tags",
 			"dblclick-open": "<span class='reference'>Double-Click</span> to edit",
+			"change-story-theme-image": "Change Image",
+			"delete-story-theme-image": "Remove Image",
 			"delete-story-theme": "Remove this story theme.",
 			"delete-story-theme-tag": "Remove story theme Tag.",
 			"dice-roller": "Dice Roller",
@@ -480,9 +483,12 @@
 			"remove": "Remove",
 			"remove-actor": "Remove this Actor",
 			"remove-actors": "Remove Actors",
+			"remove-limit": "Remove Limit",
 			"remove-story-tags": "Remove Story Tags",
 			"remove-story-tag": "Remove Story Tag",
 			"remove-tag": "Remove Tag",
+			"remove-theme": "Remove Theme Tag",
+			"remove-parent-theme": "Remove Parent Theme",
 			"rename": "Rename",
 			"rename-challenge": "Rename Challenge",
 			"roll": "Roll",
@@ -512,6 +518,7 @@
 			"status": "Story Tags and Statuses",
 			"tags-statuses": "Tags & Statuses",
 			"threats-consequences": "> Threats / >> Consequences",
+			"toggle-expand": "<br /> <span class='reference'>CTRL + Click</span> to expand theme tag.",
 			"toggle-burnt": "<span class='reference'>ALT/OPTION + Click</span> to burn/unburn tag.",
 			"toggle-roll": "<span class='reference'>Click</span> to add/remove from dice roll. <br /> <span class='reference'>SHIFT + Click</span> to burn tag on dice roll. <br /> <span class='reference'>ALT/OPTION + Click</span> to burn/unburn tag.",
 			"toggle-weakness-roll": "<span class='reference'>Click</span> to add/remove from dice roll.",
@@ -551,7 +558,8 @@
 			"backpack": "Backpack",
 			"theme": "Theme",
 			"threat": "Threat",
-			"specialImprovement": "Special Improvement"
+			"specialImprovement": "Special Improvement",
+			"storyTheme": "Story Theme"
 		}
 	}
 }

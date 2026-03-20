@@ -6,6 +6,10 @@ export class BackpackData extends foundry.abstract.TypeDataModel {
 			contents: new fields.ArrayField(
 				new fields.EmbeddedDataField(abstract.TagData),
 			),
+			filterInactive: new fields.BooleanField({
+				required: true,
+				initial: false,
+			}),
 		};
 	}
 }

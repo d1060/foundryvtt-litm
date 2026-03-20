@@ -16,6 +16,8 @@ export class LitmHooks {
 		LitmHooks.#attachGMIndicatorToMessage();
 		LitmHooks.#prepareCharacterOnCreate();
 		LitmHooks.#prepareThemeOnCreate();
+		LitmHooks.#preStoryThemeDelete();
+		LitmHooks.#preRenderItemSheet();
 		LitmHooks.#listenToContentLinks();
 		LitmHooks.#listenToTagDragTransfer();
 		LitmHooks.#customizeDiceSoNice();
@@ -467,6 +469,20 @@ export class LitmHooks {
 					img = "icons/svg/item-bag.svg";
 			}
 			item.updateSource({ img });
+		});
+	}
+
+	static #preStoryThemeDelete() {
+		Hooks.on("preDeleteItem", (item, options, userId) => {
+			if (item.type == "storyTheme" && game.litm.storyTags) {
+				game.litm.storyTags.removeStoryTheme(item.id);
+			}
+		});
+	}
+
+	static #preRenderItemSheet() {
+		Hooks.on("renderApplicationV2", (app, html, data) => {
+			//logger.info(`Pre-Rendering Item Sheet`);
 		});
 	}
 

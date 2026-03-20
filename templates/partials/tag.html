@@ -1,7 +1,10 @@
-<li {{#if remove}}data-context="remove-tag" {{/if}} data-id="{{tag.id}}"
+<li {{#if remove}}data-context="remove-tag" {{/if}}
+	data-id="{{tag.id}}"
 	data-dblclick="flip"
+	data-parentId="{{tag.parentId}}"
+	data-type="{{tag.type}}"
 	{{#if draggable}}draggable="true"{{/if}}
-	class="litm--theme-tag {{#if embedded}}embedded{{/if}}">
+	class="litm--theme-tag {{#if embedded}}embedded{{/if}}{{#if tag.nestedLevel}} level-{{tag.nestedLevel}}{{/if}}">
 	<!-- Tags embedded in the character sheet have different functionality -->
 	{{#if embedded}}
 		<div class="litm--theme-item">
@@ -11,11 +14,11 @@
 				<!-- isActive indicator -->
 				<span class="litm--checkbox litm--checkbox-with-bg {{checked tag.isActive}}"></span>
 			</button>
-			<button type="button" class="litm--theme-tag-button label" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}"
+			<button type="button" class="litm--theme-tag-button label" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}" data-type="{{tag.type}}"
 				{{#if tag.isScratched}}data-scratched{{/if}} {{#if tag.isActive}}{{#if (includes @root.rollTags tag.id 'id')}}data-selected{{/if}} data-action="select"{{/if}}
-				{{#if tag.isActive}}data-tooltip="{{localize (ifThen tag.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}"{{/if}}>
+				{{#if tag.isActive}}data-tooltip="{{localize (ifThen tag.isBurnt 'Litm.ui.toggle-burnt' 'Litm.ui.toggle-roll')}}{{#if (eq tag.type 'storyTheme')}}{{localize 'Litm.ui.toggle-expand'}}{{/if}}"{{/if}}>
 				<!-- Name -->
-				<span class="tag--name">{{#if tag.name}}{{tag.name}}{{else}}&nbsp;{{/if}}</span>
+				<span class="tag--name{{#if tag.nestedLevel}} level-{{tag.nestedLevel}}{{/if}}">{{#if tag.enrichedName}}{{{tag.enrichedName}}}{{else}}{{#if tag.name}}{{{tag.name}}}{{else}}&nbsp;{{/if}}{{/if}}</span>
 			</button>
 			<button type="button" class="litm--theme-tag-button" data-id="{{tag.id}}" data-dblclick="flip" data-name="{{tag.name}}" data-theme-id="{{themeId}}"
 				{{#if tag.isActive}}data-action="burn"{{/if}}>
@@ -38,7 +41,13 @@
 				{{checked tag.isActive}} />
 		</label>
 		<!-- Name input -->
-		<input class="tag--name" type="text" name="{{path}}.{{key}}.name" value="{{tag.name}}">
+		{{#if tag.enriched}}
+			<div class="tag--name" id="tag-{{tag.id}}" data-id="{{tag.id}}">{{{tag.enrichedName}}}</div>
+			<span class="tag--name" style="display: none" role="textbox" contenteditable data-input="tag" data-id="{{tag.id}}" aria-labelledby="tags-label">{{tag.name}}</span>
+		{{else}}
+			<input class="tag--name" data-id="{{tag.id}}" type="text" name="{{path}}.{{key}}.name" value="{{tag.name}}">
+		{{/if}}
+
 		<!-- isBurnt checkbox -->
 		<label>
 			 {{#unless (eq level 'fellowship')}}

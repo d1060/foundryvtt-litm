@@ -14,6 +14,6 @@
 		{{else if (eq tag.level 'adventure')}}
 			<i class="litm--adventure-icon"></i>
 		{{/if}}
-		<span>{{tag.name}}{{ifThen tag.value (concat "-" tag.value) ""}}</span>
+		<span>{{#if tag.enrichedName}}{{{tag.enrichedName}}}{{else}}{{tag.name}}{{/if}}{{ifThen tag.value (concat "-" tag.value) ""}}</span>
 	</label>
 </li>

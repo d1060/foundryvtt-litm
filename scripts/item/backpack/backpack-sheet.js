@@ -34,6 +34,7 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		actions: {
 			activateTag: this.#onActivateTag,
 			burnTag: this.#onBurnTag,
+			addTag: this.#onAddTag,
 		},
 		dragDrop: [{dragSelector: "[draggable]", dropSelector: "li"}],
   	}
@@ -49,8 +50,24 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
 	/** @override */
 	async _prepareContext(options) {
+		const backpack = structuredClone(this.system.contents);
+
+		for (const contextTagData of backpack) {
+			contextTagData.enrichedName = await foundry.applications.ux.TextEditor.implementation.enrichHTML(contextTagData.name);
+			contextTagData.nestedLevel = 0;
+			if (contextTagData.enrichedName != contextTagData.name)
+				contextTagData.enriched = true;
+
+			if (contextTagData.parentId) {
+				const parentTagData = backpack.find(td => td.id == contextTagData.parentId);
+				if (parentTagData.expanded) {
+					contextTagData.nestedLevel = 1;
+				}
+			}
+		}
+
 		return {
-			backpack: this.system.contents,
+			backpack,
 			name: this.item.name
 		};
 	}
@@ -139,8 +156,16 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 			return game.users.some(u => u.isGM && u.active);
 		};
 
+		const isTheme = function(element, actor) {
+			return element.dataset.type.trim() === 'storyTheme';
+		};
+
+		const isThemeChild = function(element, actor) {
+			return element.dataset.parentid.trim() !== '';
+		};
+
 		const canRemove = function(element, actor) {
-			return true;
+			return !isTheme(element, actor) && !isThemeChild(element, actor);
 		};
 
 		const options = [
@@ -158,6 +183,22 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 				condition: element => canRemove(element, this.actor),
 				callback: (html) => {
 					this._removeItem(html);
+				},
+			},
+			{
+				name: game.i18n.localize("Litm.ui.remove-theme"),
+				icon: "<i class='fas fa-trash'></i>",
+				condition: element => isTheme(element, this.actor),
+				callback: (html) => {
+					this._removeTheme(html);
+				},
+			},
+			{
+				name: game.i18n.localize("Litm.ui.remove-parent-theme"),
+				icon: "<i class='fas fa-trash'></i>",
+				condition: element => isThemeChild(element, this.actor),
+				callback: (html) => {
+					this._removeParentTheme(html);
 				},
 			},
 		];
@@ -200,6 +241,28 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		this._removeTag(item);
 	}
 
+	async _removeTheme(html) {
+		if (!(await utils.confirmDelete("Litm.other.tag"))) return;
+
+		let contents = this.system.contents;
+		const index = contents.findIndex(i => i.id == html.dataset.id);
+		if (index < 0) return;
+
+		contents = contents.filter(c => c.id != html.dataset.id && c.parentId != html.dataset.id);
+		return this.item.update({ "system.contents": contents });
+	}
+
+	async _removeParentTheme(html) {
+		if (!(await utils.confirmDelete("Litm.other.tag"))) return;
+
+		let contents = this.system.contents;
+		const index = contents.findIndex(i => i.id == html.dataset.parentid);
+		if (index < 0) return;
+
+		contents = contents.filter(c => c.id != html.dataset.parentid && c.parentId != html.dataset.parentid);
+		return this.item.update({ "system.contents": contents });
+	}
+
 	async _onRender(force, options) {
 		await super._onRender(force, options);
 		await V2.updateHeader(this);
@@ -210,8 +273,8 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 	activateListeners(html) {
 		html = html instanceof HTMLElement ? html : html[0];
 
-		html.querySelectorAll("[data-click]")
-			.forEach(el => el.addEventListener("click", this._onClick.bind(this)));
+		html.querySelectorAll("div.tag--name").forEach(el => el.addEventListener("click", this._onTagClick.bind(this)));
+		html.querySelectorAll("span.tag--name").forEach(el => el.addEventListener("blur", this._onTagBlur.bind(this)));
 	}
 
 	static async #onSubmit(event, form, formData) {
@@ -248,15 +311,52 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		return data;
 	}
 
-	_onClick(event) {
-		const button = event.currentTarget;
-		const action = button.dataset.click;
+	async _onTagClick(event) {
+		const div = event.currentTarget;
+		if (!div) return;
+		const li = div.closest("li");
+		if (!li) return;
+		const span = li.querySelector("span.tag--name");
+		if (!span) return;
 
-		switch (action) {
-			case "add-tag":
-				this.#addTag();
-				break;
+		div.style.display = "none";
+		span.style.display = "unset";
+
+		span.focus();
+
+		// Put caret at the end
+		const range = document.createRange();
+		range.selectNodeContents(span);
+		range.collapse(false);
+
+		const sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
+	}
+
+	async _onTagBlur(event) {
+		const span = event.currentTarget;
+		if (!span) return;
+		const li = span.closest("li");
+		if (!li) return;
+		const div = li.querySelector("div.tag--name");
+		if (!div) return;
+
+		const content = span.innerHTML;
+		const id = span.dataset.id;
+		const contents = structuredClone(this.system.contents);
+		const tag = contents.find(c => c.id == id);
+		if (tag) {
+			tag.name = content;
+			await this.item.update({ "system.contents": contents });
 		}
+		const enrichedContent = await foundry.applications.ux.TextEditor.implementation.enrichHTML(content);
+		div.innerHTML = enrichedContent;
+
+		div.style.display = "unset";
+		span.style.display = "none";
+
+		this.actor?.sheet?.render();
 	}
 
 	_onContext(event) {
@@ -270,7 +370,7 @@ export class BackpackSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 		}
 	}
 
-	#addTag() {
+	static async #onAddTag(element) {
 		const item = {
 			name: utils.localize("Litm.ui.name-tag"),
 			isActive: false,

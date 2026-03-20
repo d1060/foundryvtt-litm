@@ -3,6 +3,7 @@ import SpecialImprovements from "../../apps/special-improvements.js";
 import { Sockets } from "../../system/sockets.js";
 import Fellowship from "../../apps/fellowship.js";
 import { ThemeSheet } from "../../item/theme/theme-sheet.js";
+import { StoryTheme } from "../../apps/story-theme.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api
 const { ActorSheetV2 } = foundry.applications.sheets
@@ -19,6 +20,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		this.notesStartX = 0;
       	this.notesStartY = 0;
 		this.notesStartDragPosition = {};
+		this.storyThemes = [];
 
 		this._improvementEditTimer = null;
 	}
@@ -56,6 +58,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			selectStatusLevel: this.#onSelectStatusLevel,
 			showAdvancementHint: this.#showAdvancementHint,
 			editImprovement: this.#onEditImprovement,
+			filterBackpack: this.#onFilterBackpack,
 		},
 		//dragDrop: [{dropSelector: "form"}],
   	}
@@ -205,8 +208,13 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		}
 	}
 
-	async toggleBurnTag(tag, toBurn) {
-		switch (tag.type) {
+	async toggleBurnTag(tag, toBurn, isBackpack) {
+		let type = tag.type;
+
+		if (type == "storyTheme" && isBackpack)
+			type = "backpack";
+
+		switch (type) {
 			case "powerTag": {
 				const parentTheme = this.items.find(
 					(i) =>
@@ -255,7 +263,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			}
 			case "backpack": {
 				const backpack = this.items.find((i) => i.type === "backpack");
-				const { contents } = backpack.system.toObject();
+				const { contents } = structuredClone(backpack.system);
 
 				if (toBurn)
 					contents.find((t) => t.id === tag.id).toBurn = !tag.toBurn;
@@ -300,13 +308,29 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		);
 		if (this.actor.system?.promise == null) { this.actor.system.promise = 0; }
 		const note = await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.system.note);
+		const backpackItem = this.items.find((i) => i.type === "backpack");
 		const backpack = {
-			name: this.items.find((i) => i.type === "backpack")?.name,
-			id: this.items.find((i) => i.type === "backpack")?._id,
-			contents: this.system.backpack
-				//.sort((a, b) => a.name.localeCompare(b.name))
-				//.sort((a, b) => (a.isActive && b.isActive ? 0 : a.isActive ? -1 : 1)),
+			name: backpackItem?.name,
+			id: backpackItem?._id,
+			contents: [],
+			filterInactive: (backpackItem?.system.filterInactive ?? false),
 		};
+
+		for (const backpackTagData of this.system.backpack) {
+			const contextTagData = structuredClone(backpackTagData);
+			contextTagData.enrichedName = await foundry.applications.ux.TextEditor.implementation.enrichHTML(contextTagData.name);
+			contextTagData.nestedLevel = 0;
+
+			if (!contextTagData.parentId)
+				backpack.contents.push(contextTagData);
+			else {
+				const parentTagData = this.system.backpack.find(td => td.id == contextTagData.parentId);
+				if (parentTagData.expanded) {
+					contextTagData.nestedLevel = 1;
+					backpack.contents.push(contextTagData);
+				}
+			}
+		}
 
 		const showBackpackContextMenu = (this.actor.items.find(i => i.type == 'backpack') == null) || (themes?.length < 4);
 
@@ -348,6 +372,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			hookName: "LitmBackpackContextMenu",
       		fixed: true,
     	});
+		this._renderStoryThemes();
 		super._onFirstRender(context, options);
 	}
 
@@ -443,6 +468,33 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		return options;
 	}
 
+	async _renderStoryThemes() {
+		const items = this.actor.getEmbeddedCollection("Item");
+		for (const item of items) {
+			if (item.type == "storyTheme") {
+				const existingTheme = this.storyThemes.find(st => st.document.id == item.id);
+				if (existingTheme) {
+					await existingTheme.render(true);
+					existingTheme.sendBehind(true);
+				} else {
+					const index = this.storyThemes.length;
+					const zIndex = index - this.storyThemes.length;
+					const storyTheme = new StoryTheme({
+						document: item,
+						app: this,
+						index,
+						zIndex,
+						left: this.position.left,
+						top: this.position.top
+					});
+					this.storyThemes.push(storyTheme);
+					await storyTheme.render(true);
+					storyTheme.sendBehind(true);
+				}
+			}
+		}
+	}
+
 	async _onRender(context, options) {
 		await super._onRender(context, options);
 
@@ -457,6 +509,14 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this.setPosition({scale: currentScale});
 		if (this._roll?.rendered)
 			this.renderRollDialog();
+	}
+
+	_onPosition(position) {
+		super._onPosition(position);
+
+		for (const storyTheme of this.storyThemes) {
+			storyTheme?.moveToParents();
+		}
 	}
 
 	activateListeners(html) {
@@ -680,7 +740,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		const data = JSON.parse(dragData);
 
 		// Handle dropping tags and statuses
-		if (!["tag", "storyTag", "status", "randomName", "backpack"].includes(data.type)) return super._onDrop(dragEvent);
+		if (!["tag", "storyTag", "status", "randomName", "backpack", "Item"].includes(data.type)) return super._onDrop(dragEvent);
 
 		if (data.type == "backpack") {
 			const originalActorId = data["actorId"];
@@ -707,6 +767,49 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		if (data.type == "randomName") {
 			this.actor.update({"name": data.name });
 			this.actor.update({"prototypeToken.name": data.name });
+		}
+
+		if (data.type == "Item") {
+			const id = data.uuid?.split(".").pop() || data.id;
+			const item = game.items.find(i => i.id == id);
+			if (item && item.type == "storyTheme") {
+				// drop Inside a Backpack
+				const container = dragEvent.target.closest(".litm--backpack-bg, .window-content");
+				if (container.classList.contains("litm--backpack-bg")) {
+					const backpack = this.items.find((i) => i.type === "backpack");
+					if (backpack) {
+						const storyThemeTags = [{
+							id: foundry.utils.randomID(),
+							name: item.name,
+							type: "storyTheme",
+							isActive: true,
+							isBurnt: item.system.isBurnt == true,
+							tags: item.system.tags,
+							toBurn: false
+						}];
+
+						for (const innerTag of item.system.tags) {
+							storyThemeTags.push({
+								id: foundry.utils.randomID(),
+								name: innerTag.name,
+								type: "backpack",
+								isActive: true,
+								isBurnt: innerTag.isBurnt == true,
+								toBurn: false,
+								parentId: storyThemeTags[0].id
+							});
+						}
+
+						await backpack.update({
+							"system.contents": [...backpack.system.contents, ...storyThemeTags],
+						});
+					}
+				} else if (container.classList.contains("window-content")) {
+					// drop inside Character
+					this._addStoryTheme(item);
+				}
+			}
+			return super._onDrop(dragEvent);
 		}
 
 		var newTag = true;
@@ -947,6 +1050,26 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		this.actor.createEmbeddedDocuments("Item", [backpack]);
 	}
 
+	async _addStoryTheme(item) {
+		const [newStoryTheme] = await this.actor.createEmbeddedDocuments("Item", [item]);
+		if (!newStoryTheme) return;
+
+		const index = this.storyThemes.length;
+		const zIndex = index - this.storyThemes.length;
+
+		const storyTheme = new StoryTheme({
+			document: newStoryTheme,
+			app: this,
+			index,
+			zIndex,
+			left: this.position.left,
+			top: this.position.top
+		});
+		this.storyThemes.push(storyTheme);
+		await storyTheme.render();
+		storyTheme.sendBehind();
+	}
+
 	async _removeTheme(id) {
 		const item = this.items.get(id);
 		if (!(await utils.confirmDelete(`TYPES.Item.${item.type}`))) return;
@@ -1067,17 +1190,42 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 		event.preventDefault();
 		event.stopPropagation();
 
+		let isBackpack = false;
+		const container = event.target.closest(".litm--backpack-bg");
+		if (container) isBackpack = true;
+
 		const t = event.target;
 		const toBurn = event.shiftKey;
 		const toBurnNoRoll = event.altKey;
+		const toExpandTheme = event.ctrlKey;
 		const id = t.dataset.id;
 		let tag = this.system.allTags.find((t) => t.id === id);
+
+		if (toExpandTheme && tag.type == "storyTheme") {
+			tag.expanded = !(tag.expanded ?? false);
+			if (isBackpack) {
+				const backpack = this.items.find((i) => i.type === "backpack");
+				if (backpack) {
+					const contents = backpack.system.contents.map(t => ({
+						...t.toObject(),
+						expanded: t.id === tag.id ? tag.expanded : t.expanded
+					}));
+
+					await backpack.update({
+						"system.contents":  [...contents],
+					});
+				}
+			}
+			this.render();
+			return;
+		}
+
 		tag = structuredClone(tag);
 		if (!tag.name || tag.name == "") return;
 
 		const selected = t.hasAttribute("data-selected");
 
-		if (toBurnNoRoll) return this.toggleBurnTag(tag);
+		if (toBurnNoRoll) return this.toggleBurnTag(tag, false, isBackpack);
 		if (!selected && tag.isBurnt) return;
 
 		// Add or remove the tag from the roll
@@ -1086,7 +1234,7 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 				this._roll.removeTag(tag);
 				break;
 			case false:
-				this._roll.addTag(tag, toBurn);
+				await this._roll.addTag(tag, toBurn);
 				break;
 		}
 
@@ -1097,13 +1245,18 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 	static async #doBurn(event, target) {
 		if (event.detail > 1) return;
+
+		let isBackpack = false;
+		const container = event.target.closest(".litm--backpack-bg");
+		if (container) isBackpack = true;
+		
 		event.preventDefault();
 		event.stopPropagation();
 		const id = event.target.dataset.id;
 		let tag = this.system.allTags.find((t) => t.id === id);
-		this.toggleBurnTag(tag, false);
+		this.toggleBurnTag(tag, false, isBackpack);
 		if (this._roll.rendered) this._roll.render();
-		this.render();
+		//this.render();
 	}
 
 	static async #doShowFellowship(event) {
@@ -1161,6 +1314,19 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 			this._improvementEditTimer = null;
 			this._editImprovement(event);
 		}, 220);
+	}
+
+	static async #onFilterBackpack(event) {
+		const backpack = this.items.find((i) => i.type === "backpack");
+
+		if (!backpack)
+			return;
+
+		// Add the loot to the backpack
+		await backpack.update({
+			"system.filterInactive": !(backpack.system.filterInactive ?? false),
+		});
+		this.render();
 	}
 
 	async _editImprovement(event) {
@@ -1578,6 +1744,34 @@ export class CharacterSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 					});
 				}
 			}
+		}
+	}
+
+	async removeStoryTheme(themeId) {
+		const index = this.storyThemes.findIndex(st => st.document.id == themeId);
+		this.storyThemes.splice(index, 1);
+		this.actor.deleteEmbeddedDocuments("Item", [themeId]);
+	}
+
+	async renderRollDialogs() {
+		const actorSheets = [...foundry.applications.instances.values()];//.filter(app => app instanceof foundry.applications.sheets.CharacterSheet);
+		for (const sheet of actorSheets) {
+			if (sheet._roll?.rendered)
+				sheet._roll.render();
+		}
+	}
+
+	async _onClose(options) {
+		for (const storyTheme of this.storyThemes) {
+			storyTheme.close();
+		}
+	}
+
+	async _onScale(scale) {
+		for (const storyTheme of this.storyThemes) {
+			if (!storyTheme.rendered) continue;
+			storyTheme.setPosition({ scale: scale }); 
+			storyTheme.moveToParents();
 		}
 	}
 }

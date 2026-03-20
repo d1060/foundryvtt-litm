@@ -1,15 +1,53 @@
 <div class="{{cssClass}} litm--story-themes-container" data-context='menu'>
-    {{#if editingTitle}}
-        <span class="litm--story-themes-title" role="textbox" contenteditable data-input="name" data-path="name" aria-labelledby="tags-label">{{name}}</span>
-    {{else}}
-        <div class="litm--story-themes-title" {{#if isBurnt}}data-scratched{{/if}}>{{{renderedName}}}</div>
+    <div class="litm--story-themes-background"></div>
+    <div class="litm--story-themes-frame"></div>
+    <div class="litm--story-themes-inner-content">
+    <div class="litm--story-themes-title-container">
+    {{#if image}}
+    <div class="litm--story-theme-image-wrap">
+        <img class="litm--story-themes-image" src="{{image}}">
+    </div>
     {{/if}}
+    {{#if editingTitle}}
+        <span class="litm--story-themes-title" {{#if image}}style="left: 40px; width: calc(100% - 40px);"{{/if}} role="textbox" contenteditable data-input="name" data-path="name" aria-labelledby="tags-label">{{name}}</span>
+    {{else}}
+        <div class="litm--story-themes-title{{#if titleSelected}} selected{{/if}}" {{#if image}}style="left: 40px; width: calc(100% - 40px);"{{/if}} {{#if isBurnt}}data-scratched{{/if}}>{{{renderedName}}}</div>
+    {{/if}}
+    {{#if canLock}}
+        <img class="litm--story-themes-padlock" data-action="lockToggle" src="/systems/foundryvtt-litm/assets/media/{{#if locked}}padlock-closed.webp{{else}}padlock-open.webp{{/if}}">
+    {{/if}}
+    </div>
+	<img class="litm--story-themes-separator" src="systems/foundryvtt-litm/assets/media/separator.webp">
     {{#each tags as |tag|}}
         {{#if tag.editing}}
             <span class="litm--story-theme-tags" role="textbox" contenteditable data-input="tags" data-id="{{tag.id}}" data-path="tags" aria-labelledby="tags-label">{{tag.name}}</span>
             <input type="hidden" id="tags" name="name" value="{{tag.name}}" required />
         {{else}}
-            <div class="litm--story-theme-tags" data-input="tags" data-id="{{tag.id}}" data-action="toggleEdit"{{#if tag.isBurnt}} data-scratched{{/if}}>{{{tag.renderedName}}}</div>
+            <div class="litm--story-theme-tags{{#if selected}} selected{{/if}}" data-input="tags" data-id="{{tag.id}}"{{#if ../locked}} data-action="selectTag"{{else}} data-action="toggleEdit"{{/if}}{{#if tag.isBurnt}} data-scratched{{/if}}>{{{tag.renderedName}}}</div>
         {{/if}}
     {{/each}}
-</div>
+
+    {{#if hasLimits}}
+    	<img class="litm--story-themes-separator" src="systems/foundryvtt-litm/assets/media/separator.webp">
+		<div class="litm--story-themes-limits">
+			{{#each limits as |limit|}}
+				<div class="litm--story-themes-limit" data-id="{{@key}}">
+					<div class="litm--story-themes-limit-main">
+						<label class="litm--sro" for="limit-{{limit.name}}-value">{{localize "Value"}}</label>
+						<input class="litm--limit-value" type="number" data-path="limits" data-key="{{@key}}" data-target-value="value" id="limit-{{limit.name}}-value" name="limits.{{@key}}.value" placeholder="-" value="{{limit.value}}" />
+						<label class="litm--sro" for="limit-{{limit.name}}-name">{{localize "Name"}}</label>
+						<input class="litm--limit-label" type="text" data-size-input data-path="limits" data-key="{{@key}}" data-target-value="name" id="limit-{{limit.name}}-name" name="limits.{{@key}}.name" value="{{limit.name}}" />
+					</div>
+					{{#if limit.value}}
+					<div class="limit-checkboxes" data-limit-id="{{@key}}" {{#if (lt limit.value 6)}}style="grid-template-columns: repeat({{limit.value}}, auto);"{{/if}}>
+						{{#each limit.levels as |level|}}
+							<input class="limit-checkbox" type="checkbox" data-action="selectLimitLevel" data-level="{{@index}}" {{#if level}}checked{{/if}}>
+						{{/each}}
+					</div>
+					{{/if}}
+				</div>
+			{{/each}}
+		</div>
+    {{/if}}
+    </div>
+</div>  

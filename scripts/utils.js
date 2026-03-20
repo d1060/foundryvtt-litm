@@ -319,3 +319,12 @@ export function restoreScrollPositions(app) {
 		}
 	}
 }
+
+export function ensureLength(arr, length, fillValue = null) {
+	if (arr.length > length) {
+		arr.length = length;
+	} else if (arr.length < length) {
+		arr.push(...Array(length - arr.length).fill(fillValue));
+	}
+	return arr;
+}

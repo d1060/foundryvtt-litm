@@ -26,7 +26,17 @@ export class TagData extends foundry.abstract.DataModel {
 			}),
 			type: new fields.StringField({
 				required: true,
-				choices: ["weaknessTag", "powerTag", "backpack", "themeTag", "specialImprovement"],
+				choices: ["weaknessTag", "powerTag", "backpack", "themeTag", "specialImprovement", "storyTheme"],
+			}),
+			expanded: new fields.BooleanField({
+				required: false,
+				initial: false,
+			}),
+			parentId: new fields.StringField({
+				required: false,
+				nullable: true,
+				validate: (id) => foundry.data.validators.isValidId(id),
+				initial: () => null,
 			}),
 		};
 	}

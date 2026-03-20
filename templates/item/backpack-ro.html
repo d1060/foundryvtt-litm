@@ -7,10 +7,18 @@
 		aria-hidden="true">
 	<div class="litm--backpack-bg" data-context="menu" data-context-type="backpack">
 		<div class="meta">{{localize 'Litm.tags.item-tags'}}</div>
-		<div class="title">{{backpack.name}}</div>
+		<div class="title">{{backpack.name}} <img class="litm--backpack-bg-filter{{#if backpack.filterInactive}}{{else}} inactive{{/if}}" src="systems/foundryvtt-litm/assets/media/filter.webp" aria-hidden="true" data-tooltip="{{localize 'Litm.ui.backpack-filter'}}" data-action="filterBackpack"></div>
 		<ul class="taglist">
 			{{#each backpack.contents as |tag|}}
-				{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path=(concat "items." ../backpack.id ".system.contents") embedded=true remove=false}}
+				{{#if ../backpack.filterInactive}}
+					{{#if tag.isActive}}
+						{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path=(concat "items." ../backpack.id ".system.contents") embedded=true remove=false}}
+					{{/if}}
+				{{else}}
+					{{> systems/foundryvtt-litm/templates/partials/tag.html tag=tag key=@key path=(concat "items." ../backpack.id ".system.contents") embedded=true remove=false}}
+					{{#if tag.expanded}}
+					{{/if}}
+				{{/if}}
 			{{/each}}
 		</ul>
 	</div>

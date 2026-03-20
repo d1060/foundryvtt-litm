@@ -354,6 +354,10 @@
 					display: flex;
 					--checkbox-size: 10px;
 				}
+
+				&.level-1 {
+					margin-left: 8px;
+				}
 			}
 		}
 

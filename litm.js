@@ -19,6 +19,7 @@ import { ThemeSheet } from "./scripts/item/theme/theme-sheet.js";
 import { ThreatData } from "./scripts/item/threat/threat-data.js";
 import { ThreatSheet } from "./scripts/item/threat/threat-sheet.js";
 import { SpecialImprovementSheet } from "./scripts/item/special-improvement-sheet.js";
+import { StoryTheme } from "./scripts/apps/story-theme.js";
 import { LitmConfig } from "./scripts/system/config.js";
 import { Enrichers } from "./scripts/system/enrichers.js";
 import { Fonts } from "./scripts/system/fonts.js";
@@ -100,6 +101,10 @@ Hooks.once("init", () => {
 	});
 	foundry.documents.collections.Items.registerSheet("litm", SpecialImprovementSheet, {
 		types: ["specialImprovement"],
+		makeDefault: true,
+	});
+	foundry.documents.collections.Items.registerSheet("litm", StoryTheme, {
+		types: ["storyTheme"],
 		makeDefault: true,
 	});
 

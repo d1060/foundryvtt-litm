@@ -123,6 +123,11 @@
 					&:read-only {
 						cursor: auto;
 					}
+
+					&.level-1 {
+						font-size: var(--font-size-12);
+						padding-block: var(--litm-space-1);
+					}
 				}
 
 				& label {
@@ -139,7 +144,7 @@
 			}
 		}
 
-		& button[data-action="add-tag"],
+		& button[data-action="addTag"],
 		& button[data-click="add-tag"] {
 			margin-block: auto 0px;
 			margin-inline: 2rem;
